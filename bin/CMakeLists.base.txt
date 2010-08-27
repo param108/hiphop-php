@@ -16,6 +16,10 @@
 #
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4 FATAL_ERROR)
+# lets see some optimizations
+SET(CMAKE_CXX_COMPILER,"distcc")
+SET(CMAKE_C_COMPILER,"distcc")
+SET(CMAKE_CXX_FLAGS,"-O3")
 PROJECT(hphp C CXX)
 
 IF("$ENV{HPHP_HOME}" STREQUAL "")
@@ -24,14 +28,6 @@ ENDIF()
 
 file(TO_CMAKE_PATH "$ENV{HPHP_HOME}" HPHP_HOME)
 
-IF(NOT IS_DIRECTORY ${HPHP_HOME})
-	message(FATAL_ERROR "The value of HPHP_HOME does not exist")
-ENDIF()
-
-IF(NOT EXISTS "${HPHP_HOME}/LICENSE.PHP")
-	message(FATAL_ERROR "The value of HPHP_HOME in incorrect")
-ENDIF()
-
 SET(CMAKE_MODULE_PATH "${HPHP_HOME}/CMake" ${CMAKE_MODULE_PATH})
 
 include(HPHPFunctions)
@@ -39,6 +35,15 @@ include(CheckFunctionExists)
 include(HPHPSetup)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories  (
+"${HPHP_HOME}/../gcc4.3.5/include/c++/4.3.5"
+)
+include_directories (
+"${HPHP_HOME}/../gcc4.3.5/include/c++/4.3.5/x86_64-unknown-linux-gnu"
+)
+include_directories  (
+"${HPHP_HOME}/../gcc4.3.5/include/c++/4.3.5/backward"
+)
 
 if ("${PROGRAM_NAME}" STREQUAL "")
 	set(PROGRAM_NAME program)
@@ -48,7 +53,21 @@ auto_sources(SOURCES "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/php")
 auto_sources(SOURCES2 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/sys")
 auto_sources(SOURCES3 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/cls")
 auto_sources(SOURCES4 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/cpp")
-add_executable(${PROGRAM_NAME} ${SOURCES} ${SOURCES2} ${SOURCES3} ${SOURCES4})
+if(BUILD_SHARED_LIB)
+  add_library(${SHARED_LIB_NAME}  SHARED ${SOURCES} ${SOURCES2} ${SOURCES3}
+${SOURCES4})
+  SET_TARGET_PROPERTIES( ${SHARED_LIB_NAME} PROPERTIES
+  # create *nix style library versions + symbolic links
+  VERSION ${SHARED_LIB_VERSION})
+  target_link_libraries(${SHARED_LIB_NAME} libhphp_runtime)
+  hphp_link(${SHARED_LIB_NAME})
+else(BUILD_SHARED_LIB)
+  add_executable(${PROGRAM_NAME} ${SOURCES} ${SOURCES2} ${SOURCES3} ${SOURCES4})
+  target_link_libraries(${PROGRAM_NAME} libhphp_runtime)
+  hphp_link(${PROGRAM_NAME})
+endif(BUILD_SHARED_LIB)
+
+
 
 add_library(libhphp_runtime STATIC IMPORTED)
 SET_PROPERTY(TARGET libhphp_runtime PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libhphp_runtime.a")
@@ -59,10 +78,8 @@ SET_PROPERTY(TARGET timelib PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libtime
 add_library(sqlite3 STATIC IMPORTED)
 SET_PROPERTY(TARGET sqlite3 PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libsqlite3.a")
 
-if (NOT SKIP_BUNDLED_XHP)
-	add_library(xhp STATIC IMPORTED)
-	SET_PROPERTY(TARGET xhp PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libxhp.a")
-endif()
+add_library(xhp STATIC IMPORTED)
+SET_PROPERTY(TARGET xhp PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libxhp.a")
 
 add_library(afdt STATIC IMPORTED)
 SET_PROPERTY(TARGET afdt PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libafdt.a")
@@ -70,6 +87,3 @@ SET_PROPERTY(TARGET afdt PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libafdt.a"
 add_library(mbfl STATIC IMPORTED)
 SET_PROPERTY(TARGET mbfl PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libmbfl.a")
 
-target_link_libraries(${PROGRAM_NAME} libhphp_runtime)
-
-hphp_link(${PROGRAM_NAME})

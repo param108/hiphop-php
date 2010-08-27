@@ -196,11 +196,11 @@ void Util::syncdir(const std::string &dest_, const std::string &src_,
       if (pos != string::npos) {
         string ext = fdest.substr(pos + 1);
         // do not delete intermediate files
-        if (ext == "o" || ext == "d") {
+        if (ext == "cpp" || ext == "h" || ext == "hpp") {
+          todelete.insert(fdest);
           continue;
         }
       }
-      todelete.insert(fdest);
       continue;
     }
 

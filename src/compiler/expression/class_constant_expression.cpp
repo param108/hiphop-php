@@ -98,10 +98,19 @@ void ClassConstantExpression::setNthKid(int n, ConstructPtr cp) {
 }
 
 ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultPtr ar) {
+  #ifdef PREOPTIMIZE_DEBUG
+  std::cout<<"PreOptimizing:"<<getText()<<" from class:"<<m_className<<" for variable:"<<m_varName<<"\n";
+  #endif /*PREOPTIMIZE_DEBUG*/
   if (ar->getPhase() < AnalysisResult::FirstPreOptimize) {
+    #ifdef PREOPTIMIZE_DEBUG
+     std::cout<<"Failing First Optimize\n";
+    #endif /*PREOPTIMIZE_DEBUG*/
     return ExpressionPtr();
   }
   if (m_class) {
+    #ifdef PREOPTIMIZE_DEBUG
+    std::cout<<"Found m_class\n"<<"\n";
+    #endif /*PREOPTIMIZE_DEBUG*/
     ar->preOptimize(m_class);
     updateClassName();
     return ExpressionPtr();
@@ -112,27 +121,77 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultPtr ar) {
   bool inCurrentClass = currentClsName == m_className;
   ClassScopePtr cls =
     inCurrentClass ? currentCls : ar->resolveClass(m_className);
-  if (!cls) return ExpressionPtr();
+  if (!cls) {
+      #ifdef PREOPTIMIZE_DEBUG
+      std::cout<<"couldnt find classscope\n";
+      #endif /*PREOPTIMIZE_DEBUG*/
+	return ExpressionPtr();
+  }
   if (!inCurrentClass) {
-    if (m_redeclared) return ExpressionPtr();
-    if (cls->isVolatile() || cls->isRedeclaring()) return ExpressionPtr();
+         #ifdef PREOPTIMIZE_DEBUG
+	 std::cout<<"inCurrentClass == false\n";
+         #endif /*PREOPTIMIZE_DEBUG*/
+    if (m_redeclared) {
+         #ifdef PREOPTIMIZE_DEBUG
+	 std::cout<<"m_redeclared == true\n";
+         #endif /*PREOPTIMIZE_DEBUG*/
+ 	 return ExpressionPtr();
+    }
+    /* PARAM:I dont know why this check is required
+       being a volatile class does not affect constants, which need to be available anyway
+    */
+    if (cls->isVolatile()) {
+	 #ifdef PREOPTIMIZE_DEBUG
+	 std::cout<<"isVolatile == true\n";
+         #endif /*PREOPTIMIZE_DEBUG*/
+	 /*if (strcasecmp(m_className.c_str(),"zapiclient")) {
+	 return ExpressionPtr();
+	 }
+	 std::cout<<"skipping volatile check\n";*/
+    }
+    if (cls->isRedeclaring()) {
+  	 #ifdef PREOPTIMIZE_DEBUG
+	 std::cout<<"isRedeclaring == true\n";
+         #endif /*PREOPTIMIZE_DEBUG*/
+	 return ExpressionPtr();
+    }
   }
   ConstantTablePtr constants = cls->getConstants();
   if (constants->isRecursivelyDeclared(ar, m_varName)) {
+     #ifdef PREOPTIMIZE_DEBUG
+     std::cout<<"isRecursivelyDeclared == true\n";
+     #endif /*PREOPTIMIZE_DEBUG*/
     ConstructPtr decl = constants->getValue(m_varName);
     if (decl) {
+     #ifdef PREOPTIMIZE_DEBUG
+     std::cout<<"Found Declaration\n";
+     #endif /*PREOPTIMIZE_DEBUG*/
       ExpressionPtr value = dynamic_pointer_cast<Expression>(decl);
       if (!m_visited) {
+     #ifdef PREOPTIMIZE_DEBUG
+     std::cout<<"m_visited = false\n";
+     #endif /*PREOPTIMIZE_DEBUG*/
         m_visited = true;
         ar->pushScope(cls);
         ExpressionPtr optExp = value->preOptimize(ar);
         ar->popScope();
         m_visited = false;
-        if (optExp) value = optExp;
+        if (optExp) {
+        #ifdef PREOPTIMIZE_DEBUG
+	std::cout<<"Using optimized expression:"<<"\n";
+        #endif /*PREOPTIMIZE_DEBUG*/
+	 value = optExp;
+	}
       }
       if (value->isScalar()) {
         // inline the value
+        #ifdef PREOPTIMIZE_DEBUG
+	std::cout<<"Found Scalar"<<"\n";
+        #endif /*PREOPTIMIZE_DEBUG*/
         if (value->is(Expression::KindOfScalarExpression)) {
+        #ifdef PREOPTIMIZE_DEBUG
+	std::cout<<"Found KindOfScalarExpression\n";
+        #endif /*PREOPTIMIZE_DEBUG*/
           ScalarExpressionPtr exp =
             dynamic_pointer_cast<ScalarExpression>(Clone(value));
           bool annotate = Option::FlAnnotate;
@@ -142,6 +201,9 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultPtr ar) {
           exp->setLocation(getLocation());
           return exp;
         } else if (value->is(Expression::KindOfConstantExpression)) {
+	#ifdef PREOPTIMIZE_DEBUG
+	std::cout<<"Found KindOfConstantExpression\n";
+        #endif /*PREOPTIMIZE_DEBUG*/
           // inline the value
           ConstantExpressionPtr exp =
             dynamic_pointer_cast<ConstantExpression>(Clone(value));
@@ -155,6 +217,9 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultPtr ar) {
       }
     }
   }
+  #ifdef PREOPTIMIZE_DEBUG
+  std::cout<<"FallThrough (Not Recursive)\n";
+  #endif /*PREOPTIMIZE_DEBUG*/
   return ExpressionPtr();
 }
 

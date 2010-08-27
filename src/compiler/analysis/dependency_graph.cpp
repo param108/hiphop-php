@@ -82,11 +82,17 @@ string DependencyGraph::getIncludeFilePath(const string &source,
 
     // absolute path
     if (!expText.empty() && expText[0] == '/') {
+	#ifdef INCLUDE_PATH_DEBUG
+	std::cout<<"absolute path found "<<expText<<"\n";
+	#endif /*INCLUDE_PATH_DEBUG*/
       return expText;
     }
 
     // relative path to document root
     if (documentRoot) {
+        #ifdef INCLUDE_PATH_DEBUG
+	std::cout<<"Document root is set this is relative to that: "<<expText<<"\n";
+        #endif /*INCLUDE_PATH_DEBUG*/
       return expText;
     }
 
@@ -99,6 +105,9 @@ string DependencyGraph::getIncludeFilePath(const string &source,
     if (pos != string::npos) {
       resolved = source.substr(0, pos + 1) + expText;
       if (stat(resolved.c_str(), &sb) == 0) {
+        #ifdef INCLUDE_PATH_DEBUG
+	std::cout<<"found relative to present file:"<<resolved<<"\n";
+	#endif /*INCLUDE_PATH_DEBUG*/
         return resolved;
       }
     }
@@ -107,15 +116,24 @@ string DependencyGraph::getIncludeFilePath(const string &source,
     for (unsigned int i = 0; i < Option::IncludeSearchPaths.size(); i++) {
       string filename = Option::IncludeSearchPaths[i] + "/" + expText;
       if (stat(filename.c_str(), &sb) == 0) {
+	#ifdef INCLUDE_PATH_DEBUG
+	std::cout<<"found in a search path"<<filename<<"\n";
+	#endif /*INCLUDE_PATH_DEBUG*/
         return filename;
       }
     }
 
     // try still use relative path to containing file's directory
     if (!resolved.empty()) {
+        #ifdef INCLUDE_PATH_DEBUG
+	std::cout<<"Last attempt at relative: "<<resolved<<"\n";
+        #endif /*INCLUDE_PATH_DEBUG*/
       return resolved;
     }
 
+        #ifdef INCLUDE_PATH_DEBUG
+	std::cout<<"all tests failed. Using the original text:"<<expText<<"\n";
+        #endif /*INCLUDE_PATH_DEBUG*/
     return expText;
   }
 
@@ -162,11 +180,21 @@ bool DependencyGraph::checkInclude(ConstructPtr childExp,
                                    bool documentRoot,
                                    string &child,
                                    string &parent) {
+  #ifdef INCLUDE_PATH_DEBUG
+  std::cout<<"checking includes for:"<<childExp->getLocation()->file<<" in line:"<<parentExp->getText()<<"\n";
+  #endif /*INCLUDE_PATH_DEBUG*/
   child = childExp->getLocation()->file;
   parent = parseInclude(child, parentExp, documentRoot);
   if ((parent.empty() || parent == child) &&
       Option::AllowedBadPHPIncludes.find(parentExp->getText()) ==
       Option::AllowedBadPHPIncludes.end()) {
+      #ifdef INCLUDE_PATH_DEBUG
+      if (parent ==child) {
+	std::cout<<"Error:Cyclic dependency: "<<parent<<"\n";
+      } else {
+	std::cout<<"Error:Parent Empty: "<<child<<" include text:"<<parentExp->getText()<<"\n";
+      }
+      #endif /*INCLUDE_PATH_DEBUG*/
     if (codeError) {
       codeError->record(CodeError::BadPHPIncludeFile, childExp);
     }

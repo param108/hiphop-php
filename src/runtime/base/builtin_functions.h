@@ -481,10 +481,17 @@ inline int print(CStrRef s) {
 }
 inline void echo(const char *s) {
   g_context->write(s);
+  #ifdef PHP_OUTPUT_DEBUG
+  std::cout<<s;
+  #endif /*PHP_OUTPUT_DEBUG*/
 }
 inline void echo(CStrRef s) {
   g_context->write(s);
+  #ifdef PHP_OUTPUT_DEBUG
+  std::cout<<s;
+  #endif /*PHP_OUTPUT_DEBUG*/
 }
+
 
 String get_source_filename(litstr path);
 

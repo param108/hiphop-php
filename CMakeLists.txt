@@ -1,4 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4 FATAL_ERROR)
+SET(CMAKE_CXX_FLAGS,"-O3 -DHOTPROFILER")
 PROJECT(hphp C CXX)
 
 IF("$ENV{HPHP_HOME}" STREQUAL "")
@@ -14,6 +15,17 @@ ENDIF()
 IF(NOT EXISTS "${HPHP_HOME}/LICENSE.PHP")
 	message(FATAL_ERROR "The value of HPHP_HOME in incorrect")
 ENDIF()
+
+include_directories  (
+"$ENV{HPHP_HOME}/../gcc4.3.5/include/c++/4.3.5"
+)
+include_directories  (
+"$ENV{HPHP_HOME}/../gcc4.3.5/include/c++/4.3.5/backward"
+)
+include_directories (
+"$ENV{HPHP_HOME}/../gcc4.3.5/include/c++/4.3.5/x86_64-unknown-linux-gnu"
+)
+
 
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 

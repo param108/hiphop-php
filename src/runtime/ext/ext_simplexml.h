@@ -77,6 +77,7 @@ class c_simplexmlelement : public ExtObjectData {
   public: bool t___isset(Variant name);
   public: Variant t___unset(Variant name);
   public: Variant t___destruct();
+  public: void __attach_attributes();
 
   // implemented by HPHP
   public: c_simplexmlelement *create(String data, int64 options = 0, bool data_is_url = false, String ns = "", bool is_prefix = false);
@@ -90,6 +91,7 @@ class c_simplexmlelement : public ExtObjectData {
   xmlNodePtr m_node;
   Variant m_children;
   Variant m_attributes;
+  Array m_array;
   bool m_is_text;
   bool m_free_text;
   bool m_is_attribute;
@@ -100,6 +102,8 @@ class c_simplexmlelement : public ExtObjectData {
   virtual Variant &___lval(Variant v_name);
  private:
   xmlXPathContextPtr m_xpath;
+ public:
+  void __populate_m_array();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

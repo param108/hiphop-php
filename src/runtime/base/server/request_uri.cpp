@@ -160,6 +160,18 @@ bool RequestURI::resolveURL(const VirtualHost *vhost,
                             const string &pathTranslation,
                             const string &sourceRoot) {
   m_resolvedURL = m_rewrittenURL;
+  // if we have a '/' in the end directly add the defaultDocument and check
+  if (m_resolvedURL.charAt(m_resolvedURL.length()-1) == '/') {
+        m_resolvedURL += String(RuntimeOption::DefaultDocument);
+      m_pathInfo.reset();
+      if (virtualFileExists(vhost, sourceRoot, pathTranslation,
+                            m_resolvedURL)) {
+        m_defaultDoc = true;
+        PrependSlash(m_resolvedURL);
+        return true;
+      }
+      return false;
+  }
   while (!virtualFileExists(vhost, sourceRoot, pathTranslation,
                             m_resolvedURL)) {
     int pos = m_resolvedURL.rfind('/');

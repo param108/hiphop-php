@@ -1201,7 +1201,7 @@ void ClassScope::findJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar,
       FunctionScopePtr func = iter->second[0];
       if (func->isAbstract() ||
           (staticOnly && !func->isStatic()) ||
-          !(systemcpp || func->isDynamic() || func->isVirtual())) continue;
+          !(systemcpp || func->isDynamic() || func->isVirtual() || func->isPublic())) continue;
       const char *name = iter->first.c_str();
       funcs.push_back(name);
     }
@@ -1326,7 +1326,7 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
       FunctionScopePtr func = iter->second[0];
       if (func->isAbstract() || func->inPseudoMain() ||
           (staticOnly && !func->isStatic()) ||
-          !(system || func->isDynamic() || func->isVirtual())) continue;
+          !(system || func->isDynamic() || func->isVirtual() || func->isPublic())) continue;
       funcs.push_back(iter->first.c_str());
     }
   }

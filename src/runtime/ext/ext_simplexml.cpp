@@ -132,6 +132,7 @@ static c_simplexmlelement *create_element(CObjRef doc, xmlNodePtr node,
   if (node) {
     elem->m_children = create_children(doc, node, ns, is_prefix);
     elem->m_attributes = collect_attributes(node, ns, is_prefix);
+    elem->__populate_m_array();
   }
   return elem;
 }
@@ -263,6 +264,7 @@ c_simplexmlelement::c_simplexmlelement()
       m_is_attribute(false), m_is_children(false), m_is_property(false),
       m_xpath(NULL) {
   m_children = Array::Create();
+  m_array = Array::Create();
 }
 
 c_simplexmlelement::~c_simplexmlelement() {
@@ -270,6 +272,24 @@ c_simplexmlelement::~c_simplexmlelement() {
     xmlXPathFreeContext(m_xpath);
   }
 }
+
+void c_simplexmlelement::__populate_m_array() {
+      for (ArrayIter iter(m_children.toArray()); iter; ++iter) {
+      	if (iter.second().isObject()) {
+        	c_simplexmlelement *elem = iter.second().toObject().
+          	getTyped<c_simplexmlelement>();
+		//in array rep'n the text elements are not objects
+		if (elem->m_is_text && elem->m_attributes.toArray().empty()) {
+			m_array.set(iter.first(),elem->m_children[0]);
+		} else {
+			m_array.set(iter.first(),iter.second());
+		}
+	} else {
+		m_array.set(iter.first(), iter.second());
+	}
+      }
+}
+
 
 void c_simplexmlelement::t___construct(CStrRef data, int64 options /* = 0 */,
                                        bool data_is_url /* = false */,
@@ -293,6 +313,7 @@ void c_simplexmlelement::t___construct(CStrRef data, int64 options /* = 0 */,
     if (m_node) {
       m_children = create_children(m_doc, m_node, ns, is_prefix);
       m_attributes = collect_attributes(m_node, ns, is_prefix);
+      __populate_m_array();
     }
   } else {
     raise_error("String could not be parsed as XML");
@@ -527,6 +548,9 @@ Object c_simplexmlelement::t_attributes(CStrRef ns /* = "" */,
       elem->m_attributes = ref(m_attributes);
     }
     elem->m_children.set("@attributes", elem->m_attributes);
+    for (ArrayIter iter(elem->m_attributes) ; iter; ++iter) {
+        elem->m_children.set(iter.first(), iter.second());
+    }
   }
   return elem;
 }
@@ -804,13 +828,20 @@ Variant c_simplexmlelement::t___set(Variant name, Variant value) {
 }
 
 Array c_simplexmlelement::o_toArray() const {
-  if (m_attributes.toArray().empty()) {
-    return m_children;
-  }
-  Array ret;
-  ret.set("@attributes", m_attributes);
-  ret += m_children;
-  return ret;
+  //PARAM: return the array representation;
+ if (m_attributes.toArray().empty()) {
+   return m_array;
+ }
+ Array ret;
+ ret.set("@attributes", m_attributes);
+ ret += m_array;
+ return ret;
+}
+
+void c_simplexmlelement::__attach_attributes() {
+#ifdef PARAMS_CHANGES
+     m_children.set("@attributes",m_attributes);
+#endif
 }
 
 int64 c_simplexmlelement::o_toInt64() const {

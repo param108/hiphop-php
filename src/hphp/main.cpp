@@ -65,6 +65,7 @@ struct ProgramOptions {
   vector<string> excludePatterns;
   vector<string> excludeStaticPatterns;
   vector<string> cfiles;
+  vector<string> includePaths;
   vector<string> cmodules;
   bool parseOnDemand;
   string program;
@@ -193,7 +194,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     ("input-list", value<string>(&po.inputList),
      "file containing list of file names, one per line")
     ("include-path",
-     value<vector<string> >(&Option::IncludeSearchPaths)->composing(),
+     value<vector<string> >(&po.includePaths)->composing(),
      "a list of include paths to search for files being included in includes "
      "or requires but cannot be found assuming relative paths")
     ("module", value<vector<string> >(&po.modules)->composing(),
@@ -361,6 +362,13 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
   }
   for (unsigned int i = 0; i < po.excludeFiles.size(); i++) {
     Option::PackageExcludeFiles.insert(po.excludeFiles[i]);
+  }
+  for (unsigned int i = 0; i < po.includePaths.size(); i++) {
+    Option::IncludeSearchPaths.insert(Option::IncludeSearchPaths.begin(),
+                                      po.includePaths[i]);
+    #ifdef INCLUDE_PATH_DEBUG
+    std::cout<<"Include Path:"<<po.includePaths[i]<<"\n";
+    #endif /*INCLUDE_PATH_DEBUG*/
   }
   size_t rootSize = po.inputDir.size();
   for (unsigned int i = 0; i < po.excludePatterns.size(); i++) {

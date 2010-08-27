@@ -56,8 +56,10 @@ endif()
 # eable the OSS options if we have any
 add_definitions(-DHPHP_OSS=1)
 
-set(CMAKE_C_FLAGS "-w -fPIC")
-set(CMAKE_CXX_FLAGS "-fPIC -fno-omit-frame-pointer -ftemplate-depth-60 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof")
+set(HPHP_OPT "-g")
+
+set(CMAKE_C_FLAGS "${HPHP_OPT} -w -fPIC")
+set(CMAKE_CXX_FLAGS "${HPHP_OPT} -fPIC -fno-omit-frame-pointer -ftemplate-depth-60 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof")
 
 include_directories(${HPHP_HOME}/src)
 include_directories(${HPHP_HOME}/src/lib/system/gen)

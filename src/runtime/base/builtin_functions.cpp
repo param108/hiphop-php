@@ -623,6 +623,9 @@ static Variant include_impl(CStrRef file, bool once,
   } else {
 
     unsigned int path_count = RuntimeOption::IncludeSearchPaths.size();
+    #ifdef INCLUDE_PATH_DEBUG
+    std::cout<<"Trying "<<path_count<<" paths\n";
+    #endif /*INCLUDE_PATH_DEBUG*/
 
     for (unsigned int i = 0; i < path_count; i++) {
       String path("");
@@ -640,6 +643,9 @@ static Variant include_impl(CStrRef file, bool once,
       path += file;
       String can_path(Util::canonicalize(path.c_str(), path.size()),
                       AttachString);
+      #ifdef INCLUDE_PATH_DEBUG
+      std::cout<<"Trying:"<<can_path<<"\n";
+      #endif /*INCLUDE_PATH_DEBUG*/
 
       try {
         return include_impl_invoke(can_path, once, variables, currentDir);
