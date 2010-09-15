@@ -25,6 +25,7 @@
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/simple_variable.h>
+#include <compiler/expression/assignment_expression.h>
 #include <compiler/expression/array_pair_expression.h>
 #include <compiler/expression/unary_op_expression.h>
 #include <compiler/analysis/constant_table.h>
@@ -306,12 +307,20 @@ bool Expression::CheckNeeded(AnalysisResultPtr ar,
   // if the value may involve object, consider the variable as "needed"
   // so that objects are not destructed prematurely.
   bool needed = true;
-  TypePtr type = value ? value->getType() : TypePtr();
-  if (type && (type->is(Type::KindOfSome) || type->is(Type::KindOfAny))) {
-    type = value->getActualType();
+  if (value) {
+    while (value->is(KindOfAssignmentExpression)) {
+      value = dynamic_pointer_cast<AssignmentExpression>(value)->getValue();
+    }
+    if (value->isScalar()) {
+      needed = false;
+    } else {
+      TypePtr type = value->getType();
+      if (type && (type->is(Type::KindOfSome) || type->is(Type::KindOfAny))) {
+        type = value->getActualType();
+      }
+      if (type && type->isNoObjectInvolved()) needed = false;
+    }
   }
-  if (value && value->isScalar()) needed = false;
-  if (type && type->isNoObjectInvolved()) needed = false;
   if (variable->is(Expression::KindOfSimpleVariable)) {
     SimpleVariablePtr var =
       dynamic_pointer_cast<SimpleVariable>(variable);
@@ -493,14 +502,12 @@ ExpressionPtr Expression::MakeScalarExpression(AnalysisResultPtr ar,
     return MakeConstant(ar, loc, "null");
   } else if (value.isBoolean()) {
     return MakeConstant(ar, loc, value ? "true" : "false");
-  } else if (!value.isDouble() || finite(value.getDouble())) {
+  } else {
     return ScalarExpressionPtr
       (new ScalarExpression(loc,
                             Expression::KindOfScalarExpression,
                             value));
   }
-
-  return ExpressionPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -519,7 +526,10 @@ bool Expression::outputLineMap(CodeGenerator &cg, AnalysisResultPtr ar,
     break;
   case CodeGenerator::ClusterCPP:
     {
-      if (!(force || (getLocalEffects() & Construct::CanThrow))) {
+      if (!force &&
+          !(getLocalEffects() & (Construct::CanThrow|
+                                 Construct::AccessorEffect|
+                                 Construct::DiagnosticEffect))) {
         return false;
       }
       int line = cg.getLineNo(CodeGenerator::PrimaryStream);
@@ -582,8 +592,10 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   bool isLvalue = (m_context & LValue);
+  bool isTemp = isTemporary();
   if (dstType && srcType && !isLvalue &&
       Type::IsCastNeeded(ar, srcType, dstType)) {
+    isTemp = true;
   } else {
     killCast = true;
     dstType = srcType;
@@ -602,13 +614,15 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
 
   bool constRef = dstType &&
     ((m_context & (RefValue|RefParameter)) ||
-     (isTemporary() && !dstType->isPrimitive()) ||
+     (isTemp && !dstType->isPrimitive()) ||
      (isLvalue && dynamic_cast<FunctionCall*>(this)));
 
   ar->wrapExpressionBegin(cg);
+  // make LINE macro separate to not interfere with persistance of expression.
+  // and because nested LINE macros dont work
+  if (outputLineMap(cg, ar)) cg_printf("0);\n");
+
   if (constRef) {
-    // make LINE macro separate to not interfere with persistance of expression.
-    if (outputLineMap(cg, ar, true)) cg_printf("0);\n");
     cg_printf("const ");
   }
 
@@ -669,7 +683,7 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
     m_context = save;
 
     cg_printf("));\n");
-    if (isLvalue && constRef) {
+    if ((isLvalue || hasContext(DeepReference)) && constRef) {
       dstType->outputCPPDecl(cg, ar);
       cg_printf(" &%s_lv = const_cast<", t.c_str());
       dstType->outputCPPDecl(cg, ar);
@@ -701,16 +715,18 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   int n = getKidCount();
   if (hasEffect()) {
     int j;
+    ExpressionPtr lastExpr;
     for (i = j = 0; i < n; i++) {
       ExpressionPtr k = getNthExpr(i);
       if (k && !k->isScalar()) {
         if (k->hasEffect()) {
           lastEffect = i;
+          lastExpr = k;
         }
         j++;
       }
     }
-    if (lastEffect >= 0 && j > 1) {
+    if (lastEffect >= 0 && (j > 1 || lastExpr->isTemporary())) {
       kidState |= FixOrder;
       if (stashAll) {
         lastEffect = n - 1;
@@ -733,7 +749,7 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
           cg.setItemIndex(i);
           ExpressionList *el = static_cast<ExpressionList*>(this);
           if (i >= el->getOutputCount()) {
-            s = 0;
+            s = lastState = 0;
             noEffect = true;
           }
         }
@@ -773,11 +789,11 @@ bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
   }
 
   if (ExpressionPtr e0 = getNthExpr(0)) {
-    e0->preOutputCPP(cg, ar, state);
+    e0->preOutputCPP(cg, ar, state & ~(StashVars));
   }
 
   if (ExpressionPtr e1 = getNthExpr(1)) {
-    e1->preOutputCPP(cg, ar, state);
+    e1->preOutputCPP(cg, ar, state & ~(StashVars));
   }
 
   return true;
@@ -840,12 +856,9 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("ref(");
       closeParen++;
     }
-    bool isArray = is(Expression::KindOfArrayElementExpression);
-    bool isOP = is(Expression::KindOfObjectPropertyExpression);
-    if (isOP || isArray) {
+    if (is(Expression::KindOfArrayElementExpression)) {
       if (((m_context & LValue) && !(m_context & NoLValueWrapper)) ||
-          ((m_context & RefValue) && (!(m_context & InvokeArgument) || isOP)) ||
-          ((m_context & UnsetContext) && !(m_context & LValue) && isOP)) {
+          ((m_context & RefValue) && !(m_context & InvokeArgument))) {
         cg_printf("lval(");
         closeParen++;
       }
@@ -906,7 +919,9 @@ void Expression::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
     wrapped = preOutputCPP(cg, ar, 0);
   }
 
+  bool linemap = outputLineMap(cg, ar);
   outputCPPInternal(cg, ar);
+  if (linemap) cg_printf(")");
 
   m_implementedType = it;
   m_actualType = at;

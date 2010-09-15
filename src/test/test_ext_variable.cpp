@@ -314,8 +314,8 @@ bool TestExtVariable::test_debug_zval_dump() {
 }
 
 bool TestExtVariable::test_serialize() {
-  Object obj(NEW(c_stdclass)());
-  obj->o_set("name", -1, "value");
+  Object obj(NEW(c_stdClass)());
+  obj->o_set("name", "value");
   VS(f_serialize(obj), "O:8:\"stdClass\":1:{s:4:\"name\";s:5:\"value\";}");
 
   Variant v = CREATE_MAP3("a","apple","b",2,"c",CREATE_VECTOR3(1,"y",3));
@@ -325,6 +325,10 @@ bool TestExtVariable::test_serialize() {
 }
 
 bool TestExtVariable::test_unserialize() {
+  {
+    // this was crashing
+    f_unserialize(StringUtil::HexDecode("53203a20224c612072756f74612067697261207065722074757474692220204d203a20227365636f6e646f206d6520736920c3a820696e6361737472617461206461207175616c6368652070617274652122"));
+  }
   {
     Variant v = f_unserialize("O:8:\"stdClass\":1:{s:4:\"name\";s:5:\"value\";}");
     VERIFY(v.is(KindOfObject));

@@ -16,6 +16,7 @@
 
 #include <compiler/expression/assignment_expression.h>
 #include <compiler/expression/array_element_expression.h>
+#include <compiler/expression/object_property_expression.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/simple_variable.h>
@@ -166,15 +167,7 @@ void AssignmentExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_variable);
-  ar->preOptimize(m_value);
-  return ExpressionPtr();
-}
-
-ExpressionPtr AssignmentExpression::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_variable);
-  ar->postOptimize(m_value);
+ExpressionPtr AssignmentExpression::optimize(AnalysisResultPtr ar) {
   if (m_variable->is(Expression::KindOfSimpleVariable)) {
     SimpleVariablePtr var =
       dynamic_pointer_cast<SimpleVariable>(m_variable);
@@ -187,6 +180,23 @@ ExpressionPtr AssignmentExpression::postOptimize(AnalysisResultPtr ar) {
     }
   }
   return ExpressionPtr();
+}
+
+ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultPtr ar) {
+  ar->preOptimize(m_variable);
+  ar->preOptimize(m_value);
+  if (Option::EliminateDeadCode &&
+      ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
+    // otherwise used & needed flags may not be up to date yet
+    return optimize(ar);
+  }
+  return ExpressionPtr();
+}
+
+ExpressionPtr AssignmentExpression::postOptimize(AnalysisResultPtr ar) {
+  ar->postOptimize(m_variable);
+  ar->postOptimize(m_value);
+  return optimize(ar);
 }
 
 TypePtr AssignmentExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
@@ -277,12 +287,6 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
         ScalarExpressionPtr sc =
           dynamic_pointer_cast<ScalarExpression>(off);
         if (sc) {
-          int64 hash = sc->getHash();
-          if (hash >= 0) {
-            cg_printf(", 0x%016llXLL", hash);
-          } else {
-            cg_printf(", -1");
-          }
           if (sc->isLiteralString()) {
             String s(sc->getLiteralString());
             int64 n;
@@ -293,6 +297,20 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
         }
       }
       cg_printf(")");
+      return;
+    }
+  } else if (m_variable->is(Expression::KindOfObjectPropertyExpression)) {
+    ObjectPropertyExpressionPtr var(
+      dynamic_pointer_cast<ObjectPropertyExpression>(m_variable));
+    if (!var->isValid()) {
+      var->outputCPPObject(cg, ar);
+      cg_printf("o_set(");
+      var->outputCPPProperty(cg, ar);
+      cg_printf(", %s", ref ? "ref(" : "");
+      m_value->outputCPP(cg, ar);
+      cg_printf("%s, %s)",
+                ref ? ")" : "",
+                ar->getClassScope() ? "s_class_name" : "empty_string");
       return;
     }
   } else if (m_variable->is(Expression::KindOfSimpleVariable) &&

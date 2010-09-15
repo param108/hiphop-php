@@ -30,8 +30,7 @@ public:
    * Start/stop Debugger for remote debugging.
    */
   static void StartServer();
-  static void StartClient(const std::string &host, int port,
-                          const std::string &extension, const StringVec &cmds);
+  static void StartClient(const DebuggerClientOptions &options);
   static void OnServerShutdown();
   static void Stop();
 
@@ -39,20 +38,21 @@ public:
    * Add a new sandbox a debugger can connect to.
    */
   static void RegisterSandbox(const DSandboxInfo &sandbox);
-  static void GetRegisteredSandboxes(StringVec &ids);
+  static void GetRegisteredSandboxes(DSandboxInfoPtrVec &sandboxes);
+  static bool IsThreadDebugging(int64 id);
 
   /**
    * Add/remove/change DebuggerProxy.
    */
   static void RegisterProxy(SmartPtr<Socket> socket, bool local);
   static void RemoveProxy(DebuggerProxyPtr proxy);
-  static void SwitchSandbox(DebuggerProxyPtr proxy,
-                            const DSandboxInfo &sandbox);
+  static void SwitchSandbox(DebuggerProxyPtr proxy, const std::string &newId);
 
   /**
    * Called from differnt time point of execution thread.
    */
-  static void InterruptSessionStarted(const char *file);
+  static void InterruptSessionStarted(const char *file,
+                                      const char *error = NULL);
   static void InterruptSessionEnded(const char *file);
   static void InterruptRequestStarted(const char *url);
   static void InterruptRequestEnded(const char *url);
@@ -62,7 +62,8 @@ public:
    * A new line of PHP code is reached from execution thread.
    */
   static void InterruptFileLine(InterruptSite &site);
-  static void InterruptException(InterruptSite &site);
+  static void InterruptHard(InterruptSite &site);
+  static bool InterruptException(CVarRef e);
 
   /**
    * Surround text with color, if set.
@@ -74,15 +75,16 @@ public:
 private:
   static Debugger s_debugger;
 
-  static DebuggerProxyPtrSet GetProxies();
+  static DebuggerProxyPtr GetProxy();
   static void Interrupt(int type, const char *program,
-                        InterruptSite *site = NULL);
+                        InterruptSite *site = NULL, const char *error = NULL);
 
   ReadWriteMutex m_mutex;
-  StringToDebuggerProxyPtrSetMap m_proxies;
+  StringToDebuggerProxyPtrMap m_proxies;
+  StringToDSandboxInfoPtrMap m_sandboxes;
 
   /**
-   * m_threadInfos stores threads by sandbox id. These threads were started
+   * m_sandboxThreads stores threads by sandbox id. These threads were started
    * without finding a matched DebuggerProxy. Newly attached DebuggerProxy
    * can check this set to mark them with "debugger" flag on ThreadInfo's
    * RequestInjectionData. This way, these threads will start to interrupt.
@@ -91,21 +93,25 @@ private:
    * attached.
    */
   typedef std::set<ThreadInfo*> ThreadInfoSet;
+  typedef std::map<int64, ThreadInfo*> ThreadInfoMap;
   typedef std::map<std::string, ThreadInfoSet> StringToThreadInfoSet;
-  StringToThreadInfoSet m_threadInfos;
+  ThreadInfoMap m_threadInfos;
+  StringToThreadInfoSet m_sandboxThreads;
+
   void clearThreadInfos();
   void flagDebugger(const std::string &id);
+  bool isThreadDebugging(int64 id);
 
   void stop();
 
   void addSandbox(const DSandboxInfo &sandbox);
-  void getSandboxes(StringVec &ids);
+  void getSandboxes(DSandboxInfoPtrVec &sandboxes);
 
   void addProxy(SmartPtr<Socket> socket, bool local);
   void removeProxy(DebuggerProxyPtr proxy);
 
-  DebuggerProxyPtrSet findProxies(const std::string &id);
-  void switchSandbox(DebuggerProxyPtr proxy, const DSandboxInfo &sandbox);
+  DebuggerProxyPtr findProxy(const std::string &id);
+  void switchSandbox(DebuggerProxyPtr proxy, const std::string &newId);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

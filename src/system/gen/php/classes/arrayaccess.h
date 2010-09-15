@@ -22,12 +22,17 @@
 #include <php/classes/arrayaccess.fw.h>
 
 // Declarations
-#include <cls/arrayaccess.h>
+#include <cls/ArrayAccess.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+// Includes and Functions
 Variant pm_php$classes$arrayaccess_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
+
+// Redeclared Functions
+
+// Dynamic Class Declarations
 
 ///////////////////////////////////////////////////////////////////////////////
 }

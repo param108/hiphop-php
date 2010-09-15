@@ -192,7 +192,7 @@ protected:
     t->o_invoke(s_flush, Array(), -1);
   }
   void directWrite(const char* data, size_t len) {
-    Array args = CREATE_VECTOR1(String(buffer, buffer_used, CopyString));
+    Array args = CREATE_VECTOR1(String(data, len, CopyString));
     t->o_invoke(s_write, args, -1);
   }
 };
@@ -672,7 +672,7 @@ void binary_serialize_spec(CObjRef zthis, PHPOutputTransport& transport,
     // thrift type
     int8_t ttype = fieldspec.rvalAt(s_type, -1).toByte();
 
-    Variant prop = zthis->o_get(varname, -1);
+    Variant prop = zthis->o_get(varname);
     if (!prop.isNull()) {
       transport.writeI8(ttype);
       transport.writeI16(fieldno);

@@ -140,7 +140,6 @@ void DynamicFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
-  bool linemap = outputLineMap(cg, ar, true);
   if (m_class || !m_className.empty()) {
     if (m_class) {
       // e.g. $cls::$func(...)
@@ -154,9 +153,10 @@ void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
       }
       cg_printf("), ");
     } else if (m_validClass) {
+      ClassScopePtr cls = ar->findClass(m_className);
       // e.g. A::$b(); must lookup "b" even if simple, so _mil
       cg_printf("%s%s::%sinvoke_mil(\"%s\", ", Option::ClassPrefix,
-                m_className.c_str(), Option::ObjectStaticPrefix,
+                cls->getId(cg).c_str(), Option::ObjectStaticPrefix,
                 m_className.c_str());
     } else if (m_redeclared) {
       cg_printf("g->%s%s->%sinvoke_mil(\"%s\", ",
@@ -189,5 +189,4 @@ void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
   } else {
     cg_printf(", -1)");
   }
-  if (linemap) cg_printf(")");
 }

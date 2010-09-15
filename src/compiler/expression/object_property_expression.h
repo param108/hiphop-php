@@ -44,8 +44,13 @@ public:
   virtual void outputCPPExistTest(CodeGenerator &cg, AnalysisResultPtr ar,
                                   int op);
   virtual void outputCPPUnset(CodeGenerator &cg, AnalysisResultPtr ar);
+  void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar, int state);
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
-
+  bool isTemporary() const;
+  bool isValid() const { return m_valid; }
+  void outputCPPProperty(CodeGenerator &cg, AnalysisResultPtr ar);
+  void outputCPPObject(CodeGenerator &cg, AnalysisResultPtr ar,
+                       int directVariant = -1);
 private:
   void setEffect(Effect effect);
   void clearEffect(Effect effect);
@@ -54,9 +59,9 @@ private:
   ExpressionPtr m_property;
 
   bool m_valid;
-  bool m_static; // whether m_property is actually a static property
   int m_localEffects;
   ClassScopePtr m_class; // when m_object's type was inferred
+  std::string m_lvalTmp;
 
   // for avoiding code generate toObject(Variant)
   bool directVariantProxy(AnalysisResultPtr ar);

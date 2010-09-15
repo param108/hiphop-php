@@ -137,8 +137,8 @@ void Parameter::getInfo(ClassInfo::ParameterInfo &info,
       v = m_defVal->eval(env);
     } catch (FatalErrorException e) {
       std::string msg = e.getMessage();
-      v = Object((NEW(c_stdclass)())->create());
-      v.o_lval("msg") = String(msg.c_str(), msg.size(), CopyString);
+      v = Object((NEW(c_stdClass)())->create());
+      v.o_set("msg", String(msg.c_str(), msg.size(), CopyString));
     }
     String s = f_serialize(v);
     info.value = strdup(s);
@@ -350,6 +350,9 @@ void FunctionStatement::getInfo(ClassInfo::MethodInfo &info) const {
   info.attribute = (ClassInfo::Attribute)attr;
 
   info.name = m_name.c_str();
+  info.file = m_loc.file;
+  info.line1 = m_loc.line0;
+  info.line2 = m_loc.line1;
   if (!m_docComment.empty()) {
     info.docComment = m_docComment.c_str();
   }
@@ -369,7 +372,7 @@ void FunctionStatement::getInfo(ClassInfo::MethodInfo &info) const {
     ci->valueLen = 12;
     ci->valueText = "unsupported";
     if (it->second) {
-      ci->value = it->second->eval(env);
+      ci->setValue(it->second->eval(env));
     }
     info.staticVariables.push_back(ci);
   }

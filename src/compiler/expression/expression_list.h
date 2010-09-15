@@ -81,8 +81,19 @@ public:
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                     int state);
   bool outputCPPUnneeded(CodeGenerator &cg, AnalysisResultPtr ar);
+  bool hasNonArrayCreateValue(bool arrayElements = true,
+                              unsigned int start = 0) const;
+  void outputCPPUniqLitKeyArrayInit(CodeGenerator &cg,
+                                    AnalysisResultPtr ar,
+                                    int64 max,
+                                    bool arrayElements = true,
+                                    unsigned int start = 0);
 private:
   void optimize(AnalysisResultPtr ar);
+  unsigned int checkLitstrKeys() const;
+  unsigned int checkIntegerKeys(int64 &max) const;
+  bool outputCPPArrayCreate(CodeGenerator &cg, AnalysisResultPtr ar,
+                            bool isVector, bool pre);
   void outputCPPInternal(CodeGenerator &cg,
                          AnalysisResultPtr ar, bool needed, bool pre);
 

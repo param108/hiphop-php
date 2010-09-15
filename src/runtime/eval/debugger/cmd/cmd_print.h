@@ -45,6 +45,8 @@ public:
 
 private:
   Variant m_ret;
+  String m_output;
+  int m_frame;
 
   bool processList(DebuggerClient *client);
   bool processClear(DebuggerClient *client);

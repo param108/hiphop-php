@@ -54,11 +54,13 @@ public:
   static bool WarnTooManyArguments;
   static bool ThrowMissingArguments;
   static bool ThrowInvalidArguments;
+  static bool FatalOnWeirdForEach;
   static bool AssertActive;
   static bool AssertWarning;
   static int NoticeFrequency; // output 1 out of NoticeFrequency notices
   static int WarningFrequency;
   static int64 SerializationSizeLimit;
+  static int64 StringOffsetLimit;
 
   static std::string AccessLogDefaultFormat;
   static std::vector<std::pair<std::string, std::string> > AccessLogs;
@@ -145,6 +147,7 @@ public:
   static bool EnableStaticContentCache;
   static bool EnableStaticContentFromDisk;
   static bool EnableOnDemandUncompress;
+  static bool EnableStaticContentMMap;
 
   static std::string RTTIDirectory;
   static bool EnableCliRTTI;
@@ -230,7 +233,6 @@ public:
   static int  SocketDefaultTimeout;
   static bool EnableMemoryManager;
   static bool CheckMemory;
-  static bool UseZendArray; // ignored: ZendArray is always enabled
   static bool UseSmallArray;
   static bool UseDirectCopy;
   static bool EnableApc;
@@ -254,7 +256,6 @@ public:
   static time_t ApcKeyMaturityThreshold;
   static size_t ApcMaximumCapacity;
   static int ApcKeyFrequencyUpdatePeriod;
-  static bool ApcUseLockedRefs;
   static bool ApcExpireOnSets;
   static int ApcPurgeFrequency;
 

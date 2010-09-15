@@ -22,13 +22,18 @@
 #include <php/classes/directory.fw.h>
 
 // Declarations
-#include <cls/directory.h>
+#include <cls/Directory.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+// Includes and Functions
 Variant pm_php$classes$directory_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
-Object co_directory(CArrRef params, bool init = true);
+
+// Redeclared Functions
+
+// Dynamic Class Declarations
+Object co_Directory(CArrRef params, bool init = true);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

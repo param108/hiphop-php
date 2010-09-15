@@ -120,7 +120,8 @@ public:
       }
       m_function = m_function.fiberMarshal(m_refMap);
       m_params = m_params.fiberMarshal(m_refMap);
-      m_global_variables = get_global_variables();
+      ThreadInfo::s_threadInfo->m_globals =
+        m_global_variables = get_global_variables();
       fiber_marshal_global_state(m_global_variables,
                                  m_unmarshaled_global_variables, m_refMap);
 
@@ -151,7 +152,7 @@ public:
       throw ExitException(0);
     }
     if (!m_fatal.isNull()) {
-      throw FatalErrorException("%s", m_fatal.data());
+      throw FatalErrorException(m_fatal.data());
     }
     if (!m_exception.isNull()) {
       throw m_exception;
@@ -190,7 +191,7 @@ public:
         throw ExitException(0);
       }
       if (!m_fatal.isNull()) {
-        throw FatalErrorException("%s", m_fatal.data());
+        throw FatalErrorException(m_fatal.data());
       }
       if (!m_exception.isNull()) {
         throw unmarshaled_exception;
@@ -208,12 +209,11 @@ public:
 
   // ref counting
   void incRefCount() {
-    Lock lock(m_mutex);
-    ++m_refCount;
+    atomic_inc(m_refCount);
   }
   void decRefCount() {
-    Lock lock(m_mutex);
-    if (--m_refCount == 0) {
+    ASSERT(m_refCount);
+    if (atomic_dec(m_refCount) == 0) {
       delete this;
     }
   }
@@ -234,7 +234,6 @@ private:
   Array m_params;
   GlobalVariables *m_global_variables;
 
-  Mutex m_mutex;
   int m_refCount;
 
   bool m_async;

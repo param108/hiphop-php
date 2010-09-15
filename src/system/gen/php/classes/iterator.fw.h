@@ -25,35 +25,103 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// 1. Static Strings 
+// 1. Static Strings
+extern StaticString s_sys_ss5b908ab0;
+extern StaticString s_sys_ss00ce7919;
+extern StaticString s_sys_ss4f67744c;
+extern StaticString s_sys_ss0c10eb92;
+extern StaticString s_sys_ss3c6754b7;
+extern StaticString s_sys_ss35f9d4be;
+extern StaticString s_sys_ss53ceeb6c;
+extern StaticString s_sys_ss229c615f;
+extern StaticString s_sys_ss6b4cb5ed;
+extern StaticString s_sys_ss2dc69ec2;
+extern StaticString s_sys_ss7646d15b;
+extern StaticString s_sys_ss5cbbd412;
+extern StaticString s_sys_ss65104d10;
+extern StaticString s_sys_ss7b94de24;
+extern StaticString s_sys_ss79503405;
+extern StaticString s_sys_ss4aac3a61;
+extern StaticString s_sys_ss4d202b9f;
+extern StaticString s_sys_ss6731e29c;
+extern StaticString s_sys_ss5d0078af;
+extern StaticString s_sys_ss5713adf1;
+extern StaticString s_sys_ss062b6dc1;
+extern StaticString s_sys_ss6d39474d;
+extern StaticString s_sys_ss75ad17e1;
+extern StaticString s_sys_ss2565d86a;
+extern StaticString s_sys_ss4f638bdc;
+extern StaticString s_sys_ss3cd2604a;
+extern StaticString s_sys_ss48aaec55;
+extern StaticString s_sys_ss366d118c;
+extern StaticString s_sys_ss52b41b72;
+extern StaticString s_sys_ss3e9ddbc1;
+extern StaticString s_sys_ss24e95019;
+extern StaticString s_sys_ss3c26db08;
+extern StaticString s_sys_ss37a06e7d;
+extern StaticString s_sys_ss44934786;
+extern StaticString s_sys_ss6d03a6ea;
+extern StaticString s_sys_ss76b5e27b;
+extern StaticString s_sys_ss712c57f7;
+extern StaticString s_sys_ss0af50f06;
+extern StaticString s_sys_ss25c683eb;
+extern StaticString s_sys_ss371013f8;
+extern StaticString s_sys_ss48725a0c;
+extern StaticString s_sys_ss2a0ccb7a;
+extern StaticString s_sys_ss60465f1d;
+extern StaticString s_sys_ss72c51c58;
+extern StaticString s_sys_ss16bfe3b1;
+extern StaticString s_sys_ss47b9c59d;
+extern StaticString s_sys_ss1f14ff71;
+extern StaticString s_sys_ss7db173af;
+extern StaticString s_sys_ss658b04e8;
+extern StaticString s_sys_ss486e8646;
+extern StaticString s_sys_ss531f214d;
+extern StaticString s_sys_ss447efd48;
+extern StaticString s_sys_ss742fc700;
+extern StaticString s_sys_ss0bbfbb68;
+extern StaticString s_sys_ss5b7508c8;
+extern StaticString s_sys_ss19c96546;
+extern StaticString s_sys_ss48bdfe35;
+extern StaticString s_sys_ss21d85096;
+extern StaticString s_sys_ss77054c67;
+extern StaticString s_sys_ss5633b25b;
+extern StaticString s_sys_ss1d522e0a;
+extern StaticString s_sys_ss25d241c5;
+extern StaticString s_sys_ss02b6fd60;
+extern StaticString s_sys_ss58e4193c;
+extern StaticString s_sys_ss54808c44;
 
-// 2. Constants
+// 2. Static Arrays
+extern StaticArray s_sys_sa00000000;
 
-// 3. Classes
-FORWARD_DECLARE_GENERIC_INTERFACE(outeriterator);
-FORWARD_DECLARE_GENERIC_INTERFACE(serializable);
-FORWARD_DECLARE_GENERIC_INTERFACE(traversable);
-FORWARD_DECLARE_GENERIC_INTERFACE(countable);
-FORWARD_DECLARE_CLASS(arrayiterator);
-FORWARD_DECLARE_GENERIC_INTERFACE(iterator);
-FORWARD_DECLARE_CLASS(appenditerator);
-FORWARD_DECLARE_GENERIC_INTERFACE(seekableiterator);
-FORWARD_DECLARE_GENERIC_INTERFACE(recursiveiterator);
-FORWARD_DECLARE_CLASS(recursivedirectoryiterator);
-extern const int64 q_recursivedirectoryiterator_CURRENT_AS_SELF;
-extern const int64 q_recursivedirectoryiterator_CURRENT_AS_FILEINFO;
-extern const int64 q_recursivedirectoryiterator_CURRENT_AS_PATHNAME;
-extern const int64 q_recursivedirectoryiterator_KEY_AS_PATHNAME;
-extern const int64 q_recursivedirectoryiterator_KEY_AS_FILENAME;
-extern const int64 q_recursivedirectoryiterator_NEW_CURRENT_AND_KEY;
-FORWARD_DECLARE_CLASS(directoryiterator);
-FORWARD_DECLARE_GENERIC_INTERFACE(iteratoraggregate);
-FORWARD_DECLARE_CLASS(recursiveiteratoriterator);
-extern const int64 q_recursiveiteratoriterator_LEAVES_ONLY;
-extern const int64 q_recursiveiteratoriterator_SELF_FIRST;
-extern const int64 q_recursiveiteratoriterator_CHILD_FIRST;
-extern const int64 q_recursiveiteratoriterator_CATCH_GET_CHILD;
-FORWARD_DECLARE_CLASS(filteriterator);
+// 3. Constants
+
+// 4. Classes
+FORWARD_DECLARE_GENERIC_INTERFACE(OuterIterator);
+FORWARD_DECLARE_GENERIC_INTERFACE(Serializable);
+FORWARD_DECLARE_GENERIC_INTERFACE(Traversable);
+FORWARD_DECLARE_GENERIC_INTERFACE(Countable);
+FORWARD_DECLARE_CLASS(ArrayIterator);
+FORWARD_DECLARE_GENERIC_INTERFACE(Iterator);
+FORWARD_DECLARE_CLASS(AppendIterator);
+FORWARD_DECLARE_GENERIC_INTERFACE(SeekableIterator);
+FORWARD_DECLARE_GENERIC_INTERFACE(RecursiveIterator);
+FORWARD_DECLARE_CLASS(RecursiveDirectoryIterator);
+extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_SELF;
+extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_FILEINFO;
+extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_PATHNAME;
+extern const int64 q_RecursiveDirectoryIterator_KEY_AS_PATHNAME;
+extern const int64 q_RecursiveDirectoryIterator_KEY_AS_FILENAME;
+extern const int64 q_RecursiveDirectoryIterator_NEW_CURRENT_AND_KEY;
+FORWARD_DECLARE_CLASS(DirectoryIterator);
+FORWARD_DECLARE_GENERIC_INTERFACE(IteratorAggregate);
+FORWARD_DECLARE_CLASS(RecursiveIteratorIterator);
+extern const int64 q_RecursiveIteratorIterator_LEAVES_ONLY;
+extern const int64 q_RecursiveIteratorIterator_SELF_FIRST;
+extern const int64 q_RecursiveIteratorIterator_CHILD_FIRST;
+extern const int64 q_RecursiveIteratorIterator_CATCH_GET_CHILD;
+FORWARD_DECLARE_CLASS(FilterIterator);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -43,29 +43,38 @@ class VariableEnvironment;
  * 1. Statically resolved properties and methods will be statically called.
  * 2. Dynamic properties:
  *    o_get() -> t___get() as fallback
- *    o_lval() -> o_set() -> t___set() as fallback
+ *    o_lval() -> t___get() as fallback (!really)
+ *    o_set() -> t___set() as fallback
  * 3. Dynamic methods:
  *    o_invoke() -> t___call() as fallback
  * 4. Auto-generated jump-tables:
- *    o_exists()
- *    o_get()
- *    o_set()
- *    o_lval()
- *    o_invoke()
+ *    o_realProp()
+ *    o_realPropPublic()
+ *    o_realPropPrivate() # non-virtual, only as needed
  */
 class ObjectData : public Countable {
  public:
   enum Attribute {
-    InConstructor = 1, // __construct()
-    InDestructor  = 2, // __destruct()
-    HasSleep      = 4, // __sleep()
-    InSet         = 8, // __set()
-    InGet         = 16, // __get()
+    InConstructor = 1,  // __construct()
+    InDestructor  = 2,  // __destruct()
+    HasSleep      = 4,  // __sleep()
+    UseSet        = 8,  // __set()
+    UseGet        = 16, // __get()
+    UseUnset      = 32, // __unset()
+    HasLval       = 64, // defines ___lval
+  };
+  enum {
+    RealPropCreate = 1,   // Property should be created if it doesnt exist
+    RealPropWrite = 2,    // Property could be modified
+    RealPropNoDynamic = 4,// Dont return dynamic properties
+    RealPropUnchecked = 8,// Dont check property accessibility
   };
 
   ObjectData(bool isResource = false);
   virtual ~ObjectData(); // all PHP classes need virtual tables
 
+  void setAttributes(int attrs) { o_attribute |= attrs; }
+  void setAttributes(const ObjectData *o) { o_attribute |= o->o_attribute; }
   bool getAttribute(Attribute attr) const { return o_attribute & attr; }
   void setAttribute(Attribute attr) const { o_attribute |= attr;}
   void clearAttribute(Attribute attr) const { o_attribute &= ~attr;}
@@ -96,9 +105,13 @@ class ObjectData : public Countable {
   // class info
   virtual CStrRef o_getClassName() const = 0;
   virtual bool isResource() const { return false;}
-  virtual int64 o_toInt64() const { return 1;}
   bool o_isClass(const char *s) const;
   int o_getId() const { return o_id;}
+
+  // overridable casting
+  virtual bool   o_toBoolean() const { return true;}
+  virtual int64  o_toInt64() const;
+  virtual double o_toDouble()  const { return o_toInt64();}
 
   template<typename T>
   T *bindClass(ThreadInfo *info) {
@@ -126,10 +139,10 @@ class ObjectData : public Countable {
   virtual const
     Eval::MethodStatement *getMethodStatement(const char* name) const;
 
-  static Variant os_getInit(const char *s, int64 hash);
+  static Variant os_getInit(CStrRef s);
   // static methods and properties
-  static Variant os_get(const char *s, int64 hash);
-  static Variant &os_lval(const char *s, int64 hash);
+  static Variant os_get(CStrRef s);
+  static Variant &os_lval(CStrRef s);
   static Variant os_invoke(const char *c, MethodIndex, const char *s,
                            CArrRef params, int64 hash, bool fatal = true);
   static Variant os_invoke_mil(const char *c, const char *s,
@@ -147,38 +160,31 @@ class ObjectData : public Countable {
   virtual Array o_toArray() const;
   virtual Array o_toIterArray(CStrRef context, bool getRef = false);
   virtual Array o_getDynamicProperties() const;
-  bool o_exists(CStrRef s, int64 hash, CStrRef context = null_string) const;
-  virtual bool o_exists(CStrRef prop, int64 phash,
-                        const char *context, int64 hash) const;
-  virtual bool o_existsPublic(CStrRef s, int64 hash) const;
-  Variant o_get(CStrRef s, int64 hash, bool error = true,
+  virtual Variant *o_realProp(CStrRef s, int flags,
+                              CStrRef context = null_string) const;
+  virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
+  bool o_exists(CStrRef s, CStrRef context = null_string) const;
+  Variant o_get(CStrRef s, bool error = true,
                 CStrRef context = null_string);
-  virtual Variant o_get(CStrRef prop, int64 phash, bool error,
-                        const char *context, int64 hash);
-  virtual Variant o_getPublic(CStrRef s, int64 hash, bool error = true);
-  Variant o_getUnchecked(CStrRef s, int64 hash, CStrRef context = null_string);
-  virtual Variant o_getUnchecked(CStrRef prop, int64 phash,
-                                 const char *context, int64 hash);
-  Variant o_set(CStrRef s, int64 hash, CVarRef v, bool forInit = false,
+  Variant o_getPublic(CStrRef s, bool error = true);
+  Variant o_getUnchecked(CStrRef s, CStrRef context = null_string);
+  Variant o_set(CStrRef s, CVarRef v, bool forInit = false,
                 CStrRef context = null_string);
-  virtual Variant o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit,
-                        const char *context, int64 hash);
-  virtual Variant o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit);
-  Variant &o_lval(CStrRef s, int64 hash, CStrRef context = null_string);
-  virtual Variant &o_lval(CStrRef prop, int64 phash,
-                          const char *context, int64 hash);
-  virtual Variant &o_lvalPublic(CStrRef s, int64 hash);
+  Variant &o_lval(CStrRef s, CVarRef tmpForGet, CStrRef context = null_string);
+  Variant *o_weakLval(CStrRef s, CStrRef context = null_string);
 
   virtual void o_setArray(CArrRef properties);
   virtual void o_getArray(Array &props) const {}
 
+  virtual Variant o_getError(CStrRef prop, CStrRef context);
+  virtual Variant o_setError(CStrRef prop, CStrRef context);
   /**
    * This is different from o_exists(), which is isset() semantics. This one
    * is property_exists() semantics that check whether it was unset before.
    * This is used for deciding what property_exists() returns and whether or
    * not this property should be part of an iteration in foreach ($obj as ...)
    */
-  bool o_propExists(CStrRef s, int64 hash = -1, CStrRef context = null_string);
+  bool o_propExists(CStrRef s, CStrRef context = null_string);
 
   static Object FromArray(ArrayData *properties);
 
@@ -244,18 +250,17 @@ class ObjectData : public Countable {
   virtual Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   virtual Variant doRootCall(Variant v_name, Variant v_arguments, bool fatal);
 
-  virtual Variant doGet(Variant v_name, bool error);
-  virtual bool doIsSet(CStrRef prop, int64 phash,
-                       CStrRef context = null_string);
-  virtual bool doEmpty(CStrRef prop, int64 phash,
-                       CStrRef context = null_string);
+  bool o_isset(CStrRef prop, CStrRef context = null_string);
+  bool o_empty(CStrRef prop, CStrRef context = null_string);
+  Variant o_unset(CStrRef prop, CStrRef context = null_string);
+
   // magic methods
   // __construct is handled in a special way
   virtual Variant t___destruct();
   virtual Variant t___call(Variant v_name, Variant v_arguments);
   virtual Variant t___set(Variant v_name, Variant v_value);
   virtual Variant t___get(Variant v_name);
-  virtual Variant &___lval(Variant v_name);
+  virtual Variant *___lval(Variant v_name);
   virtual Variant &___offsetget_lval(Variant v_name);
   virtual bool t___isset(Variant v_name);
   virtual Variant t___unset(Variant v_name);
@@ -264,6 +269,9 @@ class ObjectData : public Countable {
   virtual Variant t___set_state(Variant v_properties);
   virtual String t___tostring();
   virtual Variant t___clone();
+
+  template<typename T, int op>
+  T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);
 
   /**
    * Marshaling/Unmarshaling between request thread and fiber thread.
@@ -279,6 +287,8 @@ class ObjectData : public Countable {
 
  private:
   ObjectData(const ObjectData &) { ASSERT(false);}
+  inline Variant o_getImpl(CStrRef propName, int flags,
+                           bool error = true, CStrRef context = null_string);
 
  protected:
   int o_id;                      // a numeric identifier of this object
@@ -310,11 +320,18 @@ protected: ObjectData *root;
 
 };
 
+template <int flags> class ExtObjectDataFlags : public ExtObjectData {
+public:
+  ExtObjectDataFlags() {
+    ObjectData::setAttributes(flags);
+  }
+};
+
 // Callback structure for functions related to static methods
 struct ObjectStaticCallbacks {
-  Variant (*os_getInit)(const char *s, int64 hash);
-  Variant (*os_get)(const char *s, int64 hash);
-  Variant &(*os_lval)(const char *s, int64 hash);
+  Variant (*os_getInit)(CStrRef s);
+  Variant (*os_get)(CStrRef s);
+  Variant &(*os_lval)(CStrRef s);
   Variant (*os_invoke)(const char *c, MethodIndex, const char *s,
                            CArrRef params, int64 hash, bool fatal);
   Variant (*os_constant)(const char *s);
@@ -348,7 +365,7 @@ class ItemSize<UNIT_SIZE> {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// Attribute helper
+// Attribute helpers
 class AttributeSetter {
 public:
   AttributeSetter(ObjectData::Attribute a, ObjectData *o) : m_a(a), m_o(o) {
@@ -356,6 +373,19 @@ public:
   }
   ~AttributeSetter() {
     m_o->clearAttribute(m_a);
+  }
+private:
+  ObjectData::Attribute m_a;
+  ObjectData *m_o;
+};
+
+class AttributeClearer {
+public:
+  AttributeClearer(ObjectData::Attribute a, ObjectData *o) : m_a(a), m_o(o) {
+    o->clearAttribute(a);
+  }
+  ~AttributeClearer() {
+    m_o->setAttribute(m_a);
   }
 private:
   ObjectData::Attribute m_a;

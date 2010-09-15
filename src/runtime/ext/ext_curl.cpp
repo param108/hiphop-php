@@ -160,6 +160,7 @@ public:
     curl_easy_setopt(m_cp, CURLOPT_WRITEHEADER,       (void*)this);
 
     m_to_free = src->m_to_free;
+    m_emptyPost = src->m_emptyPost;
   }
 
   ~CurlResource() {
@@ -640,6 +641,8 @@ private:
 };
 IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(CurlResource);
 void CurlResource::sweep() {
+  m_write.buf.release();
+  m_write_header.buf.release();
   close();
 }
 

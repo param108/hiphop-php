@@ -42,6 +42,7 @@
 #include <compiler/expression/array_pair_expression.h>
 #include <util/process.h>
 #include <runtime/base/rtti_info.h>
+#include <runtime/base/array/small_array.h>
 #include <runtime/ext/ext_json.h>
 
 using namespace HPHP;
@@ -89,6 +90,13 @@ void AnalysisResult::setFileScope(FileScopePtr fileScope) {
   m_fileScopes.push_back(fileScope);
 }
 
+bool AnalysisResult::inParseOnDemandDirs(const string &filename) {
+  for (size_t i = 0; i < m_parseOnDemandDirs.size(); i++) {
+    if (filename.find(m_parseOnDemandDirs[i]) == 0) return true;
+  }
+  return false;
+}
+
 FileScopePtr AnalysisResult::findFileScope(const std::string &name,
                                            bool parseOnDemand) {
   StringToFileScopePtrMap::const_iterator iter = m_files.find(name);
@@ -101,7 +109,7 @@ FileScopePtr AnalysisResult::findFileScope(const std::string &name,
   }
 
   FileScopePtr curr = m_file;
-  if (parseOnDemand && m_parseOnDemand &&
+  if (parseOnDemand && (m_parseOnDemand || inParseOnDemandDirs(name)) &&
       m_package && m_package->parse(name.c_str())) {
     m_file = curr;
     iter = m_files.find(name);
@@ -388,8 +396,8 @@ bool AnalysisResult::isNonFinalClass(const std::string &className) {
   return m_nonFinalClasses.find(className) != m_nonFinalClasses.end();
 }
 
-bool AnalysisResult::needStaticArray(ClassScopePtr cls) {
-  return cls && isNonFinalClass(cls->getName());
+bool AnalysisResult::needStaticArray(ClassScopePtr cls, FunctionScopePtr func) {
+  return cls && isNonFinalClass(cls->getName()) && !func->isPrivate();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -855,7 +863,12 @@ void AnalysisResult::postOptimize(int maxPass /* = 100 */) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-int AnalysisResult::registerScalarArray(ExpressionPtr pairs) {
+int AnalysisResult::registerScalarArray(ExpressionPtr pairs, int &hash,
+                                        int &index) {
+  int id = -1;
+  hash = -1;
+  index = -1;
+  bool found = false;
   if (!Option::ScalarArrayOptimization || m_insideScalarArray) {
     return -1;
   }
@@ -867,11 +880,125 @@ int AnalysisResult::registerScalarArray(ExpressionPtr pairs) {
     text = pairs->getText(false, true);
   }
   std::map<std::string, int>::const_iterator iter = m_scalarArrays.find(text);
-  if (iter != m_scalarArrays.end()) return iter->second;
-  int id = m_scalarArraysCounter++;
-  m_scalarArrays[text] = id;
-  m_scalarArrayIds.push_back(pairs);
+  if (iter != m_scalarArrays.end()) {
+    id = iter->second;
+    found = true;
+  } else {
+    id = m_scalarArraysCounter++;
+    m_scalarArrays[text] = id;
+    m_scalarArrayIds.push_back(pairs);
+  }
+  if (Option::UseNamedScalarArray) {
+    hash = hash_string(text.data(), text.size());
+    if (hash < 0) hash = -hash;
+    vector<string> &strings = m_namedScalarArrays[hash];
+    unsigned int i = 0;
+    for (; i < strings.size(); i++) {
+      if (strings[i] == text) break;
+    }
+    if (i == strings.size()) {
+      assert(!found);
+      strings.push_back(text);
+    }
+    index = i;
+    getFileScope()->addUsedScalarArray(text);
+  }
   return id;
+}
+
+int AnalysisResult::checkScalarArray(const string &text, int &index) {
+  assert(Option::ScalarArrayOptimization && Option::UseNamedScalarArray);
+  int hash = hash_string(text.data(), text.size());
+  if (hash < 0) hash = -hash;
+  vector<string> &strings = m_namedScalarArrays[hash];
+  unsigned int i = 0;
+  for (; i < strings.size(); i++) {
+    if (strings[i] == text) break;
+  }
+  assert(i < strings.size());
+  index = i;
+  return hash;
+}
+
+int AnalysisResult::getScalarArrayId(const string &text) {
+  std::map<std::string, int>::const_iterator iter = m_scalarArrays.find(text);
+  assert(iter != m_scalarArrays.end());
+  return iter->second;
+}
+
+void AnalysisResult::outputCPPNamedScalarArrays(const std::string &file) {
+  AnalysisResultPtr ar = shared_from_this();
+  string filename = file + ".h";
+  ofstream f(filename.c_str());
+  CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
+
+  cg_printf("\n");
+  if (Option::SystemGen) {
+    cg_printf("#ifndef __GENERATED_gen_sys_scalar_arrays_h__\n");
+    cg_printf("#define __GENERATED_gen_sys_scalar_arrays_h__\n");
+  } else {
+    cg_printf("#ifndef __GENERATED_sys_scalar_arrays_h__\n");
+    cg_printf("#define __GENERATED_sys_scalar_arrays_h__\n");
+  }
+  cg_printInclude("<runtime/base/hphp.h>");
+  if (!Option::SystemGen) {
+    cg_printInclude("<sys/global_variables.h>");
+  }
+  cg_printf("\n");
+  cg.namespaceBegin();
+  for (map<int, vector<string> >::const_iterator it =
+       m_namedScalarArrays.begin(); it != m_namedScalarArrays.end();
+       it++) {
+    int hash = it->first;
+    vector<string> &strings = m_namedScalarArrays[hash];
+    for (unsigned int i = 0; i < strings.size(); i++) {
+      string name = getScalarArrayName(hash, i);
+      cg_printf("extern StaticArray %s;\n", name.c_str());
+    }
+  }
+  cg.namespaceEnd();
+  if (Option::SystemGen) {
+    cg_printf("#endif // __GENERATED_gen_sys_scalar_arrays_h__\n");
+  } else {
+    cg_printf("#endif // __GENERATED_sys_scalar_arrays_h__\n");
+  }
+  f.close();
+
+  filename = file + ".no.cpp";
+  f.open(filename.c_str());
+  cg_printf("\n");
+  cg_printInclude("\"scalar_arrays.h\"");
+  cg_printf("\n");
+  cg.namespaceBegin();
+  for (map<int, vector<string> >::const_iterator it =
+       m_namedScalarArrays.begin(); it != m_namedScalarArrays.end();
+       it++) {
+    int hash = it->first;
+    vector<string> &strings = m_namedScalarArrays[hash];
+    for (unsigned int i = 0; i < strings.size(); i++) {
+      string name = getScalarArrayName(hash, i);
+      cg_printf("StaticArray %s;\n", name.c_str());
+    }
+  }
+  cg_printf("\n");
+  const char *clsname =
+    Option::SystemGen ? "SystemScalarArrays" : "ScalarArrays";
+  const char *prefix = Option::SystemGen ? Option::SystemScalarArrayName :
+    Option::ScalarArrayName;
+  cg_indentBegin("void %s::initializeNamed() {\n", clsname);
+  for (map<int, vector<string> >::const_iterator it =
+       m_namedScalarArrays.begin(); it != m_namedScalarArrays.end();
+       it++) {
+    int hash = it->first;
+    vector<string> &strings = m_namedScalarArrays[hash];
+    for (unsigned int i = 0; i < strings.size(); i++) {
+      string name = getScalarArrayName(hash, i);
+      int id = getScalarArrayId(strings[i]);
+      cg_printf("%s = %s[%d];\n", name.c_str(), prefix, id);
+    }
+  }
+  cg_indentEnd("}\n");
+  cg.namespaceEnd();
 }
 
 bool AnalysisResult::getInsideScalarArray() {
@@ -1214,6 +1341,16 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
     // this calls outputCPPScalarArrays, so must happen
     // after function bodies have been output
     outputCPPSystem();
+    if (Option::UseNamedLiteralString) {
+      string file = m_outputPath + "/" + Option::SystemFilePrefix +
+        "literal_strings";
+      outputCPPNamedLiteralStrings(false, file);
+    }
+    if (Option::UseNamedScalarArray) {
+      string file = m_outputPath + "/" + Option::SystemFilePrefix +
+        "scalar_arrays";
+      outputCPPNamedScalarArrays(file);
+    }
   } else if (Option::GenerateCPPMain) {
     outputCPPGlobalDeclarations();
     outputCPPMain();
@@ -1223,9 +1360,16 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
     outputCPPGlobalVariablesMethods(3);
     outputCPPGlobalVariablesMethods(4);
     if (Option::UseNamedLiteralString) {
-      outputCPPNamedLiteralStrings();
+      string file = m_outputPath + "/" + Option::SystemFilePrefix +
+        "literal_strings";
+      outputCPPNamedLiteralStrings(false, file);
     } else if (Option::PrecomputeLiteralStrings) {
       outputCPPLiteralStringPrecomputation();
+    }
+    if (Option::UseNamedScalarArray) {
+      string file = m_outputPath + "/" + Option::SystemFilePrefix +
+        "scalar_arrays";
+      outputCPPNamedScalarArrays(file);
     }
     outputCPPGlobalState();
     outputCPPFiberGlobalState();
@@ -1332,8 +1476,7 @@ void AnalysisResult::outputCPPExtClassImpl(CodeGenerator &cg) {
     bool extension = cls->getAttribute(ClassScope::Extension);
     if (cls->isInterface()) continue;
 
-    const char *clsName = cls->getName().c_str();
-    classes.push_back(clsName);
+    classes.push_back(cls->getOriginalName().c_str());
     merged[cls->getName()].push_back(cls);
     cls->outputCPPDynamicClassImpl(cg, ar);
     if (extension) {
@@ -1353,7 +1496,7 @@ void AnalysisResult::outputCPPExtClassImpl(CodeGenerator &cg) {
          iter2 != iter->second.end(); ++iter2) {
       ClassScopePtr cls = *iter2;
       if (!cls->isInterface()) {
-        classes.push_back(cls->getName().c_str());
+        classes.push_back(cls->getOriginalName().c_str());
         break;
       }
     }
@@ -1405,7 +1548,7 @@ void AnalysisResult::recordClassSource(const std::string &clsname,
   string file; int line;
   if (loc) {
     file = loc->file;
-    line = loc->line0;
+    line = loc->line1 ? loc->line1 : loc->line0;
   } else {
     file = filename;
     line = 0;
@@ -1419,7 +1562,7 @@ void AnalysisResult::recordFunctionSource(const std::string &funcname,
   string file; int line;
   if (loc) {
     file = loc->file;
-    line = loc->line0;
+    line = loc->line1;
   } else {
     file = filename;
     line = 0;
@@ -1476,7 +1619,7 @@ void AnalysisResult::outputCPPNameMaps() {
     for (set<pair<string, int> >::const_iterator iterInner =
            iter->second.begin();
          iterInner != iter->second.end(); ++iterInner) {
-      cg_printf("\"%s\", \"%s\", \"%d\",\n", iter->first.c_str(),
+      cg_printf("\"%s\", \"%s\", (const char *)%d,\n", iter->first.c_str(),
                 iterInner->first.c_str(), iterInner->second);
     }
   }
@@ -1491,7 +1634,7 @@ void AnalysisResult::outputCPPNameMaps() {
     for (set<pair<string, int> >::const_iterator iterInner =
            iter->second.begin();
          iterInner != iter->second.end(); ++iterInner) {
-      cg_printf("\"%s\", \"%s\", \"%d\",\n", iter->first.c_str(),
+      cg_printf("\"%s\", \"%s\", (const char *)%d,\n", iter->first.c_str(),
                 iterInner->first.c_str(), iterInner->second);
     }
   }
@@ -1536,7 +1679,7 @@ void AnalysisResult::outputRTTIMetaData(const char *filename) {
 }
 
 void AnalysisResult::outputCPPUtilDecl(CodeGenerator::Output output) {
-  if (!Option::GenConcat) return;
+  if (!Option::GenConcat && !Option::GenArrayCreate) return;
 
   string filename = string(Option::SystemFilePrefix) + "cpputil.h";
   string headerPath = m_outputPath + "/" + filename;
@@ -1553,12 +1696,15 @@ void AnalysisResult::outputCPPUtilDecl(CodeGenerator::Output output) {
     outputTaintDecl(cg);
     outputConcatDecl(cg);
   }
+  if (Option::GenArrayCreate) {
+    outputArrayCreateDecl(cg);
+  }
   cg.namespaceEnd();
   cg_printf("#endif // __GENERATED_cpputil_h__\n");
 }
 
 void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
-  if (!Option::GenConcat) return;
+  if (!Option::GenConcat && !Option::GenArrayCreate) return;
 
   string filename = string(Option::SystemFilePrefix) + "cpputil.cpp";
   string headerPath = m_outputPath + "/" + filename;
@@ -1567,10 +1713,15 @@ void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
   CodeGenerator cg(&f, output);
   cg_printf("\n");
   cg_printInclude("\"cpputil.h\"");
+  cg_printInclude("<runtime/base/array/zend_array.h>");
+  cg_printInclude("<runtime/base/array/small_array.h>");
   cg.namespaceBegin();
   if (Option::GenConcat) {
     outputTaintImpl(cg);
     outputConcatImpl(cg);
+  }
+  if (Option::GenArrayCreate) {
+    outputArrayCreateImpl(cg);
   }
   cg.namespaceEnd();
 }
@@ -1660,7 +1811,7 @@ void AnalysisResult::outputConcatImpl(CodeGenerator &cg) {
     }
     cg_printf("char *buf = (char*)malloc(len + 1);\n");
     cg_printf("if (buf == NULL) {\n");
-    cg_printf("  throw FatalErrorException(\"malloc failed: %%d\", len);\n");
+    cg_printf("  throw FatalErrorException(0,\"malloc failed: %%d\", len);\n");
     cg_printf("}\n");
     for (int i = 1; i <= num; i++) {
       cg_printf("memcpy(buf");
@@ -1690,6 +1841,104 @@ void AnalysisResult::outputConcatImpl(CodeGenerator &cg) {
   }
 }
 
+void AnalysisResult::outputArrayCreateNumDecl(CodeGenerator &cg, int num,
+                                              const char *type) {
+  cg_printf("ArrayData *array_create%d(unsigned long n, ", num);
+  for (int i = 1; i <= num; i++) {
+    cg_printf("%s k%d, CVarRef v%d", type, i, i);
+    if (i < num) {
+      cg_printf(", ");
+    } else {
+      cg_printf(")");
+    }
+  }
+}
+
+void AnalysisResult::outputArrayCreateDecl(CodeGenerator &cg) {
+  for (set<int>::const_iterator iter = m_arrayLitstrKeySizes.begin();
+       iter != m_arrayLitstrKeySizes.end(); ++iter) {
+    int num = *iter;
+    ASSERT(num > 0);
+    outputArrayCreateNumDecl(cg, num, "CStrRef");
+    cg_printf(";\n");
+  }
+  for (set<int>::const_iterator iter = m_arrayIntegerKeySizes.begin();
+       iter != m_arrayIntegerKeySizes.end(); ++iter) {
+    int num = *iter;
+    ASSERT(num > 0);
+    outputArrayCreateNumDecl(cg, num, "int64");
+    cg_printf(";\n");
+  }
+}
+
+void AnalysisResult::outputArrayCreateImpl(CodeGenerator &cg) {
+  for (set<int>::const_iterator iter = m_arrayLitstrKeySizes.begin();
+       iter != m_arrayLitstrKeySizes.end(); ++iter) {
+    int num = *iter;
+    ASSERT(num > 0);
+    outputArrayCreateNumDecl(cg, num, "CStrRef");
+    cg_indentBegin(" {\n");
+    if (num <= SmallArray::SARR_SIZE) {
+      cg_indentBegin("if (RuntimeOption::UseSmallArray) {\n");
+      cg_indentBegin("StringData *keys[] = {\n");
+      for (int i = 1; i <= num; i++) {
+        cg_printf("k%d.get(), ", i);
+      }
+      cg_indentEnd("NULL,\n");
+      cg_printf("};\n");
+      cg_indentBegin("const Variant *values[] = {\n");
+      for (int i = 1; i <= num; i++) {
+        cg_printf("&v%d, ", i);
+      }
+      cg_indentEnd("NULL,\n");
+      cg_printf("};\n");
+      cg_printf("return NEW(SmallArray)(%d, n, keys, values);\n", num);
+      cg_indentEnd("}\n");
+    }
+    cg_indentBegin("ZendArray::Bucket *p[] = {\n");
+    for (int i = 1; i <= num; i++) {
+      cg_printf("NEW(ZendArray::Bucket)(k%d.get(), v%d), ",
+                i, i);
+    }
+    cg_indentEnd("NULL,\n");
+    cg_printf("};\n");
+    cg_printf("return NEW(ZendArray)(%d, n, p);\n", num);
+    cg_indentEnd("}\n");
+  }
+  for (set<int>::const_iterator iter = m_arrayIntegerKeySizes.begin();
+       iter != m_arrayIntegerKeySizes.end(); ++iter) {
+    int num = *iter;
+    ASSERT(num > 0);
+    outputArrayCreateNumDecl(cg, num, "int64");
+    cg_indentBegin(" {\n");
+    if (num <= SmallArray::SARR_SIZE) {
+      cg_indentBegin("if (RuntimeOption::UseSmallArray) {\n");
+      cg_indentBegin("int64 keys[] = {\n");
+      for (int i = 1; i <= num; i++) {
+        cg_printf("k%d, ", i);
+      }
+      cg_printf("};\n");
+      cg_indentBegin("const Variant *values[] = {\n");
+      for (int i = 1; i <= num; i++) {
+        cg_printf("&v%d, ", i);
+      }
+      cg_indentEnd("NULL,\n");
+      cg_printf("};\n");
+      cg_printf("return NEW(SmallArray)(%d, n, keys, values);\n", num);
+      cg_indentEnd("}\n");
+    }
+    cg_indentBegin("ZendArray::Bucket *p[] = {\n");
+    for (int i = 1; i <= num; i++) {
+      cg_printf("NEW(ZendArray::Bucket)(k%d, v%d), ",
+                i, i);
+    }
+    cg_indentEnd("NULL,\n");
+    cg_printf("};\n");
+    cg_printf("return NEW(ZendArray)(%d, n, p);\n", num);
+    cg_indentEnd("}\n");
+  }
+}
+
 void AnalysisResult::outputCPPDynamicTablesHeader
     (CodeGenerator &cg,
      bool includeGlobalVars /* = true*/, bool includes /* = true */,
@@ -1701,6 +1950,7 @@ void AnalysisResult::outputCPPDynamicTablesHeader
     cg_printInclude("<runtime/base/runtime_option.h>");
     cg_printInclude("<runtime/ext/ext.h>");
     cg_printInclude("<runtime/eval/eval.h>");
+    cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
     cg_printf("\n");
   } else {
     cg_printf("\n");
@@ -1735,14 +1985,14 @@ void AnalysisResult::createGlobalFuncTable() {
          m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
     FunctionScopePtr func = iter->second[0];
     if (func->isDynamic() || func->isRedeclaring()) {
-      funcs.push_back(iter->second[0]->name().c_str());
+      funcs.push_back(iter->second[0]->getOriginalName().c_str());
     }
   }
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
          m_functions.begin(); iter != m_functions.end(); ++iter) {
     FunctionScopePtr func = iter->second[0];
     if (func->isSepExtension()) {
-      funcs.push_back(iter->second[0]->name().c_str());
+      funcs.push_back(iter->second[0]->getOriginalName().c_str());
     }
   }
   if (funcs.size() > 0) {
@@ -1780,14 +2030,14 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
       for (unsigned int i = 0; i < it->second.size(); i++) {
         const char *name = it->second[i];
         StringToFunctionScopePtrVecMap::const_iterator sepiter =
-          m_functions.find(name);
+          m_functions.find(Util::toLower(name));
         if (sepiter != m_functions.end()) {
           ASSERT(!system);
           FunctionScopePtr func = sepiter->second[0];
           if (it->second.size() == 1) {
             cg_indentBegin("Variant d%s%s(const char *s, CArrRef params, "
                            "int64 hash, bool fatal) {\n",
-                           Option::InvokePrefix, cg.formatLabel(name).c_str());
+                           Option::InvokePrefix, func->getId(cg).c_str());
             cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
                            hash_string_i(name), name);
             FunctionScope::OutputCPPDynamicInvokeCount(cg);
@@ -1798,7 +2048,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
             cg_indentEnd("}\n");
           } else {
             cg_indentBegin("Variant %s%s(CArrRef params) {\n",
-                           Option::InvokePrefix, name);
+                           Option::InvokePrefix, func->getId(cg).c_str());
             FunctionScope::OutputCPPDynamicInvokeCount(cg);
             func->outputCPPDynamicInvoke(cg, ar, Option::BuiltinFunctionPrefix,
                                          cg.formatLabel(name).c_str());
@@ -1807,13 +2057,14 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
         }
       }
 
+      FunctionScopePtr func;
       if (it->second.size() == 1 &&
-          !findFunction(it->second[0])->isRedeclaring()) {
+          !(func = findFunction(Util::toLower(it->second[0])))->
+          isRedeclaring()) {
         // no conflict
         cg_printf("Variant d%s%s(const char *s, CArrRef params, int64 hash, "
                   "bool fatal);\n",
-                  Option::InvokePrefix,
-                  cg.formatLabel(it->second.front()).c_str());
+                  Option::InvokePrefix, func->getId(cg).c_str());
       } else {
         for (unsigned int i = 0; i < it->second.size(); i++) {
           const char *name = it->second.at(i);
@@ -1848,11 +2099,12 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
                     "funcTable[i] = &invoke_builtin;\n", m_funcTableSize);
         for (CodeGenerator::MapIntToStringVec::const_iterator it =
                m_funcTable.begin(); it != m_funcTable.end(); it++) {
+          FunctionScopePtr func;
           if (it->second.size() == 1 &&
-              !findFunction(it->second[0])->isRedeclaring()) {
+              !(func = findFunction(Util::toLower(it->second[0])))->
+              isRedeclaring()) {
             cg_printf("funcTable[%d] = &d%s%s;\n", it->first,
-                      Option::InvokePrefix,
-                      cg.formatLabel(it->second.front()).c_str());
+                      Option::InvokePrefix, func->getId(cg).c_str());
           } else {
             cg_printf("funcTable[%d] = &invoke_case_%d;\n",
                       it->first, it->first);
@@ -1905,8 +2157,8 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
 
     outputCPPDynamicTablesHeader(cg, true, false);
     cg.printSection("Class Invoke Tables");
-    if (!system) MethodSlot::emitMethodSlot(cg, ar); // FMC broken for IDL tests
-    else {
+    MethodSlot::emitMethodSlot(cg, ar, system); // FMC broken for IDL tests(?)
+    if (system) {
       // make available to user apps and tests, temporary
       cg_printf(FMC);
       cg_printf("bool RuntimeOption::FastMethodCall = true;\n");
@@ -1924,7 +2176,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
              iter2 != iter->second.end(); ++iter2) {
           cls = *iter2;
           if (cls->isUserClass() && !cls->isInterface()) {
-            classes.push_back(cls->getName().c_str());
+            classes.push_back(cls->getOriginalName().c_str());
             classScopes[cls->getName()].push_back(cls);
             if (!system) {
               cls->outputCPPDynamicClassDecl(cg);
@@ -1939,14 +2191,14 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
 
       BOOST_FOREACH(tie(n, cls), m_systemClasses) {
         if (!cls->isInterface() && !cls->isSepExtension()) {
-          classes.push_back(cls->getName().c_str());
+          classes.push_back(cls->getOriginalName().c_str());
         }
       }
       outputCPPExtClassImpl(cg);
     } else {
       BOOST_FOREACH(tie(n, cls), m_systemClasses) {
         if (!cls->isInterface() && cls->isSepExtension()) {
-          classes.push_back(cls->getName().c_str());
+          classes.push_back(cls->getOriginalName().c_str());
           cls->outputCPPDynamicClassDecl(cg);
           cls->outputCPPGlobalTableWrappersDecl(cg, ar);
           classScopes[cls->getName()].push_back(cls);
@@ -2439,14 +2691,6 @@ void AnalysisResult::outputCPPScalarArrayInit(CodeGenerator &cg, int fileCount,
             name->outputCPP(cg, ar);
             cg_printf(", ");
             value->outputCPP(cg, ar);
-            ScalarExpressionPtr sc =
-              dynamic_pointer_cast<ScalarExpression>(name);
-            if (sc) {
-              int64 hash = sc->getHash();
-              if (hash >= 0) {
-                cg_printf(", 0x%016llXLL", hash);
-              }
-            }
             cg_printf(");");
           } else {
             cg_printf("%s[%d].append(", prefix, exp.id);
@@ -2461,6 +2705,28 @@ void AnalysisResult::outputCPPScalarArrayInit(CodeGenerator &cg, int fileCount,
       cg_printf("ArrayData::Create());\n");
     }
   }
+}
+
+string AnalysisResult::getScalarArrayName(int hash, int index) {
+  assert(index >= 0);
+  string name(Option::SystemGen ? "s_sys_sa" : "s_sa");
+  name += boost::str(boost::format("%08x") % hash);
+  if (index > 0) name += ("_" + lexical_cast<string>(index));
+  return name;
+}
+
+void AnalysisResult::outputCPPScalarArrayId(CodeGenerator &cg, int id,
+                                            int hash, int index) {
+  if (Option::UseNamedScalarArray) {
+    string name = getScalarArrayName(hash, index);
+    cg_printf("%s", name.c_str());
+    return;
+  }
+  if (cg.getOutput() == CodeGenerator::SystemCPP) {
+    cg_printf("SystemScalarArrays::%s[%d]", Option::SystemScalarArrayName, id);
+    return;
+  }
+  cg_printf("ScalarArrays::%s[%d]", Option::ScalarArrayName, id);
 }
 
 void AnalysisResult::outputCPPGlobalDeclarations() {
@@ -2655,8 +2921,10 @@ void AnalysisResult::outputCPPScalarArrays(CodeGenerator &cg, int fileCount,
         cg_printf("ArrayUtil::InitScalarArrays(%s, %d, sa_cdata, %d);\n",
                   prefix, m_scalarArrayIds.size(),
                   m_scalarArrayCompressedTextSize);
+        cg_printf("%s::initializeNamed();\n", clsname);
       } else {
         outputCPPScalarArrayInit(cg, 1, 0);
+        cg_printf("%s::initializeNamed();\n", clsname);
       }
     }
     cg_indentEnd("}\n");
@@ -3083,7 +3351,8 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
   cg_indentBegin("const char *g_class_map[] = {\n");
 
   // system functions
-  cg_printf("(const char *)ClassInfo::IsSystem, NULL, \"\",\n");
+  cg_printf("(const char *)ClassInfo::IsSystem, NULL, \"\","
+            " \"\", NULL, NULL,\n");
   cg_printf("NULL,\n"); // interfaces
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
          m_functions.begin(); iter != m_functions.end(); ++iter) {
@@ -3097,7 +3366,8 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
   m_constants->outputCPPClassMap(cg, ar);
 
   // user functions
-  cg_printf("(const char *)ClassInfo::IsNothing, NULL, \"\",\n");
+  cg_printf("(const char *)ClassInfo::IsNothing, NULL, \"\","
+            " \"\", NULL, NULL,\n");
   cg_printf("NULL,\n"); // interfaces
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
          m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
@@ -3433,7 +3703,7 @@ void AnalysisResult::outputSwigFFIStubs() {
  */
 string AnalysisResult::getLiteralStringName(int hash, int index) {
   assert(index >= 0);
-  string name("s_ss");
+  string name(Option::SystemGen ? "s_sys_ss" : "s_ss");
   name += boost::str(boost::format("%08x") % hash);
   if (index > 0) name += ("_" + lexical_cast<string>(index));
   return name;
@@ -3633,18 +3903,25 @@ void AnalysisResult::outputCPPLiteralStringPrecomputation() {
 }
 
 
-void AnalysisResult::outputCPPNamedLiteralStrings() {
+void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
+                                                  const string &file) {
   AnalysisResultPtr ar = shared_from_this();
-  string filename = m_outputPath + "/" + Option::SystemFilePrefix +
-    "literal_strings.h";
+  string filename = genStatic ? file : (file + ".h");
   ofstream f(filename.c_str());
   CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
 
   cg_printf("\n");
-  cg_printf("#ifndef __GENERATED_sys_literal_strings_h__\n");
-  cg_printf("#define __GENERATED_sys_literal_strings_h__\n");
-  cg_printInclude("<runtime/base/hphp.h>");
-  cg_printf("\n");
+  if (Option::SystemGen) {
+    cg_printf("#ifndef __GENERATED_gen_sys_literal_strings_h__\n");
+    cg_printf("#define __GENERATED_gen_sys_literal_strings_h__\n");
+  } else {
+    cg_printf("#ifndef __GENERATED_sys_literal_strings_h__\n");
+    cg_printf("#define __GENERATED_sys_literal_strings_h__\n");
+  }
+  if (!genStatic) {
+    cg_printInclude("<runtime/base/hphp.h>");
+    cg_printf("\n");
+  }
   cg.namespaceBegin();
   for (map<int, vector<string> >::const_iterator it =
        m_namedStringLiterals.begin(); it != m_namedStringLiterals.end();
@@ -3653,15 +3930,26 @@ void AnalysisResult::outputCPPNamedLiteralStrings() {
     vector<string> &strings = m_namedStringLiterals[hash];
     for (unsigned int i = 0; i < strings.size(); i++) {
       string name = getLiteralStringName(hash, i);
-      cg_printf("extern StaticString %s;\n", name.c_str());
+      if (genStatic) {
+        cg_printf("static StaticString %s(", name.c_str());
+        cg_printString(strings[i], ar, false, false);
+        cg_printf(");\n");
+      } else {
+        cg_printf("extern StaticString %s;\n", name.c_str());
+      }
     }
   }
   cg.namespaceEnd();
-  cg_printf("#endif // __GENERATED_sys_literal_strings_h__\n");
+  if (Option::SystemGen) {
+    cg_printf("#endif // __GENERATED_gen_sys_literal_strings_h__\n");
+  } else {
+    cg_printf("#endif // __GENERATED_sys_literal_strings_h__\n");
+  }
   f.close();
 
-  filename = m_outputPath + "/" + Option::SystemFilePrefix +
-    "literal_strings.no.cpp";
+  if (genStatic) return;
+
+  filename = file + ".no.cpp";
   f.open(filename.c_str());
   cg_printf("\n");
   cg_printInclude("\"literal_strings.h\"");
@@ -3750,6 +4038,8 @@ void AnalysisResult::outputCPPSepExtensionImpl(const std::string &filename) {
     Option::SepExtensionOptions &options = Option::SepExtensions[i];
     cg_printf("#include \"ext_%s.h\"\n", options.name.c_str());
   }
+  string litstrFile = filename + ".litstr";
+  cg_printf("#include \"%s\"\n", litstrFile.c_str());
 
   cg_printf("\n");
   cg_printf("using namespace std;\n");
@@ -3768,6 +4058,8 @@ void AnalysisResult::outputCPPSepExtensionImpl(const std::string &filename) {
 
   cg.namespaceEnd();
   fTable.close();
+  outputCPPNamedLiteralStrings(true, litstrFile);
+  if (m_scalarArrays.size()) assert(false);
 }
 
 //
@@ -3825,19 +4117,9 @@ AnalysisResult::getOrAddMethodSlot(const std::string & mname) {
     //Logger::Warning ("Method %s referenced but not defined.", mname.c_str());
     getCodeError()->record(CodeError::UndefinedMethod, ConstructPtr(),
                            ConstructPtr(), mname.c_str());
-    pair<StringToMethodSlotMap::iterator, bool> ret =
-      stringToMethodSlotMap.insert(
-          (pair<string, MethodSlot>(mname, MethodSlot(mname, 0))));
-    method = ret.first;
+    // too late to add to stringToMethodSlotMap, getMethodSlot already done
+    return errorMethodSlot;
   };
-  return &((*method).second);
-}
-
-// Used only during table gen
-MethodSlot*
-AnalysisResult::getMethodSlotUpdate(const std::string & mname) {
-  StringToMethodSlotMap::iterator method = stringToMethodSlotMap.find(mname);
-  assert (method != stringToMethodSlotMap.end()) ;
   return &((*method).second);
 }
 
@@ -3866,6 +4148,14 @@ struct CoalesceOrder {
   }
 };
 
+// Used only during table gen
+MethodSlot*
+AnalysisResult::getMethodSlotUpdate(const std::string & mname) {
+  StringToMethodSlotMap::iterator method = stringToMethodSlotMap.find(mname);
+  assert (method != stringToMethodSlotMap.end()) ;
+  return &((*method).second);
+}
+
 const MethodSlot* errorMethodSlot(NULL);
 
 void MethodSlot::genMethodSlot(AnalysisResultPtr ar) {
@@ -3880,8 +4170,9 @@ static void buildMethodSlotsAndConflict(AnalysisResultPtr ar,
     cls->collectMethods(ar, funcs);
     vector<MethodSlot *> methodsProcessed;
     methodsProcessed.reserve(funcs.size());
-    string mname;
-    BOOST_FOREACH(tie(mname, tuples::ignore), funcs) {
+    FunctionScopePtr fsp;
+    BOOST_FOREACH(tie(tuples::ignore, fsp), funcs) {
+      string mname (fsp->getOriginalName());
 #     if DEBUG_GMS
       printf ("process %s::%s\n", cls->getName().c_str(), mname.c_str());
 #     endif
@@ -3920,8 +4211,6 @@ static void buildMethodSlotsAndConflict(AnalysisResultPtr ar,
   // build a global index of all methods declared anywhere
   // and an interference graph of methods names that must have a different
   // callIndex
-
-  CallIndexVectSet callIndexVectSet; // set of methods at this callIndex
 
   ar->stringToMethodSlotMap.clear();
   string cname;
@@ -3986,9 +4275,9 @@ static void buildMethodSlotsAndConflict(AnalysisResultPtr ar,
       // already assigned from a different class
       if (methodSlot->m_callIndex) continue;
 
-      unsigned int callIndex = callIndexVectSet.size() + 1;
-      callIndexVectSet.resize(callIndex);
-      MethodSet& methodsAtCallIndex = callIndexVectSet.back();
+      unsigned int callIndex = ar->callIndexVectSet.size() + 1;
+      ar->callIndexVectSet.resize(callIndex);
+      MethodSet& methodsAtCallIndex = ar->callIndexVectSet.back();
       methodsAtCallIndex.insert(methodSlot->m_serialNum);
       methodSlot->m_overloadIndex = 1;
       methodSlot->m_callIndex = callIndex;
@@ -3996,7 +4285,7 @@ static void buildMethodSlotsAndConflict(AnalysisResultPtr ar,
     }
   }
 
-  unsigned int maxSystemMethodCallIndex = callIndexVectSet.size();
+  unsigned int maxSystemMethodCallIndex = ar->callIndexVectSet.size();
 
   // assign m_callIndex & m_overloadIndex IDs for user classes
   map<string, unsigned int> classMax, classMin;
@@ -4031,8 +4320,8 @@ static void buildMethodSlotsAndConflict(AnalysisResultPtr ar,
       MethodSet& conflictingMethods (methodSlot->conflictingMethods);
       // start scanning up for a unconflicted callIndex
       MethodSet* methodsAtCallIndex;
-      for (;callIndex <= callIndexVectSet.size(); ++callIndex) {
-        methodsAtCallIndex = &callIndexVectSet[callIndex-1];
+      for (;callIndex <= ar->callIndexVectSet.size(); ++callIndex) {
+        methodsAtCallIndex = &ar->callIndexVectSet[callIndex-1];
         bool conflict = false;
         // intersect methods used at this index with conflicting methods
         for (MethodSet::iterator i = methodsAtCallIndex->begin(),
@@ -4048,9 +4337,9 @@ static void buildMethodSlotsAndConflict(AnalysisResultPtr ar,
         // callIndex==1 is {"fun1", "fun4"},
         // so fun3 can't have callIndex==1
       }
-      if (callIndex >= callIndexVectSet.size()) {
-        callIndexVectSet.resize(callIndex);
-        methodsAtCallIndex = &callIndexVectSet[callIndex-1];
+      if (callIndex >= ar->callIndexVectSet.size()) {
+        ar->callIndexVectSet.resize(callIndex);
+        methodsAtCallIndex = &ar->callIndexVectSet[callIndex-1];
       }
       methodsAtCallIndex->insert(methodSlot->m_serialNum);
       methodSlot->m_overloadIndex = methodsAtCallIndex->size();
@@ -4069,7 +4358,7 @@ static void buildMethodSlotsAndConflict(AnalysisResultPtr ar,
   cout << "stringToMethodSlotMap" << endl;
   cout << ar->stringToMethodSlotMap;
   cout << "callIndexVectSet" << endl;
-  cout << callIndexVectSet;
+  cout << ar->callIndexVectSet;
 
   cout << "max indices : number of functions" << endl;
   ClassScopePtrVec clsvec;
@@ -4090,27 +4379,110 @@ static void buildMethodSlotsAndConflict(AnalysisResultPtr ar,
   }
 # endif
 }
-void MethodSlot::emitMethodSlot(CodeGenerator &cg, AnalysisResultPtr ar) {
-  cg_printf("extern MethodIndexMap methodIndexMap;\n");
+void MethodSlot::emitMethodSlot(CodeGenerator &cg, AnalysisResultPtr ar,
+                                bool system) {
   cg_printf("#define M(x, y) MethodIndex(x, y)\n");
-  cg_printf("extern const MethodIndex methodIndexMapInit[];\n");
-  cg_printf("const MethodIndex methodIndexMapInit[]= {");
-  int linebreak = 0;
+  const char * sysTable = system ? "Sys" : "";
+
+  // predefined, statically constructed, hash table for quick startup,
+  // and hopefully fast lookup
+  // methodIndexHMap[name]->MethodIndex
+  // this uses linear probing since it's difficult to construct a hash bucket
+  // chain statically.
+  unsigned tableSize = ar->stringToMethodSlotMap.size() * 2;
+  struct MethodIndexHMap {
+    MethodIndexHMap() : name(NULL), methodIndex(0,0) {}
+    MethodIndexHMap(const char *name, unsigned callIndex,
+                    unsigned overloadIndex)
+      : name(name), methodIndex(callIndex, overloadIndex) {}
+    const char *name;
+    MethodIndex methodIndex;
+  };
+  MethodIndexHMap methodIndexHMap [tableSize];
+
   BOOST_FOREACH(StringToMethodSlotMap::value_type slot,
                 ar->stringToMethodSlotMap) {
-    cg_printf("M(%d,%d),%s", slot.second.getCallIndex(),
-              slot.second.getOverloadIndex(),
-              ( (++linebreak & 3) == 0)?"\n":"");
+    ASSERT(!slot.second.isFail());
+    const char *name = slot.first.c_str();
+    unsigned hash = (unsigned)(hash_string_i(name) % tableSize);
+    while (methodIndexHMap[hash].name) {
+      hash = hash ? hash - 1 : tableSize - 1;
+    }
+    methodIndexHMap[hash] = MethodIndexHMap(name,
+                                            slot.second.getCallIndex(),
+                                            slot.second.getOverloadIndex());
   }
-  cg_printf("MethodIndex(0, 0)};\n");
+
+  cg_printf("#define H(x,y,z) MethodIndexHMap(#x,MethodIndex(y,z))\n");
+  cg_printf("#define Z MethodIndexHMap(0,MethodIndex(0,0))\n");
+  cg_printf("const unsigned methodIndexHMapSize%s = %u;\n",
+            sysTable, tableSize);
+  cg_printf("extern const MethodIndexHMap methodIndexHMap%s [];\n", sysTable);
+  cg_printf("const MethodIndexHMap methodIndexHMap%s [methodIndexHMapSize%s] "
+            "= {\n", sysTable, sysTable);
+  int wrap=0;
+  for (unsigned i=0; i<tableSize; ++i)  {
+    if (methodIndexHMap[i].name) {
+      cg_printf ("H(%s,%d,%d)",
+                 methodIndexHMap[i].name,
+                 methodIndexHMap[i].methodIndex.m_callIndex,
+                 methodIndexHMap[i].methodIndex.m_overloadIndex);
+    } else {
+      cg_printf ("Z");
+    }
+    if (i < tableSize - 1 ) cg_printf (", ");
+    if (++wrap == 3) {
+      cg_printf ("\n");
+      wrap=0;
+    }
+  }
+  cg_printf ("};\n");
   cg_printf("#undef M\n");
-  cg_printf("const char * methodIndexMapInitName[]= {");
-  linebreak = 0;
+  cg_printf("#undef H\n");
+  cg_printf("#undef Z\n");
+
+  // reverse map, MethodIndex -> name
+  unsigned mapSize = ar->callIndexVectSet.size();
+  unsigned maxOverload = 0;
+  // linearize all MethodIndex's, e.g. MI(1,1), MI(1,2), MI(1,3), MI(2,1)
+  // methodIndexReverseIndex[methodIndexReverseCallIndex[
+  //    methodIndex.getCallIndex()] + methodIndex.getOverloadIndex()] =
+  //        methodSlot.getName()
+  cg_printf("extern const unsigned methodIndexReverseCallIndex%s[];\n",
+            sysTable);
+  cg_printf("const unsigned methodIndexReverseCallIndex%s[] = {0, \n",
+            sysTable);
+  for (unsigned i=1; i<mapSize; ++i) {
+    maxOverload += ar->callIndexVectSet[i - 1].size();
+    cg_printf("%u", maxOverload);
+    if (i < mapSize - 1 ) cg_printf (",");
+    if (++wrap == 20) {
+      cg_printf ("\n");
+      wrap = 0;
+    }
+  }
+  cg_printf("};\n");
+
+  map<unsigned int, const char *> serialNumIndex; // serialNum -> methodName
   BOOST_FOREACH(StringToMethodSlotMap::value_type slot,
                 ar->stringToMethodSlotMap) {
-    cg_printf("\"%s\",%s", slot.first.c_str(),
-        ( (++linebreak & 3) == 0)?"\n":"");
+    serialNumIndex[slot.second.m_serialNum] = slot.first.c_str();
   }
-  cg_printf("NULL};\n");
+
+  wrap = 0;
+  cg_printf("extern const char * methodIndexReverseIndex%s[];\n", sysTable);
+  cg_printf("const char * methodIndexReverseIndex%s[] = {\n", sysTable);
+  for (unsigned callIndex=0; callIndex<mapSize; ++callIndex) {
+    MethodSet& methodsAtCallIndex (ar->callIndexVectSet[callIndex]);
+    BOOST_FOREACH(int serialNum, methodsAtCallIndex) {
+      cg_printf("\"%s\"", serialNumIndex[serialNum]);
+      if (callIndex < mapSize - 1 ) cg_printf(", ");
+      if (++wrap == 5) {
+        cg_printf ("\n");
+        wrap = 0;
+      }
+    }
+  }
+  cg_printf("};\n");
 }
 }

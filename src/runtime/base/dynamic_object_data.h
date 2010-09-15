@@ -42,19 +42,12 @@ class DynamicObjectData : public ObjectData {
   // properties
   virtual Array o_toArray() const;
   virtual Array o_getDynamicProperties() const;
-  virtual bool o_exists(CStrRef prop, int64 phash,
-                        const char *context, int64 hash) const;
-  virtual Variant o_get(CStrRef prop, int64 phash, bool error,
-      const char *context, int64 hash);
-  virtual Variant o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit,
-      const char *context, int64 hash);
-  virtual Variant &o_lval(CStrRef prop, int64 phash,
-      const char *context, int64 hash);
-  void o_set(const Array properties);
+  virtual Variant *o_realProp(CStrRef prop, int flags,
+                              CStrRef context = null_string) const;
+  virtual Variant *o_realPropPublic(CStrRef prop, int flags) const;
+//  void o_setDynamicProperties(const Array properties);
   virtual void o_getArray(Array &props) const;
   virtual void o_setArray(CArrRef props);
-
-  DECLARE_INSTANCE_PROP_WRAPPER_OPS
 
   // methods
   virtual Variant o_invoke(MethodIndex, const char *s, CArrRef params,
@@ -83,8 +76,6 @@ class DynamicObjectData : public ObjectData {
   virtual Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   virtual Variant doRootCall(Variant v_name, Variant v_arguments, bool fatal);
 
-  virtual Variant doGet(Variant v_name, bool error);
-
   // magic methods
   // __construct is handled in a special way
   virtual Variant t___destruct();
@@ -97,7 +88,6 @@ class DynamicObjectData : public ObjectData {
   virtual Variant t___set_state(Variant v_properties);
   virtual String t___tostring();
   virtual Variant t___clone();
-  virtual Variant &___lval(Variant v_name);
   virtual Variant &___offsetget_lval(Variant v_name);
 
   void setParent(Object p) { parent = p; }

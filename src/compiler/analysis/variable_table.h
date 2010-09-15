@@ -68,7 +68,7 @@ public:
 
   enum JumpTableType {
     JumpReturn,
-    JumpExists,
+    JumpRealProp,
     JumpSet,
     JumpInitialized,
     JumpInitializedString,
@@ -92,18 +92,9 @@ public:
     // this order is significant in outputCPPPropertyOp()
     JumpTableClassGetArray,
     JumpTableClassSetArray,
-    JumpTableClassGet,
-    JumpTableClassGetPublic,
-    JumpTableClassGetPrivate,
-    JumpTableClassExists,
-    JumpTableClassExistsPublic,
-    JumpTableClassExistsPrivate,
-    JumpTableClassSet,
-    JumpTableClassSetPublic,
-    JumpTableClassSetPrivate,
-    JumpTableClassLval,
-    JumpTableClassLvalPublic,
-    JumpTableClassLvalPrivate,
+    JumpTableClassRealProp,
+    JumpTableClassRealPropPublic,
+    JumpTableClassRealPropPrivate,
   };
 
 public:
@@ -127,6 +118,7 @@ public:
   bool isGlobal(const std::string &name) const;
   bool isSuperGlobal(const std::string &name) const;
   bool isLocal(const std::string &name) const;
+  bool isLocal(const Symbol *sym) const;
   bool isRedeclared(const std::string &name) const;
   bool isLocalGlobal(const std::string &name) const;
   bool isNestedStatic(const std::string &name) const;
@@ -134,6 +126,7 @@ public:
   bool isUsed(const std::string &name) const;
   bool isNeeded(const std::string &name) const;
 
+  bool needLocalCopy(const Symbol *sym) const;
   bool needLocalCopy(const std::string &name) const;
   bool needGlobalPointer() const;
   bool isPseudoMainTable() const;
@@ -214,6 +207,9 @@ public:
   bool checkUnused(const std::string &name);
   void addNeeded(const std::string &name);
   void clearUsed();
+  void addStaticVariable(Symbol *sym, AnalysisResultPtr ar,
+                         bool member = false);
+
 
   /**
    * Set all variables to variants, since l-dynamic value was used.
@@ -241,7 +237,7 @@ public:
   void outputCPPPropertyClone(CodeGenerator &cg, AnalysisResultPtr ar,
                               bool dynamicObject = false);
   void outputCPPPropertyTable(CodeGenerator &cg, AnalysisResultPtr ar,
-      const char *parent,
+                              const char *parent, const char *parentName,
       ClassScope::Derivation dynamicObject = ClassScope::FromNormal);
   void outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPStaticVariables(CodeGenerator &cg, AnalysisResultPtr ar);
@@ -293,22 +289,11 @@ private:
   };
 
   int m_attribute;
-  std::map<std::string, int> m_parameters;
-  std::set<std::string> m_protected;
-  std::set<std::string> m_private;
-  std::set<std::string> m_static;
-  std::set<std::string> m_global;
-  std::set<std::string> m_superGlobals;
-  std::set<std::string> m_redeclared;
-  std::set<std::string> m_localGlobal;  // the name occurred in a
-                                        // global statement
-  std::set<std::string> m_nestedStatic; // the name occurred in a
-                                        // nested static statement
-  std::set<std::string> m_lvalParam;    // the non-readonly parameters
-  std::set<std::string> m_used;         // the used (referenced) variables
-  std::set<std::string> m_needed;       // needed even though not referenced
-  StringToConstructPtrMap m_staticInitVal; // static stmt variable init value
-  StringToConstructPtrMap m_clsInitVal; // class variable init value
+  int m_nextParam;
+  bool m_hasGlobal;
+  bool m_hasStatic;
+  bool m_hasPrivate;
+  bool m_hasNonStaticPrivate;
 
   std::set<JumpTableName> m_emptyJumpTables;
 
@@ -337,10 +322,9 @@ private:
 
   bool isGlobalTable(AnalysisResultPtr ar) const;
 
-  void addStaticVariable(const std::string &name, AnalysisResultPtr ar,
-                         bool member = false);
-
   virtual TypePtr setType(AnalysisResultPtr ar, const std::string &name,
+                          TypePtr type, bool coerce);
+  virtual TypePtr setType(AnalysisResultPtr ar, Symbol *sym,
                           TypePtr type, bool coerce);
   virtual void dumpStats(std::map<std::string, int> &typeCounts);
 

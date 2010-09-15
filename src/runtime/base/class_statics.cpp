@@ -34,15 +34,15 @@ ClassStatics::ClassStatics(const std::string& name) : m_redecId(-1) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant ClassStatics::os_getInit(const char *s, int64 hash /* = -1 */) {
+Variant ClassStatics::os_getInit(CStrRef s) {
   throw FatalErrorException(m_msg);
 }
 
-Variant ClassStatics::os_get(const char *s, int64 hash /* = -1 */) {
+Variant ClassStatics::os_get(CStrRef s) {
   throw FatalErrorException(m_msg);
 }
 
-Variant &ClassStatics::os_lval(const char *s, int64 hash /* = -1 */) {
+Variant &ClassStatics::os_lval(CStrRef s) {
   throw FatalErrorException(m_msg);
 }
 
@@ -55,7 +55,7 @@ Variant ClassStatics::os_invoke(const char *c, MethodIndex methodIndex,
   } else {
     if (RuntimeOption::FastMethodCall) {
       // only call with known methodIndex, must succeed
-      s = methodIndexLookupReverse(methodIndex);
+      s = g_bypassMILR ? s : methodIndexLookupReverse(methodIndex);
     }
     raise_warning("call_user_func to non-existent method %s::%s",
                     c, s);

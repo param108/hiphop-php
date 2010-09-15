@@ -275,8 +275,13 @@ bool FunctionScope::isConstructor(ClassScopePtr cls) const {
      || cls->classNameCtor() && getName() == cls->getName());
 }
 
-string FunctionScope::getOriginalName() const {
-  if (m_pseudoMain) return "";
+bool FunctionScope::isMagic() const {
+  return m_name.size() >= 2 && m_name[0] == '_' && m_name[1] == '_';
+}
+
+static std::string s_empty;
+const string &FunctionScope::getOriginalName() const {
+  if (m_pseudoMain) return s_empty;
   if (m_stmt) {
     MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
     return stmt->getOriginalName();
@@ -474,6 +479,14 @@ void FunctionScope::setRefParam(int index) {
   m_refs[index] = true;
 }
 
+bool FunctionScope::hasRefParam(int max) const {
+  ASSERT(max >= 0 && max < (int)m_refs.size());
+  for (int i = 0; i < max; i++) {
+    if (m_refs[i]) return true;
+  }
+  return false;
+}
+
 const std::string &FunctionScope::getParamName(int index) const {
   ASSERT(index >= 0 && index < (int)m_paramNames.size());
   return m_paramNames[index];
@@ -540,7 +553,7 @@ void FunctionScope::setOverriding(TypePtr returnType,
 }
 
 std::string FunctionScope::getId(CodeGenerator &cg) const {
-  string name = cg.formatLabel(getName());
+  string name = cg.formatLabel(getOriginalName());
   if (m_redeclaring < 0) {
     return name;
   }
@@ -678,11 +691,45 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
     cg_printf("num_args, ");
   }
   bool userFunc = isUserFunction();
+  MethodStatementPtr stmt;
   ExpressionListPtr params;
   if (userFunc) {
-    MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
+    stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
     params = stmt->getParams();
   }
+  bool arrayCreated = false;
+  if (Option::GenArrayCreate &&
+      cg.getOutput() != CodeGenerator::SystemCPP &&
+      aggregateParams && m_maxParam > 0) {
+    if (stmt && !stmt->hasRefParam()) {
+      cg_printf("Array(");
+      stmt->outputParamArrayInit(cg);
+      cg_printf(")");
+      arrayCreated = true;
+    } else if (!userFunc && !hasRefParam(m_maxParam)) {
+      cg_printf("Array(");
+      for (int i = 0; i < m_maxParam; i++) {
+        if (isRefParam(i)) {
+          cg_printf("%d, ref(a%d)", i, i);
+        } else {
+          cg_printf("%d, a%d", i, i);
+        }
+        if (i < m_maxParam - 1) {
+          cg_printf(", ");
+        } else {
+          cg_printf(")");
+        }
+      }
+      cg_printf(")");
+      arrayCreated = true;
+    }
+  }
+  if (arrayCreated && isVariableArgument()) {
+    cg_printf(",");
+    cg_printf("args");
+    return;
+  }
+
   if (aggregateParams) {
     cg_printf("Array(");
     if (m_maxParam) {
@@ -698,7 +745,7 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
         dynamic_pointer_cast<ParameterExpression>((*params)[i]);
       isRef = param->isRef();
       if (aggregateParams) {
-        cg_printf("set%s(%d, v_%s", isRef ? "Ref" : "", i,
+        cg_printf("set%s(v_%s", isRef ? "Ref" : "",
                                     param->getName().c_str());
       } else {
         cg_printf("%sv_%s%s",
@@ -708,7 +755,7 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
     } else {
       isRef = isRefParam(i);
       if (aggregateParams) {
-        cg_printf("set%s(%d, a%d", isRef ? "Ref" : "", i, i);
+        cg_printf("set%s(a%d", isRef ? "Ref" : "", i);
       } else {
         cg_printf("%sa%d%s",
                   isRef ? "ref(" : "", i, isRef ? ")" : "");
@@ -730,7 +777,10 @@ void FunctionScope::outputCPPArguments(ExpressionListPtr params,
                                        CodeGenerator &cg,
                                        AnalysisResultPtr ar, int extraArg,
                                        bool variableArgument,
-                                       int extraArgArrayId /* = -1 */) {
+                                       int extraArgArrayId /* = -1 */,
+                                       int extraArgArrayHash /* = -1 */,
+                                       int extraArgArrayIndex /* = -1 */) {
+
   int paramCount = params ? params->getOutputCount() : 0;
   ASSERT(extraArg <= paramCount);
   int iMax = paramCount - extraArg;
@@ -750,25 +800,32 @@ void FunctionScope::outputCPPArguments(ExpressionListPtr params,
     if (i > 0) cg_printf(extra ? "." : ", ");
     if (!extra && (i == iMax || extraArg < 0)) {
       if (extraArgArrayId != -1) {
-        if (cg.getOutput() == CodeGenerator::SystemCPP) {
-          cg_printf("SystemScalarArrays::%s[%d]",
-                    Option::SystemScalarArrayName, extraArgArrayId);
-        } else {
-          cg_printf("ScalarArrays::%s[%d]",
-                    Option::ScalarArrayName, extraArgArrayId);
-        }
+        assert(extraArgArrayHash != -1 && extraArgArrayIndex != -1);
+        ar->outputCPPScalarArrayId(cg, extraArgArrayId, extraArgArrayHash,
+                                   extraArgArrayIndex);
         break;
       }
       extra = true;
       // Parameter arrays are always vectors.
-      cg_printf("Array(ArrayInit(%d, true).", paramCount - i);
+      if (Option::GenArrayCreate &&
+          cg.getOutput() != CodeGenerator::SystemCPP) {
+        if (!params->hasNonArrayCreateValue(false, i)) {
+          ar->m_arrayIntegerKeySizes.insert(paramCount - i);
+          cg_printf("Array(");
+          params->outputCPPUniqLitKeyArrayInit(cg, ar, paramCount - i,
+                                               false, i);
+          cg_printf(")");
+          return;
+        }
+      }
       firstExtra = i;
+      cg_printf("Array(ArrayInit(%d, true).", paramCount - i);
     }
     if (extra) {
       bool needRef = param->hasContext(Expression::RefValue) &&
                      !param->hasContext(Expression::NoRefWrapper) &&
                      param->isRefable();
-      cg_printf("set%s(%d, ", needRef ? "Ref" : "", i - firstExtra);
+      cg_printf("set%s(", needRef ? "Ref" : "");
       if (needRef) {
         // The parameter itself shouldn't be wrapped with ref() any more.
         param->setContext(Expression::NoRefWrapper);
@@ -880,9 +937,10 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
     for (int i = 0; i < m_minParam; i++) {
       cg_printf("CVarRef arg%d(", i);
       if (!guarded) cg_printf("count <= %d ? null_variant : ", i);
-      cg_printf("(%sad->getValue%s(pos)));\n",
-                i ? "pos = ad->iter_advance(pos)," : "",
-                isRefParam(i) ? "Ref" : "");
+      cg_printf("%s(ad->getValue%s(pos%s)));\n",
+                isRefParam(i) ? "ref" : "",
+                isRefParam(i) ? "Ref" : "",
+                i ? " = ad->iter_advance(pos)" : "");
     }
   }
 
@@ -892,8 +950,6 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
       if (do_while) cg_indentBegin("{\n");
     }
   }
-
-
 
   stringstream callss;
   callss << retrn << (m_refReturn ? "ref(" : "(");
@@ -925,7 +981,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
           cg_printf("null_variant");
         }
       } else {
-        cg_printf("ref(arg%d)", i);
+        cg_printf("arg%d", i);
       }
     } else {
       if (fewArgs) {
@@ -951,9 +1007,11 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
       }
     }
     if (!fewArgs) {
-      cg_printf("CVarRef arg%d((%sad->getValue%s(pos)));\n",
-                iMax, iMax ? "pos = ad->iter_advance(pos)," : "",
-                isRefParam(iMax) ? "Ref" : "");
+      cg_printf("CVarRef arg%d(%s(ad->getValue%s(pos%s)));\n",
+                iMax,
+                isRefParam(iMax) ? "ref" : "",
+                isRefParam(iMax) ? "Ref" : "",
+                iMax ? " = ad->iter_advance(pos)" : "");
     }
     if (++iMax < maxParam || variable) {
       cg_printf("if (count == %d) ", iMax);
@@ -970,7 +1028,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
             cg_printf("null_variant");
           }
         } else {
-          cg_printf("ref(arg%d)", i);
+          cg_printf("arg%d", i);
         }
       } else {
         if (fewArgs) {
@@ -1269,7 +1327,6 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
     attribute |= ClassInfo::IsStatic;
   }
   if (isFinal()) attribute |= ClassInfo::IsFinal;
-  if (!m_docComment.empty()) attribute |= ClassInfo::HasDocComment;
 
   if (isVariableArgument()) {
     attribute |= ClassInfo::VariableArguments;
@@ -1282,12 +1339,21 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   attribute |= m_attributeClassInfo;
+  if (!m_docComment.empty() && Option::GenerateDocComments) {
+    attribute |= ClassInfo::HasDocComment;
+  } else {
+    attribute &= ~ClassInfo::HasDocComment;
+  }
 
   // Use the original cased name, for reflection to work correctly.
-  cg_printf("(const char *)0x%04X, \"%s\", NULL, NULL,\n", attribute,
-            getOriginalName().c_str());
+  cg_printf("(const char *)0x%04X, \"%s\", \"%s\", (const char *)%d, "
+            "(const char *)%d, NULL, NULL,\n", attribute,
+            getOriginalName().c_str(),
+            m_stmt ? m_stmt->getLocation()->file : "",
+            m_stmt ? m_stmt->getLocation()->line0 : 0,
+            m_stmt ? m_stmt->getLocation()->line1 : 0);
 
-  if (!m_docComment.empty()) {
+  if (!m_docComment.empty() && Option::GenerateDocComments) {
     char *dc = string_cplus_escape(m_docComment.c_str(), m_docComment.size());
     cg_printf("\"%s\",\n", dc);
     free(dc);
@@ -1361,7 +1427,84 @@ void FunctionScope::RecordRefParamInfo(string fname, FunctionScopePtr func) {
   if (func->isReferenceVariableArgument()) {
     info->setRefVarArg(func->getMaxParamCount());
   }
+  VariableTablePtr variables = func->getVariables();
   for (int i = 0; i < func->getMaxParamCount(); i++) {
     if (func->isRefParam(i)) info->setRefParam(i);
+    variables->addParam(func->getParamName(i),
+                        TypePtr(), AnalysisResultPtr(), ConstructPtr());
+  }
+}
+
+void FunctionScope::outputMethodWrapper(CodeGenerator &cg,
+                                        AnalysisResultPtr ar) {
+  cg_printf("\n");
+  if (m_stmt) {
+    m_stmt->printSource(cg);
+  }
+  cg.printDocComment(m_docComment);
+
+  int minCount = getMinParamCount();
+  int maxCount = getMaxParamCount();
+
+  for (int count = minCount; count <= maxCount; count++) {
+    if (isStatic()) cg_printf("static ");
+    TypePtr type = getReturnType();
+    if (type) {
+      type->outputCPPDecl(cg, ar);
+    } else {
+      cg_printf("void");
+    }
+
+    cg_printf(" %s%s(", Option::MethodWrapperPrefix, getId(cg).c_str());
+    for (int i = 0; i < count; i++) {
+      if (i > 0) cg_printf(", ");
+      getParamType(i)->outputCPPDecl(cg, ar);
+      cg_printf(" %s%s", Option::VariablePrefix, getParamName(i).c_str());
+    }
+    if (isVariableArgument()) {
+      if (count) cg_printf(", ");
+      cg_printf("Array args = Array()");
+    }
+    cg_indentBegin(") {\n");
+
+    if ((isStatic() || isPerfectVirtual() || !isVirtual()) &&
+        !isRedeclaring()) {
+
+      if (type) cg_printf("return ");
+      cg_printf("%s%s(", Option::MethodPrefix, cg.formatLabel(m_name).c_str());
+      if (isVariableArgument()) {
+        cg_printf("args.size() + %d, ", count);
+      }
+      for (int i = 0; i < count; i++) {
+        if (i > 0) cg_printf(", ");
+        cg_printf("%s%s", Option::VariablePrefix, getParamName(i).c_str());
+      }
+      if (isVariableArgument()) {
+        if (count) cg_printf(", ");
+        cg_printf("args");
+      }
+      cg_printf(");\n");
+
+    } else {
+      cg_printf("Array params;\n");
+      for (int i = 0; i < count; i++) {
+        cg_printf("params.append(%s%s);\n",
+                  Option::VariablePrefix, getParamName(i).c_str());
+      }
+      if (isVariableArgument()) {
+        cg_printf("params.merge(args);\n");
+      }
+
+      if (type) cg_printf("return ");
+      if (isStatic()) {
+        cg_printf("%sinvoke_mil(NULL, \"%s\", params, -1);\n",
+                  Option::ObjectStaticPrefix, m_name.c_str());
+      } else {
+        cg_printf("%sinvoke_mil(\"%s\", params, -1);\n",
+                  Option::ObjectPrefix, m_name.c_str());
+      }
+    }
+
+    cg_indentEnd("}\n");
   }
 }

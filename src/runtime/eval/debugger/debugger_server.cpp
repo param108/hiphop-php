@@ -15,6 +15,7 @@
 */
 
 #include <runtime/eval/debugger/debugger_server.h>
+#include <runtime/eval/debugger/debugger_client.h>
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/base/runtime_option.h>
 #include <util/network.h>
@@ -30,6 +31,12 @@ DebuggerServer DebuggerServer::s_debugger_server;
 void DebuggerServer::Start() {
   if (RuntimeOption::EnableDebuggerServer) {
     Debugger::SetTextColors();
+
+    // Some server commands pre-formatted texts with color for clients. Loading
+    // a set of default colors for better display.
+    Hdf hdf;
+    DebuggerClient::LoadColors(hdf);
+
     s_debugger_server.start();
   }
 }
@@ -90,18 +97,18 @@ void DebuggerServer::accept() {
     struct pollfd fds[1];
     fds[0].fd = sock->fd();
     fds[0].events = POLLIN|POLLERR|POLLHUP;
-    if (poll(fds, 1, POLLING_SECONDS * 1000) == 1 &&
+    if (poll(fds, 1, POLLING_SECONDS * 1000) > 0 &&
         (fds[0].revents & POLLIN)) {
       struct sockaddr sa;
       socklen_t salen = sizeof(sa);
       Socket *new_sock = new Socket(::accept(sock->fd(), &sa, &salen),
                                     sock->getType());
       SmartPtr<Socket> ret(new_sock);
-      if (!new_sock->valid()) {
+      if (new_sock->valid()) {
+        Debugger::RegisterProxy(ret, false);
+      } else {
         Logger::Error("unable to accept incoming debugger request");
-        break;
       }
-      Debugger::RegisterProxy(ret, false);
     } // else timed out, then we have a chance to check m_stopped bit
   }
 }

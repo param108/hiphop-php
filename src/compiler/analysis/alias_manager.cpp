@@ -138,6 +138,7 @@ void BucketMapEntry::resetScope() {
     m_num = 0;
   } else {
     m_num = m_stack.back();
+    assert(m_exprs.size() >= m_num);
     m_exprs.resize(m_num);
   }
 }
@@ -411,133 +412,51 @@ static bool isReadOnlyAccess(ExpressionPtr e) {
   }
 }
 
-int AliasManager::findInterf(ExpressionPtr rv, bool isLoad,
-                             ExpressionPtr &rep) {
-  BucketMapEntry lvs = m_bucketMap[0];
+static void updateDepthAndFlags(ExpressionPtr e, int &depth, int &flags) {
+  ScalarExpressionPtr se = spc(ScalarExpression, e);
+  const std::string &s = se->getString();
+  if (s == "begin") {
+    depth--;
+  } else if (s == "end") {
+    depth++;
+  } else if (s == "io") {
+    flags |= Expression::IOEffect;
+  } else {
+    assert(false);
+  }
+}
 
-  rep = ExpressionPtr();
-  ExpressionPtrList::reverse_iterator it = lvs.rbegin(), end = lvs.rend();
-  int a;
-
-  int depth = 0, min_depth = 0, max_depth = 0;
+void AliasManager::cleanInterf(ExpressionPtr load,
+                               ExpressionPtrList::reverse_iterator it,
+                               ExpressionPtrList::reverse_iterator &end,
+                               int depth) {
   while (it != end) {
-    ExpressionPtr e = *it++;
-    switch (e->getKindOf()) {
-    case Expression::KindOfScalarExpression:
-      {
-        ScalarExpressionPtr se = spc(ScalarExpression, e);
-        const std::string &s = se->getString();
-        if (s == "begin") {
-          depth--;
-          if (depth < min_depth) min_depth = depth;
-        } else if (s == "end") {
-          depth++;
-          if (depth > max_depth) max_depth = depth;
-        } else if (s == "io") {
-          int effect = rv->getLocalEffects();
-          if (effect & (Expression::IOEffect|
-                        Expression::CanThrow|
-                        Expression::AccessorEffect)) {
-            return InterfAccess;
-          }
-        } else {
-          assert(false);
-        }
-      }
-      break;
-
-    case Expression::KindOfObjectMethodExpression:
-    case Expression::KindOfDynamicFunctionCall:
-    case Expression::KindOfSimpleFunctionCall:
-    case Expression::KindOfNewObjectExpression:
-      a = testAccesses(rv, e);
-      if (a == DisjointAccess) {
+    ExpressionPtr e = *it;
+    bool eIsLoad = false;
+    int effects = 0;
+    int a = checkInterf(load, e, eIsLoad, depth, effects);
+    if (a != DisjointAccess) {
+      if (a == NotAccess) {
+        if (depth < 0) return;
+      } else if (!eIsLoad) {
+        m_bucketMap[0].erase(it, end);
         continue;
       }
-      return a;
-
-    case Expression::KindOfListAssignment: {
-      ListAssignmentPtr la = spc(ListAssignment, e);
-      ExpressionList &lhs = *la->getVariables().get();
-      for (int i = lhs.getCount(); i--; ) {
-        ExpressionPtr ep = lhs[i];
-        if (ep && testAccesses(ep, rv) != DisjointAccess) {
-          return InterfAccess;
-        }
-      }
-      break;
     }
+    ++it;
+  }
+}
 
-    case Expression::KindOfObjectPropertyExpression:
-    case Expression::KindOfConstantExpression:
-    case Expression::KindOfSimpleVariable:
-    case Expression::KindOfDynamicVariable:
-    case Expression::KindOfArrayElementExpression:
-    case Expression::KindOfStaticMemberExpression:
-      a = testAccesses(e, rv);
-      if (a == DisjointAccess) {
-        continue;
-      }
-      if (a == SameAccess) {
-        if (isLoad) {
-          // The value of an earlier load is available
-          // if it dominates this one
-          if (depth > min_depth) {
-            a = InterfAccess;
-          }
-        } else {
-          // The assignment definitely hits the load
-          // if it post-dominates it.
-          if (min_depth < 0) {
-            a = InterfAccess;
-          }
-        }
-      }
-      if (a != SameAccess &&
-          isLoad && isReadOnlyAccess(e)) {
-        continue;
-      }
-      rep = e;
-      return a;
-
-    case Expression::KindOfUnaryOpExpression:
-      a = testAccesses(spc(UnaryOpExpression,e)->getExpression(), rv);
-      goto handle_assign;
-    case Expression::KindOfBinaryOpExpression:
-      a = testAccesses(spc(BinaryOpExpression,e)->getExp1(), rv);
-      goto handle_assign;
-    case Expression::KindOfAssignmentExpression:
-      a = testAccesses(spc(AssignmentExpression,e)->getVariable(), rv);
-      goto handle_assign;
-
-    handle_assign:
-      if (a == DisjointAccess) {
-        continue;
-      }
-      rep = e;
-      if (a == SameAccess) {
-        if (isLoad) {
-          // we can propagate the value of an assignment
-          // to a load, provided the assignment dominates
-          // the load.
-          if (depth > min_depth) {
-            a = InterfAccess;
-          }
-        } else {
-          // a later assignment kills an earlier one
-          // provided the later one post-dominates the earlier
-          if (min_depth < 0) {
-            a = InterfAccess;
-          }
-        }
-      }
-      return a;
-
-    default:
-      break;
+bool AliasManager::okToKill(ExpressionPtr ep, bool killRef) {
+  if (ep && ep->is(Expression::KindOfSimpleVariable)) {
+    SimpleVariablePtr sv = spc(SimpleVariable, ep);
+    AliasInfo &ai = m_aliasInfo[sv->getName()];
+    if (!ai.getIsGlobal() && !ai.getIsParam() &&
+        (killRef || (!ai.checkRefLevel(0) && !ai.getIsRefTo()))) {
+      return true;
     }
   }
-  return DisjointAccess;
+  return false;
 }
 
 static int getOpForAssignmentOp(int op) {
@@ -557,6 +476,227 @@ static int getOpForAssignmentOp(int op) {
   }
 }
 
+void AliasManager::killLocals() {
+  BucketMapEntry &lvs = m_bucketMap[0];
+  ExpressionPtrList::reverse_iterator it = lvs.rbegin(), end = lvs.rend();
+  int effects = 0;
+  int depth = 0;
+  int emask = (Expression::IOEffect |
+               Expression::CanThrow |
+               Expression::AccessorEffect |
+               Expression::OtherEffect);
+
+  while (it != end) {
+    ExpressionPtr e = *it;
+    switch (e->getKindOf()) {
+      case Expression::KindOfScalarExpression:
+        updateDepthAndFlags(e, depth, effects);
+        if (depth < 0) {
+          it = end;
+          continue;
+        }
+        break;
+
+      case Expression::KindOfListAssignment:
+        if (!(effects & emask)) {
+          ListAssignmentPtr la = spc(ListAssignment, e);
+          ExpressionList &lhs = *la->getVariables().get();
+          for (int i = lhs.getCount(); i--; ) {
+            if (okToKill(lhs[i], false)) {
+              lhs[i].reset();
+            }
+          }
+        }
+        goto kill_it;
+
+      case Expression::KindOfAssignmentExpression:
+        if (!(effects & emask)) {
+          if (okToKill(spc(AssignmentExpression, e)->getVariable(), false)) {
+            e->setContext(Expression::DeadStore);
+            m_replaced++;
+          }
+        }
+        goto kill_it;
+
+      case Expression::KindOfBinaryOpExpression:
+        if (!(effects & emask) &&
+            getOpForAssignmentOp(spc(BinaryOpExpression, e)->getOp())) {
+          if (okToKill(spc(BinaryOpExpression, e)->getExp1(), false)) {
+            e->setContext(Expression::DeadStore);
+            m_replaced++;
+            ++it;
+            continue;
+          }
+        }
+        cleanInterf(spc(BinaryOpExpression, e)->getExp1(), ++it, end, depth);
+        continue;
+
+      case Expression::KindOfUnaryOpExpression:
+        cleanInterf(spc(UnaryOpExpression, e)->getExpression(),
+                    ++it, end, depth);
+        continue;
+
+      case Expression::KindOfSimpleVariable:
+      case Expression::KindOfObjectPropertyExpression:
+      case Expression::KindOfDynamicVariable:
+      case Expression::KindOfArrayElementExpression:
+      case Expression::KindOfStaticMemberExpression:
+        if (e->hasContext(Expression::UnsetContext) &&
+            e->hasContext(Expression::LValue)) {
+          if (!(effects & emask) && okToKill(e, true)) {
+            e->setReplacement(
+              Expression::MakeConstant(m_arp, e->getLocation(), "null"));
+            m_replaced++;
+          } else {
+            effects |= Expression::UnknownEffect;
+          }
+          goto kill_it;
+        }
+        cleanInterf(e, ++it, end, depth);
+        continue;
+
+      default: kill_it:
+        lvs.erase(it, end);
+        effects |= e->getContainedEffects();
+        continue;
+    }
+
+    effects |= e->getContainedEffects();
+    ++it;
+  }
+}
+
+int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
+                              int &depth, int &effects) {
+  isLoad = true;
+  switch (e->getKindOf()) {
+    case Expression::KindOfScalarExpression:
+    {
+      updateDepthAndFlags(e, depth, effects);
+      return NotAccess;
+    }
+
+    case Expression::KindOfObjectMethodExpression:
+    case Expression::KindOfDynamicFunctionCall:
+    case Expression::KindOfSimpleFunctionCall:
+    case Expression::KindOfNewObjectExpression:
+      isLoad = false;
+      return testAccesses(rv, e);
+
+    case Expression::KindOfListAssignment: {
+      isLoad = false;
+      ListAssignmentPtr la = spc(ListAssignment, e);
+      ExpressionList &lhs = *la->getVariables().get();
+      for (int i = lhs.getCount(); i--; ) {
+        ExpressionPtr ep = lhs[i];
+        if (ep && testAccesses(ep, rv) != DisjointAccess) {
+          return InterfAccess;
+        }
+      }
+      break;
+    }
+
+    case Expression::KindOfObjectPropertyExpression:
+    case Expression::KindOfConstantExpression:
+    case Expression::KindOfSimpleVariable:
+    case Expression::KindOfDynamicVariable:
+    case Expression::KindOfArrayElementExpression:
+    case Expression::KindOfStaticMemberExpression:
+      return testAccesses(e, rv);
+
+    case Expression::KindOfUnaryOpExpression:
+      isLoad = false;
+      return testAccesses(spc(UnaryOpExpression,e)->getExpression(), rv);
+    case Expression::KindOfBinaryOpExpression:
+      isLoad = false;
+      return testAccesses(spc(BinaryOpExpression,e)->getExp1(), rv);
+    case Expression::KindOfAssignmentExpression:
+      isLoad = false;
+      return testAccesses(spc(AssignmentExpression,e)->getVariable(), rv);
+
+    default:
+      break;
+  }
+
+  return DisjointAccess;
+}
+
+int AliasManager::findInterf(ExpressionPtr rv, bool isLoad,
+                             ExpressionPtr &rep) {
+  BucketMapEntry &lvs = m_bucketMap[0];
+
+  rep = ExpressionPtr();
+  ExpressionPtrList::reverse_iterator it = lvs.rbegin(), end = lvs.rend();
+
+  int depth = 0, min_depth = 0, max_depth = 0;
+  for (; it != end; ++it) {
+    ExpressionPtr e = *it;
+    bool eIsLoad = false;
+    int effects = 0;
+    int a = checkInterf(rv, e, eIsLoad, depth, effects);
+    if (a != DisjointAccess) {
+      if (a == NotAccess) {
+        if (effects & Expression::IOEffect) {
+          int effect = rv->getLocalEffects();
+          if (effect & (Expression::IOEffect|
+                        Expression::CanThrow|
+                        Expression::AccessorEffect|
+                        Expression::OtherEffect)) {
+            return InterfAccess;
+          }
+        } else if (depth < min_depth) {
+          min_depth = depth;
+        } else if (depth > max_depth) {
+          max_depth = depth;
+        }
+      } else {
+        if (eIsLoad) {
+          if (a == SameAccess) {
+            if (isLoad) {
+              // The value of an earlier load is available
+              // if it dominates this one
+              if (depth > min_depth) {
+                a = InterfAccess;
+              }
+            } else {
+              // The assignment definitely hits the load
+              // if it post-dominates it.
+              if (min_depth < 0) {
+                a = InterfAccess;
+              }
+            }
+          }
+          if (a != SameAccess &&
+              isLoad && isReadOnlyAccess(e)) {
+            continue;
+          }
+        } else {
+          if (a == SameAccess) {
+            if (isLoad) {
+              // we can propagate the value of an assignment
+              // to a load, provided the assignment dominates
+              // the load.
+              if (depth > min_depth) {
+                a = InterfAccess;
+              }
+            } else {
+              // a later assignment kills an earlier one
+              // provided the later one post-dominates the earlier
+              if (min_depth < 0) {
+                a = InterfAccess;
+              }
+            }
+          }
+        }
+        rep = e;
+        return a;
+      }
+    }
+  }
+
+  return DisjointAccess;
+}
+
 ExpressionPtr AliasManager::canonicalizeNonNull(ExpressionPtr e) {
   ExpressionPtr r = canonicalizeNode(e);
   return r ? r : e;
@@ -569,7 +709,6 @@ ExpressionPtr AliasManager::canonicalizeRecurNonNull(ExpressionPtr e) {
 
 static bool sameExpr(ExpressionPtr e1, ExpressionPtr e2) {
   if (e1 == e2) return true;
-  if (e1->getCanonID() != e2->getCanonID()) return false;
   while (e2->getCanonPtr()) {
     e2 = e2->getCanonPtr();
     if (e2 == e1) return true;
@@ -595,7 +734,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
 
   case Expression::KindOfAssignmentExpression: {
     AssignmentExpressionPtr ae = spc(AssignmentExpression,e);
-    if (e->getContext() & Expression::DeadStore) {
+    if (e->hasContext(Expression::DeadStore)) {
       Construct::recomputeEffects();
       return ae->replaceValue(ae->getValue());
     }
@@ -727,38 +866,57 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
                   rep->setReplacement(value);
                   m_replaced++;
                 } else {
-                  ExpressionPtr rhs = value;
-                  while (rhs->is(Expression::KindOfAssignmentExpression)) {
-                    rhs = spc(AssignmentExpression, rhs)->getValue();
+                  ExpressionPtr last = value;
+                  while (last->is(Expression::KindOfAssignmentExpression)) {
+                    last = spc(AssignmentExpression, last)->getValue();
                   }
-                  if (!rhs->hasEffect()) {
-                    m_noAdd = true;
-                    ExpressionPtr v = canonicalizeRecurNonNull(rhs->clone());
-                    m_noAdd = false;
-                    if (v->getCanonID() == rhs->getCanonID()) {
-                      if (a->isUnused() && rhs == value) {
-                        value = value->replaceValue(
-                          canonicalizeRecurNonNull(
-                            Expression::MakeConstant(
-                              m_arp, value->getLocation(), "null")));
-                        a->setNthKid(1, value);
-                        m_changes++;
-                      } else {
-                        ExpressionListPtr el(
-                          new ExpressionList(a->getLocation(),
-                                             Expression::KindOfExpressionList,
-                                             ExpressionList::ListKindWrapped));
-                        a = spc(AssignmentExpression, a->clone());
-                        el->addElement(a);
-                        el->addElement(a->getValue());
-                        a->setNthKid(
-                          1, Expression::MakeConstant(m_arp,
-                                                      value->getLocation(),
-                                                      "null"));
-                        rep->setReplacement(el);
-                        m_replaced++;
+                  ExpressionPtr cur = value;
+                  while (cur) {
+                    ExpressionPtr rhs = cur;
+                    ExpressionPtr next;
+                    if (cur->is(Expression::KindOfAssignmentExpression)) {
+                      rhs = spc(AssignmentExpression, cur)->getVariable();
+                      next = spc(AssignmentExpression, cur)->getValue();
+                    } else {
+                      next.reset();
+                    }
+                    if (!rhs->hasEffect()) {
+                      m_noAdd = true;
+                      ExpressionPtr v = rhs->clone();
+                      v->clearContext();
+                      v = canonicalizeRecurNonNull(v);
+                      m_noAdd = false;
+                      while (v->getCanonPtr() && v->getCanonPtr() != last) {
+                        v = v->getCanonPtr();
+                      }
+                      if (v->getCanonPtr()) {
+                        if (a->isUnused() && rhs == value) {
+                          value = value->replaceValue(
+                            canonicalizeRecurNonNull(
+                              Expression::MakeConstant(
+                                m_arp, value->getLocation(), "null")));
+                          a->setNthKid(1, value);
+                          m_changes++;
+                        } else {
+                          ExpressionListPtr el(
+                            new ExpressionList(
+                              a->getLocation(),
+                              Expression::KindOfExpressionList,
+                              ExpressionList::ListKindWrapped));
+                          a = spc(AssignmentExpression, a->clone());
+                          el->addElement(a);
+                          el->addElement(a->getValue());
+                          a->setNthKid(
+                            1, Expression::MakeConstant(m_arp,
+                                                        value->getLocation(),
+                                                        "null"));
+                          rep->setReplacement(el);
+                          m_replaced++;
+                        }
+                        break;
                       }
                     }
+                    cur = next;
                   }
                 }
               }
@@ -800,29 +958,42 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
           if (Option::LocalCopyProp &&
               rep->getKindOf() == Expression::KindOfAssignmentExpression) {
             AssignmentExpressionPtr ae = spc(AssignmentExpression,rep);
-            ExpressionPtr rhs = ae->getValue();
-            while (rhs->is(Expression::KindOfAssignmentExpression)) {
-              rhs = spc(AssignmentExpression, rhs)->getValue();
+            ExpressionPtr cur = ae->getValue(), last = cur;
+            while (last->is(Expression::KindOfAssignmentExpression)) {
+              last = spc(AssignmentExpression, last)->getValue();
             }
-            if (rhs->isScalar()) {
-              rhs = rhs->clone();
-              getCanonical(rhs);
-              return rhs;
+            if (last->isScalar()) {
+              last = last->clone();
+              getCanonical(last);
+              return last;
             }
-            if (rhs->is(Expression::KindOfSimpleVariable)) {
-              ExpressionPtr orig;
-              int i = findInterf(rhs, true, orig);
-              if (i == SameAccess && sameExpr(rhs, orig)) {
-                rhs = rhs->clone();
-                return e->replaceValue(canonicalizeRecurNonNull(rhs));
+            while (cur) {
+              ExpressionPtr rhs = cur;
+              ExpressionPtr next;
+              if (cur->is(Expression::KindOfAssignmentExpression)) {
+                rhs = spc(AssignmentExpression, cur)->getVariable();
+                next = spc(AssignmentExpression, cur)->getValue();
+              } else {
+                next.reset();
               }
+              if (rhs->is(Expression::KindOfSimpleVariable)) {
+                rhs = rhs->clone();
+                rhs->clearContext();
+                ExpressionPtr orig;
+                int i = findInterf(rhs, true, orig);
+                if (i == SameAccess &&
+                    (sameExpr(cur, orig) || next && sameExpr(next, orig))) {
+                  return e->replaceValue(canonicalizeRecurNonNull(rhs));
+                }
+              }
+              cur = next;
             }
             if (ae->isUnused() && m_bucketMap[0].isLast(ae)) {
               rep = ae->clone();
               ae->setContext(Expression::DeadStore);
               ae->setNthKid(1, Expression::MakeConstant(m_arp,
-                                                          ae->getLocation(),
-                                                          "null"));
+                                                        ae->getLocation(),
+                                                        "null"));
               ae->setNthKid(0, Expression::MakeConstant(m_arp,
                                                         ae->getLocation(),
                                                         "null"));
@@ -830,7 +1001,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
               m_replaced++;
               return e->replaceValue(canonicalizeRecurNonNull(rep));
             }
-            e->setCanonPtr(rhs);
+            e->setCanonPtr(last);
           }
         }
       }
@@ -842,8 +1013,19 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
 
   case Expression::KindOfBinaryOpExpression: {
     BinaryOpExpressionPtr bop = spc(BinaryOpExpression, e);
-
     int rop = getOpForAssignmentOp(bop->getOp());
+    if (bop->hasContext(Expression::DeadStore)) {
+      assert(rop);
+      ExpressionPtr rhs = bop->getExp2();
+      ExpressionPtr lhs = bop->getExp1();
+      lhs->clearContext();
+      return bop->replaceValue(
+        canonicalizeNonNull(ExpressionPtr(
+                              new BinaryOpExpression(
+                                bop->getLocation(),
+                                Expression::KindOfBinaryOpExpression,
+                                lhs, rhs, rop))));
+    }
     if (rop) {
       ExpressionPtr lhs = bop->getExp1();
       ExpressionPtr alt;
@@ -1045,9 +1227,15 @@ int AliasManager::canonicalizeRecur(StatementPtr s) {
     clear();
     break;
 
+  case Statement::KindOfReturnStatement:
+  {
+    canonicalizeKid(s, spc(Expression,s->getNthKid(0)), 0);
+    killLocals();
+    return FallThrough;
+  }
+
   case Statement::KindOfBreakStatement:
   case Statement::KindOfContinueStatement:
-  case Statement::KindOfReturnStatement:
     ret = Branch;
     break;
 
@@ -1167,6 +1355,9 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       {
         const std::string &name = spc(SimpleVariable, e)->getName();
         AliasInfo &ai = m_aliasInfo[name];
+        if (spc(SimpleVariable, e)->isSuperGlobal()) {
+          ai.setIsGlobal();
+        }
         if (context & Expression::RefValue) {
           ai.addRefLevel(0);
         }
@@ -1229,6 +1420,11 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
           }
           if (SimpleVariablePtr sv = dpc(SimpleVariable, e)) {
             m_aliasInfo[sv->getName()].setIsGlobal();
+            if (s->is(Statement::KindOfStaticStatement) &&
+                !m_variables->isPseudoMainTable()) {
+              m_variables->addStaticVariable(
+                m_variables->getSymbol(sv->getName(), true), m_arp);
+            }
           }
         }
         break;
@@ -1316,6 +1512,7 @@ int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
 
   if (Option::LocalCopyProp || Option::EliminateDeadCode) {
     canonicalizeRecur(m->getStmts());
+    killLocals();
     if (m_replaced) return -1;
   }
 

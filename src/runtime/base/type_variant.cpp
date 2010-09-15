@@ -24,6 +24,7 @@
 #include <runtime/ext/ext_variable.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/fiber_reference_map.h>
+#include <runtime/base/zend/zend_string.h>
 #include <compiler/parser/hphp.tab.hpp>
 
 using namespace std;
@@ -45,6 +46,11 @@ static StaticString s_scalar("scalar");
 
 ///////////////////////////////////////////////////////////////////////////////
 // private implementations
+
+Variant::Variant(litstr  v) : _count(0), m_type(KindOfString) {
+  m_data.pstr = NEW(StringData)(v);
+  m_data.pstr->incRefCount();
+}
 
 Variant::Variant(CStrRef v) : _count(0), m_type(KindOfString) {
   StringData *s = v.get();
@@ -223,7 +229,7 @@ Variant& Variant::assign(CVarRef v) {
     } else if (this != &v) {
       // We need to release whatever value innerVar holds before
       // calling bind()
-      if (innerVar->m_type > LiteralString) innerVar->destruct();
+      if (IS_REFCOUNTED_TYPE(innerVar->m_type)) innerVar->destruct();
       innerVar->bind(v);
     }
     return *this;
@@ -231,7 +237,7 @@ Variant& Variant::assign(CVarRef v) {
   if (this == &v) {
     return *this;
   }
-  if (m_type > LiteralString) destruct();
+  if (IS_REFCOUNTED_TYPE(m_type)) destruct();
   bind(v);
   return *this;
 }
@@ -254,7 +260,7 @@ CVarRef Variant::set(bool v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (m_type > LiteralString) destruct();
+    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
   }
   m_type = KindOfBoolean;
   m_data.num = (v ? 1 : 0);
@@ -268,7 +274,7 @@ CVarRef Variant::set(char v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (m_type > LiteralString) destruct();
+    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
   }
   m_type = KindOfByte;
   m_data.num = v;
@@ -282,7 +288,7 @@ CVarRef Variant::set(short v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (m_type > LiteralString) destruct();
+    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
   }
   m_type = KindOfInt16;
   m_data.num = v;
@@ -296,7 +302,7 @@ CVarRef Variant::set(int v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (m_type > LiteralString) destruct();
+    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
   }
   m_type = KindOfInt32;
   m_data.num = v;
@@ -310,7 +316,7 @@ CVarRef Variant::set(int64 v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (m_type > LiteralString) destruct();
+    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
   }
   m_type = KindOfInt64;
   m_data.num = v;
@@ -324,7 +330,7 @@ CVarRef Variant::set(double v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (m_type > LiteralString) destruct();
+    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
   }
   m_type = KindOfDouble;
   m_data.dbl = v;
@@ -338,10 +344,11 @@ CVarRef Variant::set(litstr v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (m_type > LiteralString) destruct();
+    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
   }
-  m_type = LiteralString;
-  m_data.str = v;
+  m_type = KindOfString;
+  m_data.pstr = NEW(StringData)(v);
+  m_data.pstr->incRefCount();
   return *this;
 }
 
@@ -352,7 +359,7 @@ CVarRef Variant::set(StringData *v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (m_type > LiteralString) destruct();
+    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
   }
   if (v) {
     m_type = KindOfString;
@@ -370,7 +377,7 @@ CVarRef Variant::set(ArrayData *v) {
     m_data.pvar->set(v);
     return *this;
   }
-  if (m_type > LiteralString) destruct();
+  if (IS_REFCOUNTED_TYPE(m_type)) destruct();
   if (v) {
     m_type = KindOfArray;
     m_data.parr = v;
@@ -389,7 +396,7 @@ CVarRef Variant::set(ObjectData *v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (m_type > LiteralString) destruct();
+    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
   }
   if (v) {
     m_type = KindOfObject;
@@ -402,28 +409,18 @@ CVarRef Variant::set(ObjectData *v) {
   return *this;
 }
 
-CVarRef Variant::set(const ObjectOffset& v) {
-  return (*this = static_cast<Variant>(v));
-}
-
-void Variant::escalateString() const {
-  if (m_type == KindOfVariant) {
-    m_data.pvar->escalateString();
-    return;
-  }
-  ASSERT(getType() == LiteralString);
-  m_type = KindOfString;
-  StringData *v = NEW(StringData)(m_data.str);
-  m_data.pstr = v;
-  v->incRefCount();
-}
-
 void Variant::split() {
   switch (m_type) {
   case KindOfVariant: m_data.pvar->split();     break;
   // copy-on-write
-  case KindOfStaticString:  set(m_data.pstr->copy()); break;
-  case KindOfString:  set(m_data.pstr->copy()); break;
+  case KindOfStaticString:
+  case KindOfString:
+  {
+    int len = m_data.pstr->size();
+    const char *copy = string_duplicate(m_data.pstr->data(), len);
+    set(NEW(StringData)(copy, len, AttachString));
+    break;
+  }
   case KindOfArray:   set(m_data.parr->copy()); break;
   default:
     break;
@@ -479,16 +476,6 @@ DataType Variant::toNumeric(int64 &ival, double &dval,
   case KindOfDouble:
     dval = m_data.dbl;
     return KindOfDouble;
-  case LiteralString:
-    if (checkString) {
-      const char *data = m_data.str;
-      int len = strlen(data);
-      if (len) {
-        DataType r = is_numeric_string(data, len, &ival, &dval, 0);
-        if (r == KindOfInt64 || r == KindOfDouble) return r;
-      }
-    }
-    break;
   case KindOfStaticString:
   case KindOfString:
     if (checkString) {
@@ -571,15 +558,16 @@ Variant Variant::dequeue() {
 
 void Variant::prepend(CVarRef v) {
   if (m_type == KindOfVariant) {
-    return m_data.pvar->prepend(v);
+    m_data.pvar->prepend(v);
+    return;
   }
   if (isNull()) {
     set(Array::Create());
   }
 
   if (is(KindOfArray)) {
-    ArrayData *oldArr = getArrayData();
-    ArrayData *newarr = oldArr->prepend(v, (oldArr->getCount() > 1));
+    ArrayData *arr = getArrayData();
+    ArrayData *newarr = arr->prepend(v, (arr->getCount() > 1));
     if (newarr) {
       set(newarr);
     }
@@ -660,14 +648,6 @@ Variant Variant::array_iter_key() const {
   return false;
 }
 
-Variant Variant::array_iter_value(ssize_t &pos) const {
-  if (is(KindOfArray)) {
-    return getArrayData()->value(pos);
-  }
-  throw_bad_type_exception("expecting an array");
-  return null_variant;
-}
-
 Variant Variant::array_iter_each() {
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();
@@ -684,30 +664,32 @@ Variant Variant::array_iter_each() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // unary plus
-Variant Variant::operator+() {
+Variant Variant::operator+() const {
   if (is(KindOfArray)) {
     throw BadArrayOperandException();
   }
   if (isDouble()) {
-    set(toDouble());
-  } else if (isIntVal()) {
-    set(toInt64());
-  } else if (isString()) {
+    return toDouble();
+  }
+  if (isIntVal()) {
+    return toInt64();
+  }
+  if (isString()) {
     String s = toString();
     DataType ret = KindOfNull;
     int64 lval; double dval;
     ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
     if (ret == KindOfDouble) {
-      set(dval);
-    } else if (ret == KindOfInt64) {
-      set(lval);
-    } else {
-      set(toInt64());
+      return dval;
     }
-  } else {
-    ASSERT(false);
+    if (ret == KindOfInt64) {
+      return lval;
+    }
+    return toInt64();
   }
-  return *this;
+
+  ASSERT(false);
+  return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -837,14 +819,14 @@ Variant &Variant::operator+=(double n) {
 ///////////////////////////////////////////////////////////////////////////////
 // minus
 
-Variant Variant::operator-() {
+Variant Variant::operator-() const {
   if (is(KindOfArray)) {
     throw BadArrayOperandException();
   }
   if (isDouble()) {
-    set(-toDouble());
+    return -toDouble();
   } else if (isIntVal()) {
-    set(-toInt64());
+    return -toInt64();
   } else {
     if (isString()) {
       String s = toString();
@@ -852,11 +834,11 @@ Variant Variant::operator-() {
       int64 lval; double dval;
       ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
       if (ret == KindOfDouble) {
-        set(-dval);
+        return -dval;
       } else if (ret == KindOfInt64) {
-        set(-lval);
+        return -lval;
       } else {
-        set(-toInt64());
+        return -toInt64();
       }
     } else {
       ASSERT(false);
@@ -1319,7 +1301,6 @@ Variant Variant::operator~() const {
     return ~toInt64();
   case KindOfDouble:
     return ~(int64)(toDouble());
-  case LiteralString:
   case KindOfStaticString:
   case KindOfString:
     return ~toString();
@@ -1398,7 +1379,6 @@ Variant &Variant::operator++() {
   case KindOfInt32:
   case KindOfInt64:  set(toInt64() + 1);  break;
   case KindOfDouble: set(toDouble() + 1); break;
-  case LiteralString:
   case KindOfStaticString:
   case KindOfString:
     {
@@ -1413,9 +1393,6 @@ Variant &Variant::operator++() {
         case KindOfDouble: set(dval + 1); break;
         case KindOfNull:
           split();
-          if (getType() == LiteralString) {
-            escalateString();
-          }
           getStringData()->inc(); break;
         default:
           ASSERT(false);
@@ -1443,7 +1420,6 @@ Variant &Variant::operator--() {
   case KindOfInt32:
   case KindOfInt64:  set(toInt64() - 1);  break;
   case KindOfDouble: set(toDouble() - 1); break;
-  case LiteralString:
   case KindOfStaticString:
   case KindOfString:
     {
@@ -1550,11 +1526,10 @@ bool Variant::toBooleanHelper() const {
   switch (m_type) {
   case KindOfNull:    return false;
   case KindOfDouble:  return m_data.dbl != 0;
-  case LiteralString: return StringData(m_data.str).toBoolean();
   case KindOfStaticString:
   case KindOfString:  return m_data.pstr->toBoolean();
   case KindOfArray:   return !m_data.parr->empty();
-  case KindOfObject:  return m_data.pobj != NULL;
+  case KindOfObject:  return m_data.pobj->o_toBoolean();
   case KindOfVariant: return m_data.pvar->toBoolean();
   default:
     ASSERT(false);
@@ -1569,11 +1544,10 @@ int64 Variant::toInt64Helper(int base /* = 10 */) const {
   case KindOfDouble:  {
     return (m_data.dbl > LONG_MAX) ? (uint64)m_data.dbl : (int64)m_data.dbl;
   }
-  case LiteralString: return StringData(m_data.str).toInt64(base);
   case KindOfStaticString:
   case KindOfString:  return m_data.pstr->toInt64(base);
   case KindOfArray:   return m_data.parr->empty() ? 0 : 1;
-  case KindOfObject:  return m_data.pobj ? m_data.pobj->o_toInt64() : 0;
+  case KindOfObject:  return m_data.pobj->o_toInt64();
   case KindOfVariant: return m_data.pvar->toInt64(base);
   default:
     ASSERT(false);
@@ -1586,9 +1560,9 @@ double Variant::toDouble() const {
   switch (m_type) {
   case KindOfNull:    return 0.0;
   case KindOfDouble:  return m_data.dbl;
-  case LiteralString: return StringData(m_data.str).toDouble();
   case KindOfStaticString:
   case KindOfString:  return m_data.pstr->toDouble();
+  case KindOfObject:  return m_data.pobj->o_toDouble();
   case KindOfVariant: return m_data.pvar->toDouble();
   default:
     break;
@@ -1601,7 +1575,6 @@ String Variant::toString() const {
   case KindOfNull:    return empty_string;
   case KindOfBoolean: return m_data.num ? "1" : "";
   case KindOfDouble:  return m_data.dbl;
-  case LiteralString: return m_data.str;
   case KindOfStaticString:
   case KindOfString:  return m_data.pstr;
   case KindOfArray:   return "Array";
@@ -1617,7 +1590,6 @@ Array Variant::toArray() const {
   switch (m_type) {
   case KindOfNull:    return Array::Create();
   case KindOfInt64:   return Array::Create(m_data.num);
-  case LiteralString: return Array::Create(m_data.str);
   case KindOfStaticString:
   case KindOfString:  return Array::Create(String(m_data.pstr));
   case KindOfArray:   return m_data.parr;
@@ -1642,12 +1614,11 @@ Object Variant::toObject() const {
   case KindOfInt32:
   case KindOfInt64:
   case KindOfDouble:
-  case LiteralString:
   case KindOfStaticString:
   case KindOfString:
     {
-      c_stdclass *obj = NEW(c_stdclass)();
-      obj->o_lval(s_scalar, -1) = *this;
+      c_stdClass *obj = NEW(c_stdClass)();
+      obj->o_set(s_scalar, *this, false);
       return obj;
     }
   case KindOfArray:   return m_data.parr->toObject();
@@ -1655,7 +1626,7 @@ Object Variant::toObject() const {
     ASSERT(false);
     break;
   }
-  return Object(NEW(c_stdclass)());
+  return Object(NEW(c_stdClass)());
 }
 
 Variant Variant::toKey() const {
@@ -1670,15 +1641,6 @@ Variant Variant::toKey() const {
   switch (m_type) {
   case KindOfNull:
     return empty_string;
-  case LiteralString:
-    {
-      int64 n = 0;
-      if (toString()->isStrictlyInteger(n)) {
-        return n;
-      } else {
-        return *this;
-      }
-    }
   case KindOfBoolean:
   case KindOfByte:
   case KindOfInt16:
@@ -1798,10 +1760,16 @@ bool Variant::same(CVarRef v2) const {
       break;
     }
     break;
-  case LiteralString:
   case KindOfStaticString:
-  case KindOfString:
-    return v2.isString() && equal(v2);
+  case KindOfString: {
+    switch (v2.getType()) {
+    case KindOfStaticString:
+    case KindOfString:
+      return getStringData()->same(v2.getStringData());
+    default:
+      return false;
+    }
+  }
   case KindOfArray:
     if (v2.is(KindOfArray)) {
       return toArray().same(v2.toArray());
@@ -1826,7 +1794,6 @@ bool Variant::same(CVarRef v2) const {
   case KindOfInt32:                                             \
   case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
   case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
-  case LiteralString:                                           \
   case KindOfStaticString:                                      \
   case KindOfString:  return HPHP::reverse(v2, toString());     \
   case KindOfArray:   return HPHP::reverse(v2, toArray());      \
@@ -1847,7 +1814,6 @@ bool Variant::same(CVarRef v2) const {
   case KindOfInt32:                                             \
   case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
   case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
-  case LiteralString:                                           \
   case KindOfStaticString:                                      \
   case KindOfString:  return HPHP::reverse(v2, toString());     \
   case KindOfArray:   return HPHP::reverse(v2, toArray());      \
@@ -1871,7 +1837,6 @@ bool Variant::same(CVarRef v2) const {
   case KindOfInt32:                                             \
   case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
   case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
-  case LiteralString:                                           \
   case KindOfStaticString:                                      \
   case KindOfString:  return HPHP::reverse(v2, toString());     \
   case KindOfArray:                                             \
@@ -1897,7 +1862,6 @@ bool Variant::same(CVarRef v2) const {
   case KindOfInt32:                                             \
   case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
   case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
-  case LiteralString:                                           \
   case KindOfStaticString:                                      \
   case KindOfString:  return HPHP::reverse(v2, toString());     \
   case KindOfArray:   return toArray().forward(v2);             \
@@ -1990,11 +1954,9 @@ void Variant::callOffsetUnset(CVarRef key) {
 
 #define IMPLEMENT_RVAL_INTEGRAL                                         \
   if (m_type == KindOfArray) {                                          \
-    return m_data.parr->get((int64)offset, prehash, error);             \
+    return m_data.parr->get((int64)offset, error);                      \
   }                                                                     \
   switch (m_type) {                                                     \
-    case LiteralString:                                                 \
-      return toString().get()->getChar((int)offset);                    \
     case KindOfStaticString:                                            \
     case KindOfString:                                                  \
       return m_data.pstr->getChar((int)offset);                         \
@@ -2002,7 +1964,7 @@ void Variant::callOffsetUnset(CVarRef key) {
       return getArrayAccess()->o_invoke(s_offsetGet,                    \
                                         Array::Create(offset));         \
     case KindOfVariant:                                                 \
-      return m_data.pvar->rvalAt(offset, prehash, error);               \
+      return m_data.pvar->rvalAt(offset, error);                        \
     case KindOfNull:                                                    \
       break;                                                            \
     default:                                                            \
@@ -2013,27 +1975,22 @@ void Variant::callOffsetUnset(CVarRef key) {
   }                                                                     \
   return null_variant;
 
-Variant Variant::rvalAt(bool offset, int64 prehash /* = -1 */,
-    bool error /* = false */) const {
+Variant Variant::rvalAt(bool offset, bool error /* = false */) const {
   IMPLEMENT_RVAL_INTEGRAL
 }
-Variant Variant::rvalAt(double offset, int64 prehash /* = -1 */,
-    bool error /* = false */) const {
+Variant Variant::rvalAt(double offset, bool error /* = false */) const {
   IMPLEMENT_RVAL_INTEGRAL
 }
 
-Variant Variant::rvalAtHelper(int64 offset, int64 prehash /* = -1 */,
-                              bool error /* = false */) const {
+Variant Variant::rvalAtHelper(int64 offset, bool error /* = false */) const {
   switch (m_type) {
-  case LiteralString:
-    return toString().get()->getChar((int)offset);
   case KindOfStaticString:
   case KindOfString:
     return m_data.pstr->getChar((int)offset);
   case KindOfObject:
     return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
   case KindOfVariant:
-    return m_data.pvar->rvalAt(offset, prehash, error);
+    return m_data.pvar->rvalAt(offset, error);
   case KindOfNull:
     break;
   default:
@@ -2045,29 +2002,26 @@ Variant Variant::rvalAtHelper(int64 offset, int64 prehash /* = -1 */,
   return null_variant;
 }
 
-Variant Variant::rvalAt(litstr offset, int64 prehash /* = -1 */,
-                        bool error /* = false */,
+Variant Variant::rvalAt(litstr offset, bool error /* = false */,
                         bool isString /* = false */) const {
   if (m_type == KindOfArray) {
-    if (isString) return m_data.parr->get(offset, prehash, error);
+    if (isString) return m_data.parr->get(offset, error);
     int64 n;
     int len = strlen(offset);
     if (!is_strictly_integer(offset, len, n)) {
-      return m_data.parr->get(offset, prehash, error);
+      return m_data.parr->get(offset, error);
     } else {
-      return m_data.parr->get(n, prehash, error);
+      return m_data.parr->get(n, error);
     }
   }
   switch (m_type) {
-  case LiteralString:
-    return toString().get()->getChar(String(offset).toInt32());
   case KindOfStaticString:
   case KindOfString:
     return m_data.pstr->getChar(String(offset).toInt32());
   case KindOfObject:
     return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
   case KindOfVariant:
-    return m_data.pvar->rvalAt(offset, prehash, error);
+    return m_data.pvar->rvalAt(offset, error);
   case KindOfNull:
     break;
   default:
@@ -2079,29 +2033,26 @@ Variant Variant::rvalAt(litstr offset, int64 prehash /* = -1 */,
   return null_variant;
 }
 
-Variant Variant::rvalAt(CStrRef offset, int64 prehash /* = -1 */,
-                        bool error /* = false */,
+Variant Variant::rvalAt(CStrRef offset, bool error /* = false */,
                         bool isString /* = false */) const {
   if (m_type == KindOfArray) {
-    if (isString) return m_data.parr->get(offset, prehash, error);
-    if (offset.isNull()) return m_data.parr->get(empty_string, -1, error);
+    if (isString) return m_data.parr->get(offset, error);
+    if (offset.isNull()) return m_data.parr->get(empty_string, error);
     int64 n;
     if (!offset->isStrictlyInteger(n)) {
-      return m_data.parr->get(offset, prehash, error);
+      return m_data.parr->get(offset, error);
     } else {
-      return m_data.parr->get(n, prehash, error);
+      return m_data.parr->get(n, error);
     }
   }
   switch (m_type) {
-  case LiteralString:
-    return toString().get()->getChar(offset.toInt32());
   case KindOfStaticString:
   case KindOfString:
     return m_data.pstr->getChar(offset.toInt32());
   case KindOfObject:
     return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
   case KindOfVariant:
-    return m_data.pvar->rvalAt(offset, prehash, error, isString);
+    return m_data.pvar->rvalAt(offset, error, isString);
   case KindOfNull:
     break;
   default:
@@ -2113,37 +2064,27 @@ Variant Variant::rvalAt(CStrRef offset, int64 prehash /* = -1 */,
   return null_variant;
 }
 
-Variant Variant::rvalAt(CVarRef offset, int64 prehash /* = -1 */,
-                        bool error /* = false */) const {
+Variant Variant::rvalAt(CVarRef offset, bool error /* = false */) const {
   if (m_type == KindOfArray) {
     // Fast path for KindOfArray
     switch (offset.m_type) {
     case KindOfNull:
-      return m_data.parr->get(empty_string, prehash, error);
+      return m_data.parr->get(empty_string, error);
     case KindOfBoolean:
     case KindOfByte:
     case KindOfInt16:
     case KindOfInt32:
     case KindOfInt64:
-      return m_data.parr->get(offset.m_data.num, prehash, error);
+      return m_data.parr->get(offset.m_data.num, error);
     case KindOfDouble:
-      return m_data.parr->get((int64)offset.m_data.dbl, prehash, error);
-    case LiteralString: {
-      String soffset = offset.toString();
-      int64 n;
-      if (soffset.get()->isStrictlyInteger(n)) {
-        return m_data.parr->get(n, prehash, error);
-      } else {
-        return m_data.parr->get(soffset, prehash, error);
-      }
-    }
+      return m_data.parr->get((int64)offset.m_data.dbl, error);
     case KindOfStaticString:
     case KindOfString: {
       int64 n;
       if (offset.m_data.pstr->isStrictlyInteger(n)) {
-        return m_data.parr->get(n, prehash, error);
+        return m_data.parr->get(n, error);
       } else {
-        return m_data.parr->get(String(offset.m_data.pstr), prehash, error);
+        return m_data.parr->get(String(offset.m_data.pstr), error);
       }
     }
     case KindOfArray:
@@ -2151,12 +2092,12 @@ Variant Variant::rvalAt(CVarRef offset, int64 prehash /* = -1 */,
       break;
     case KindOfObject:
       if (offset.isResource()) {
-        return m_data.parr->get(offset.toInt64(), prehash, error);
+        return m_data.parr->get(offset.toInt64(), error);
       }
       throw_bad_type_exception("Invalid type used as key");
       break;
     case KindOfVariant:
-      return rvalAt(*(offset.m_data.pvar), prehash, error);
+      return rvalAt(*(offset.m_data.pvar), error);
     default:
       ASSERT(false);
       break;
@@ -2164,15 +2105,13 @@ Variant Variant::rvalAt(CVarRef offset, int64 prehash /* = -1 */,
     return null_variant;
   }
   switch (m_type) {
-  case LiteralString:
-    return toString().get()->getChar(offset.toInt32());
   case KindOfStaticString:
   case KindOfString:
     return m_data.pstr->getChar(offset.toInt32());
   case KindOfObject:
     return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
   case KindOfVariant:
-    return m_data.pvar->rvalAt(offset, prehash, error);
+    return m_data.pvar->rvalAt(offset, error);
   case KindOfNull:
     break;
   default:
@@ -2184,54 +2123,46 @@ Variant Variant::rvalAt(CVarRef offset, int64 prehash /* = -1 */,
   return null_variant;
 }
 
-Variant &Variant::lvalAt(bool    key, int64 prehash /* = -1 */,
-                         bool    checkExist /* = false */) {
-  return lvalAtImpl(key, prehash, checkExist);
+Variant &Variant::lvalAt(bool    key, bool    checkExist /* = false */) {
+  return lvalAtImpl(key, checkExist);
 }
-Variant &Variant::lvalAt(char    key, int64 prehash /* = -1 */,
-                         bool    checkExist /* = false */) {
-  return lvalAtImpl(key, prehash, checkExist);
+Variant &Variant::lvalAt(char    key, bool    checkExist /* = false */) {
+  return lvalAtImpl(key, checkExist);
 }
-Variant &Variant::lvalAt(short   key, int64 prehash /* = -1 */,
-                         bool    checkExist /* = false */) {
-  return lvalAtImpl(key, prehash, checkExist);
+Variant &Variant::lvalAt(short   key, bool    checkExist /* = false */) {
+  return lvalAtImpl(key, checkExist);
 }
-Variant &Variant::lvalAt(int     key, int64 prehash /* = -1 */,
-                         bool    checkExist /* = false */) {
-  return lvalAtImpl(key, prehash, checkExist);
+Variant &Variant::lvalAt(int     key, bool    checkExist /* = false */) {
+  return lvalAtImpl(key, checkExist);
 }
-Variant &Variant::lvalAt(int64   key, int64 prehash /* = -1 */,
-                         bool    checkExist /* = false */) {
+Variant &Variant::lvalAt(int64   key, bool    checkExist /* = false */) {
   if (m_type == KindOfArray) {
     Variant *ret = NULL;
     ArrayData *arr = m_data.parr;
     ArrayData *escalated =
-      arr->lval(key, ret, arr->getCount() > 1, prehash, checkExist);
+      arr->lval(key, ret, arr->getCount() > 1, checkExist);
     if (escalated) {
       set(escalated);
     }
     ASSERT(ret);
     return *ret;
   }
-  return lvalAtImpl(key, prehash, checkExist);
+  return lvalAtImpl(key, checkExist);
 }
-Variant &Variant::lvalAt(double  key, int64 prehash /* = -1 */,
-                         bool    checkExist /* = false */) {
-  return lvalAtImpl((int64)key, prehash, checkExist);
+Variant &Variant::lvalAt(double  key, bool    checkExist /* = false */) {
+  return lvalAtImpl((int64)key, checkExist);
 }
-Variant &Variant::lvalAt(litstr  key, int64 prehash /* = -1 */,
-                         bool    checkExist /* = false */,
+Variant &Variant::lvalAt(litstr  key, bool    checkExist /* = false */,
                          bool    isString /* = false */) {
   if (m_type == KindOfArray) {
     Variant *ret = NULL;
     ArrayData *arr = m_data.parr;
     ArrayData *escalated;
     if (isString) {
-      escalated = arr->lval(key, ret, arr->getCount() > 1, prehash,
-                            checkExist);
+      escalated = arr->lval(key, ret, arr->getCount() > 1, checkExist);
     } else {
       escalated = arr->lval(String(key).toKey(), ret, arr->getCount() > 1,
-                            prehash, checkExist);
+                            checkExist);
     }
     if (escalated) {
       set(escalated);
@@ -2239,21 +2170,18 @@ Variant &Variant::lvalAt(litstr  key, int64 prehash /* = -1 */,
     ASSERT(ret);
     return *ret;
   }
-  return lvalAtImpl(key, prehash, checkExist);
+  return lvalAtImpl(key, checkExist);
 }
-Variant &Variant::lvalAt(CStrRef key, int64 prehash /* = -1 */,
-                         bool    checkExist /* = false */,
+Variant &Variant::lvalAt(CStrRef key, bool    checkExist /* = false */,
                          bool    isString /* = false */) {
   if (m_type == KindOfArray) {
     Variant *ret = NULL;
     ArrayData *arr = m_data.parr;
     ArrayData *escalated;
     if (isString) {
-      escalated = arr->lval(key, ret, arr->getCount() > 1, prehash,
-                            checkExist);
+      escalated = arr->lval(key, ret, arr->getCount() > 1, checkExist);
     } else {
-      escalated = arr->lval(key.toKey(), ret, arr->getCount() > 1, prehash,
-                            checkExist);
+      escalated = arr->lval(key.toKey(), ret, arr->getCount() > 1, checkExist);
     }
     if (escalated) {
       set(escalated);
@@ -2261,22 +2189,29 @@ Variant &Variant::lvalAt(CStrRef key, int64 prehash /* = -1 */,
     ASSERT(ret);
     return *ret;
   }
-  return lvalAtImpl(key, prehash, checkExist);
+  return lvalAtImpl(key, checkExist);
 }
-Variant &Variant::lvalAt(CVarRef k, int64 prehash /* = -1 */,
-                         bool checkExist /* = false */) {
+Variant &Variant::lvalAt(CVarRef k, bool checkExist /* = false */) {
   if (m_type == KindOfArray) {
     Variant *ret = NULL;
     ArrayData *arr = m_data.parr;
     ArrayData *escalated = arr->lval(k.toKey(), ret, arr->getCount() > 1,
-        prehash, checkExist);
+        checkExist);
     if (escalated) {
       set(escalated);
     }
     ASSERT(ret);
     return *ret;
   }
-  return lvalAtImpl(k, prehash, checkExist);
+  return lvalAtImpl(k, checkExist);
+}
+
+Variant *Variant::lvalPtr(CStrRef key, bool forWrite, bool create) {
+  Variant *t = m_type == KindOfVariant ? m_data.pvar : this;
+  if (t->m_type == KindOfArray) {
+    return t->asArrRef().lvalPtr(key, forWrite, create);
+  }
+  return NULL;
 }
 
 Variant &Variant::lvalInvalid() {
@@ -2290,63 +2225,85 @@ Variant &Variant::lvalBlackHole() {
   return bh;
 }
 
-Variant Variant::refvalAt(bool    key, int64 prehash /* = -1 */) {
-  return refvalAtImpl(key, prehash);
+Variant Variant::refvalAt(bool    key) {
+  return refvalAtImpl(key);
 }
-Variant Variant::refvalAt(char    key, int64 prehash /* = -1 */) {
-  return refvalAtImpl(key, prehash);
+Variant Variant::refvalAt(char    key) {
+  return refvalAtImpl(key);
 }
-Variant Variant::refvalAt(short   key, int64 prehash /* = -1 */) {
-  return refvalAtImpl(key, prehash);
+Variant Variant::refvalAt(short   key) {
+  return refvalAtImpl(key);
 }
-Variant Variant::refvalAt(int     key, int64 prehash /* = -1 */) {
-  return refvalAtImpl(key, prehash);
+Variant Variant::refvalAt(int     key) {
+  return refvalAtImpl(key);
 }
-Variant Variant::refvalAt(int64   key, int64 prehash /* = -1 */) {
-  return refvalAtImpl(key, prehash);
+Variant Variant::refvalAt(int64   key) {
+  return refvalAtImpl(key);
 }
-Variant Variant::refvalAt(double  key, int64 prehash /* = -1 */) {
-  return refvalAtImpl((int64)key, prehash);
+Variant Variant::refvalAt(double  key) {
+  return refvalAtImpl((int64)key);
 }
-Variant Variant::refvalAt(litstr  key, int64 prehash /* = -1 */,
-                          bool isString /* = false */) {
-  return refvalAtImpl(key, prehash, isString);
+Variant Variant::refvalAt(litstr  key, bool isString /* = false */) {
+  return refvalAtImpl(key, isString);
 }
-Variant Variant::refvalAt(CStrRef key, int64 prehash /* = -1 */,
-                          bool isString /* = false */) {
-  return refvalAtImpl(key, prehash, isString);
+Variant Variant::refvalAt(CStrRef key, bool isString /* = false */) {
+  return refvalAtImpl(key, isString);
 }
-Variant Variant::refvalAt(CVarRef key, int64 prehash /* = -1 */) {
-  return refvalAtImpl(key, prehash);
+Variant Variant::refvalAt(CVarRef key) {
+  return refvalAtImpl(key);
 }
 
-Variant Variant::refvalAtImpl(CStrRef key, int64 prehash /* = -1 */,
-                              bool isString /* = false */) {
+Variant Variant::refvalAtImpl(CStrRef key, bool isString /* = false */) {
   if (m_type == KindOfVariant) {
-    return m_data.pvar->refvalAtImpl(key, prehash, isString);
+    return m_data.pvar->refvalAtImpl(key, isString);
   }
-  if (is(KindOfArray) || isNull() ||
-      (is(KindOfBoolean) && !toBoolean()) ||
-      (is(LiteralString) && !*getLiteralString()) ||
-      (is(KindOfStaticString) && getStringData()->empty()) ||
-      (is(KindOfString) && getStringData()->empty())) {
-    return ref(lvalAt(key, prehash, false, isString));
+  if (is(KindOfArray) || isObjectConvertable()) {
+    return ref(lvalAt(key, false, isString));
   } else {
-    return rvalAt(key, prehash, isString);
+    return rvalAt(key, isString);
   }
 }
 
-Variant Variant::o_get(CStrRef propName, int64 prehash /* = -1 */,
-                       bool error /* = true */,
+Variant Variant::o_get(CStrRef propName, bool error /* = true */,
                        CStrRef context /* = null_string */) const {
   if (m_type == KindOfObject) {
-    return m_data.pobj->o_get(propName, prehash, error, context);
+    return m_data.pobj->o_get(propName, error, context);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_get(propName, prehash, error, context);
+    return m_data.pvar->o_get(propName, error, context);
   } else if (error) {
     raise_notice("Trying to get property of non-object");
   }
   return null_variant;
+}
+
+Variant Variant::o_getPublic(CStrRef propName, bool error /* = true */) const {
+  if (m_type == KindOfObject) {
+    return m_data.pobj->o_getPublic(propName, error);
+  } else if (m_type == KindOfVariant) {
+    return m_data.pvar->o_getPublic(propName, error);
+  } else if (error) {
+    raise_notice("Trying to get property of non-object");
+  }
+  return null_variant;
+}
+
+Variant Variant::o_set(CStrRef propName, CVarRef val,
+                       CStrRef context /* = null_string */) {
+  if (propName.empty()) {
+    throw EmptyObjectPropertyException();
+  }
+
+  if (m_type == KindOfObject) {
+  } else if (m_type == KindOfVariant) {
+    return m_data.pvar->o_set(propName, val, context);
+  } else if (isObjectConvertable()) {
+    set(Object(NEW(c_stdClass)()));
+  } else {
+    // Raise a warning
+    raise_warning("Attempt to assign property of non-object");
+    return val;
+  }
+  return m_data.pobj->o_set(propName, val, false, context);
 }
 
 Variant Variant::o_invoke(MethodIndex methodIndex, const char *s,
@@ -2563,23 +2520,30 @@ Variant Variant::o_root_invoke_few_args_mil(const char *s, int64 hash,
                                 INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
-
-ObjectOffset Variant::o_lval(CStrRef propName, int64 prehash /*= -1 */,
-                             CStrRef context /* = null_string */) {
+Variant &Variant::o_lval(CStrRef propName, CVarRef tmpForGet,
+                         CStrRef context /* = null_string */) {
   if (m_type == KindOfObject) {
-    return Object(m_data.pobj).o_lval(propName, prehash, context);
+    return m_data.pobj->o_lval(propName, tmpForGet, context);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_lval(propName, prehash, context);
-  } else if (m_type == KindOfNull) {
-    set(Object(NEW(c_stdclass)()));
-    return Object(m_data.pobj).o_lval(propName, prehash, context);
+    return m_data.pvar->o_lval(propName, tmpForGet, context);
+  } else if (isObjectConvertable()) {
+    set(Object(NEW(c_stdClass)()));
+    return m_data.pobj->o_lval(propName, tmpForGet, context);
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
-    // Return an ObjectOffset blackhole
-    Variant ret;
-    ret.set(Object(NEW(c_stdclass)()));
-    return Object(ret.m_data.pobj).o_lval(propName, prehash, context);
+    return const_cast<Variant&>(tmpForGet);
+  }
+}
+
+Variant &Variant::o_unsetLval(CStrRef propName, CVarRef tmpForGet,
+                              CStrRef context /* = null_string */) {
+  if (m_type == KindOfObject) {
+    return m_data.pobj->o_lval(propName, tmpForGet, context);
+  } else if (m_type == KindOfVariant) {
+    return m_data.pvar->o_unsetLval(propName, tmpForGet, context);
+  } else {
+    return const_cast<Variant&>(tmpForGet);
   }
 }
 
@@ -2589,8 +2553,7 @@ ObjectOffset Variant::o_lval(CStrRef propName, int64 prehash /*= -1 */,
       escalate();                                                       \
     }                                                                   \
     ArrayData *escalated =                                              \
-      m_data.parr->set(ToKey(key), v, (m_data.parr->getCount() > 1),    \
-                       prehash);                                        \
+      m_data.parr->set(ToKey(key), v, (m_data.parr->getCount() > 1));   \
     if (escalated) {                                                    \
       set(escalated);                                                   \
     }                                                                   \
@@ -2604,18 +2567,17 @@ ObjectOffset Variant::o_lval(CStrRef propName, int64 prehash /*= -1 */,
     }                                                                   \
     /* Fall through */                                                  \
   case KindOfNull:                                                      \
-    set(ArrayData::Create(ToKey(key), v));                                     \
+    set(ArrayData::Create(ToKey(key), v));                              \
     break;                                                              \
   case KindOfVariant:                                                   \
     m_data.pvar->set(key, v);                                           \
     break;                                                              \
-  case LiteralString:                                                   \
   case KindOfStaticString:                                              \
   case KindOfString:                                                    \
     {                                                                   \
       String s = toString();                                            \
       if (s.empty()) {                                                  \
-        set(Array::Create(ToKey(key), v));                                     \
+        set(Array::Create(ToKey(key), v));                              \
       } else {                                                          \
         s.lvalAt(key) = v;                                              \
         set(s);                                                         \
@@ -2638,8 +2600,7 @@ check_array:                                                            \
     Variant *cv = NULL;                                                 \
     ASSERT(!v.isContagious());                                          \
     ArrayData *escalated =                                              \
-      m_data.parr->lval(ToKey(key), cv, (m_data.parr->getCount() > 1),  \
-          prehash);                                                     \
+      m_data.parr->lval(ToKey(key), cv, (m_data.parr->getCount() > 1)); \
     if (escalated) {                                                    \
       set(escalated);                                                   \
     }                                                                   \
@@ -2657,7 +2618,7 @@ check_array:                                                            \
     case T_SL_EQUAL:    return ((*cv) <<= v);                           \
     case T_SR_EQUAL:    return ((*cv) >>= v);                           \
     default:                                                            \
-      throw FatalErrorException("invalid operator %d", op);             \
+      throw FatalErrorException(0, "invalid operator %d", op);          \
     }                                                                   \
   }                                                                     \
   switch (m_type) {                                                     \
@@ -2673,7 +2634,6 @@ check_array:                                                            \
   case KindOfVariant:                                                   \
     m_data.pvar->setOpEqual(op, key, v);                                \
     break;                                                              \
-  case LiteralString:                                                   \
   case KindOfStaticString:                                              \
   case KindOfString:                                                    \
     throw_bad_type_exception("not array objects");                      \
@@ -2694,7 +2654,7 @@ check_array:                                                            \
     case T_SL_EQUAL:     cv <<= v;             break;                   \
     case T_SR_EQUAL:     cv >= v;              break;                   \
     default:                                                            \
-      throw FatalErrorException("invalid operator %d", op);             \
+      throw FatalErrorException(0, "invalid operator %d", op);          \
     }                                                                   \
     aa->o_invoke(s_offsetSet, CREATE_VECTOR2(key, cv), -1);             \
     return cv;                                                          \
@@ -2705,60 +2665,52 @@ check_array:                                                            \
   }                                                                     \
   return v;                                                             \
 
-CVarRef Variant::set(bool key, CVarRef v, int64 prehash /* = -1 */) {
+CVarRef Variant::set(bool key, CVarRef v) {
   IMPLEMENT_SETAT;
 }
 
-CVarRef Variant::set(int64 key, CVarRef v, int64 prehash /* = -1 */) {
+CVarRef Variant::set(int64 key, CVarRef v) {
   IMPLEMENT_SETAT;
 }
-CVarRef Variant::set(double  key, CVarRef v, int64 prehash /* = -1 */) {
-  IMPLEMENT_SETAT;
-}
-
-CVarRef Variant::set(litstr key, CVarRef v, int64 prehash /* = -1 */,
-                     bool isString /* = false */) {
+CVarRef Variant::set(double  key, CVarRef v) {
   IMPLEMENT_SETAT;
 }
 
-CVarRef Variant::set(CStrRef key, CVarRef v, int64 prehash /* = -1 */,
-                     bool isString /* = false */) {
+CVarRef Variant::set(litstr key, CVarRef v, bool isString /* = false */) {
   IMPLEMENT_SETAT;
 }
 
-CVarRef Variant::set(CVarRef key, CVarRef v, int64 prehash /* = -1 */) {
+CVarRef Variant::set(CStrRef key, CVarRef v, bool isString /* = false */) {
   IMPLEMENT_SETAT;
 }
 
-CVarRef Variant::setOpEqual(int op, bool key, CVarRef v,
-                            int64 prehash /* = -1 */) {
+CVarRef Variant::set(CVarRef key, CVarRef v) {
+  IMPLEMENT_SETAT;
+}
+
+CVarRef Variant::setOpEqual(int op, bool key, CVarRef v) {
   IMPLEMENT_SETAT_OPEQUAL;
 }
 
-CVarRef Variant::setOpEqual(int op, int64 key, CVarRef v,
-                            int64 prehash /* = -1 */) {
+CVarRef Variant::setOpEqual(int op, int64 key, CVarRef v) {
   IMPLEMENT_SETAT_OPEQUAL;
 }
 
-CVarRef Variant::setOpEqual(int op, double  key, CVarRef v,
-                            int64 prehash /* = -1 */) {
+CVarRef Variant::setOpEqual(int op, double  key, CVarRef v) {
   IMPLEMENT_SETAT_OPEQUAL;
 }
 
 CVarRef Variant::setOpEqual(int op, litstr key, CVarRef v,
-                            int64 prehash /* = -1 */,
                             bool isString /* = false */) {
   IMPLEMENT_SETAT_OPEQUAL;
 }
 
 CVarRef Variant::setOpEqual(int op, CStrRef key, CVarRef v,
-                            int64 prehash /* = -1 */,
                             bool isString /* = false */) {
   IMPLEMENT_SETAT_OPEQUAL;
 }
 
-CVarRef Variant::setOpEqual(int op, CVarRef key, CVarRef v,
-                            int64 prehash /* = -1 */) {
+CVarRef Variant::setOpEqual(int op, CVarRef key, CVarRef v) {
   IMPLEMENT_SETAT_OPEQUAL;
 }
 
@@ -2803,7 +2755,6 @@ CVarRef Variant::append(CVarRef v) {
       m_data.pobj->o_invoke(s_offsetSet, params);
       break;
     }
-  case LiteralString:
   case KindOfStaticString:
   case KindOfString:
     if (toString().empty()) {
@@ -2846,7 +2797,7 @@ check_array:
     case T_SL_EQUAL:    return ((*cv) <<= v);
     case T_SR_EQUAL:    return ((*cv) >>= v);
     default:
-      throw FatalErrorException("invalid operator %d", op);
+      throw FatalErrorException(0, "invalid operator %d", op);
     }
     return v;
   }
@@ -2882,12 +2833,11 @@ check_array:
     case T_SR_EQUAL:     cv >= v;              break;
       break;
     default:
-      throw FatalErrorException("invalid operator %d", op);
+      throw FatalErrorException(0, "invalid operator %d", op);
     }
     aa->o_invoke(s_offsetSet, CREATE_VECTOR2(null_variant, cv));
     return cv;
   }
-  case LiteralString:
   case KindOfStaticString:
   case KindOfString:
     if (toString().empty()) {
@@ -2901,19 +2851,19 @@ check_array:
   return v;
 }
 
-void Variant::remove(CVarRef key, int64 prehash /* = -1 */) {
+void Variant::remove(CVarRef key) {
   switch(key.getType()) {
   case KindOfByte:
   case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
-    removeImpl(key.toInt64(), prehash);
+    removeImpl(key.toInt64());
     return;
   default:
     break;
   }
   // Trouble cases: Array, Object
-  removeImpl(key, prehash);
+  removeImpl(key);
 }
 
 void Variant::setStatic() const {
@@ -2982,8 +2932,6 @@ void Variant::serialize(VariableSerializer *serializer,
     serializer->write(m_data.num);          break;
   case KindOfDouble:
     serializer->write(m_data.dbl);          break;
-  case LiteralString:
-    serializer->write(m_data.str);          break;
   case KindOfStaticString:
   case KindOfString:
     serializer->write(m_data.pstr->data(),
@@ -3081,13 +3029,15 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
     }
     break;
   case 'S':
-    {
+    if (unserializer->getType() == VariableUnserializer::APCSerialize) {
       union {
         char buf[8];
         StringData *sd;
       } u;
       in.read(u.buf, 8);
       operator=(u.sd);
+    } else {
+      throw Exception("Unknown type '%c'", type);
     }
     break;
   case 'a':
@@ -3099,13 +3049,15 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
     }
     break;
   case 'A':
-    {
+    if (unserializer->getType() == VariableUnserializer::APCSerialize) {
       union {
         char buf[8];
         ArrayData *ad;
       } u;
       in.read(u.buf, 8);
       operator=(u.ad);
+    } else {
+      throw Exception("Unknown type '%c'", type);
     }
     break;
   case 'o':
@@ -3149,7 +3101,7 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
         obj = create_object(clsName.data(), Array::Create(), false);
       } catch (ClassNotFoundException &e) {
         obj = create_object("__PHP_Incomplete_Class", Array::Create(), false);
-        obj->o_set("__PHP_Incomplete_Class_Name", -1, clsName);
+        obj->o_set("__PHP_Incomplete_Class_Name", clsName);
       }
       operator=(obj);
       int64 size;
@@ -3176,12 +3128,13 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
               }
             }
           }
+          Variant tmp;
           Variant &value = subLen != 0 ?
             (key.charAt(1) == '*' ?
-             obj->o_lval(key.substr(subLen), -1, clsName) :
-             obj->o_lval(key.substr(subLen), -1,
+             obj->o_lval(key.substr(subLen), tmp, clsName) :
+             obj->o_lval(key.substr(subLen), tmp,
                          String(key.data() + 1, subLen - 2, AttachLiteral)))
-            : obj->o_lval(key, -1);
+            : obj->o_lval(key, tmp);
           value.unserialize(unserializer);
         }
       }
@@ -3240,7 +3193,6 @@ Variant Variant::share(bool save) const {
   case KindOfInt32:
   case KindOfInt64:   return m_data.num;
   case KindOfDouble:  return m_data.dbl;
-  case LiteralString: return m_data.str;
   case KindOfStaticString:
   case KindOfString:
     return String(m_data.pstr->data(), m_data.pstr->size(), CopyString);
@@ -3256,11 +3208,11 @@ Variant Variant::share(bool save) const {
   case KindOfObject:
     if (save) {
       // we have to return an object so to remember its type
-      c_stdclass *obj = NEW(c_stdclass)();
-      obj->o_set(s_s, -1, f_serialize(*this));
+      c_stdClass *obj = NEW(c_stdClass)();
+      obj->o_set(s_s, f_serialize(*this));
       return obj;
     } else {
-      return f_unserialize(m_data.pobj->o_get(s_s, -1));
+      return f_unserialize(m_data.pobj->o_get(s_s));
     }
     break;
   default:
@@ -3308,7 +3260,6 @@ Variant Variant::fiberMarshal(FiberReferenceMap &refMap) const {
   case KindOfInt32:
   case KindOfInt64:   return m_data.num;
   case KindOfDouble:  return m_data.dbl;
-  case LiteralString: return m_data.str;
   case KindOfStaticString:
   case KindOfString:
     return String(m_data.pstr).fiberCopy();
@@ -3355,7 +3306,6 @@ Variant Variant::fiberUnmarshal(FiberReferenceMap &refMap) const {
   case KindOfInt32:
   case KindOfInt64:   return m_data.num;
   case KindOfDouble:  return m_data.dbl;
-  case LiteralString: return m_data.str;
   case KindOfStaticString:
   case KindOfString:
     return String(m_data.pstr).fiberCopy();
@@ -3380,7 +3330,6 @@ const char *Variant::getTypeString(DataType type) {
   case KindOfInt32:   return "KindOfInt32";
   case KindOfInt64:   return "KindOfInt64";
   case KindOfDouble:  return "KindOfDouble";
-  case LiteralString: return "LiteralString";
   case KindOfStaticString:  return "KindOfStaticString";
   case KindOfString:  return "KindOfString";
   case KindOfArray:   return "KindOfArray";
@@ -3405,5 +3354,160 @@ void Variant::dump() const {
   printf("Variant: %s", ret.toString().data());
 }
 
+template<>
+Variant AssignOp<T_CONCAT_EQUAL>::assign(Variant &var, CVarRef val) {
+  return concat_assign(var, val);
+}
+
+template<>
+Variant AssignOp<T_PLUS_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var += val;
+}
+
+template<>
+Variant AssignOp<T_MINUS_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var -= val;
+}
+
+template<>
+Variant AssignOp<T_MUL_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var *= val;
+}
+
+template<>
+Variant AssignOp<T_DIV_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var /= val;
+}
+
+template<>
+Variant AssignOp<T_MOD_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var %= val;
+}
+
+template<>
+Variant AssignOp<T_AND_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var &= val;
+}
+
+template<>
+Variant AssignOp<T_OR_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var |= val;
+}
+
+template<>
+Variant AssignOp<T_XOR_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var ^= val;
+}
+
+template<>
+Variant AssignOp<T_SL_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var <<= val;
+}
+
+template<>
+Variant AssignOp<T_SR_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var >>= val;
+}
+
+template<>
+Variant AssignOp<T_INC>::assign(Variant &var, CVarRef val) {
+  return val.isNull() ? ++var : var++;
+}
+
+template<>
+Variant AssignOp<T_DEC>::assign(Variant &var, CVarRef val) {
+  return val.isNull() ? --var : var--;
+}
+
+template<typename T, int op>
+T Variant::o_assign_op(CStrRef propName, CVarRef val,
+                       CStrRef context /* = null_string */) {
+  if (propName.empty()) {
+    throw EmptyObjectPropertyException();
+  }
+
+  if (m_type == KindOfObject) {
+  } else if (m_type == KindOfVariant) {
+    return (T)m_data.pvar->template o_assign_op<T,op>(propName, val, context);
+  } else if (isObjectConvertable()) {
+    set(Object(NEW(c_stdClass)()));
+  } else {
+    // Raise a warning
+    raise_warning("Attempt to assign property of non-object");
+    Variant tmp;
+    return (T)tmp.template o_assign_op<T,op>(propName, val, context);
+  }
+  return (T)m_data.pobj->template o_assign_op<T,op>(propName, val, context);
+}
+
+template<typename T, int op>
+T Object::o_assign_op(CStrRef propName, CVarRef val,
+                      CStrRef context /* = null_string */) {
+  if (propName.empty()) {
+    throw EmptyObjectPropertyException();
+  }
+  ObjectData *obj = m_px;
+  if (!obj) {
+    obj = NEW(c_stdClass)();
+    SmartPtr<ObjectData>::operator=(obj);
+  }
+
+  return obj->template o_assign_op<T,op>(propName, val, context);
+}
+
+template<typename T, int op>
+T ObjectData::o_assign_op(CStrRef propName, CVarRef val,
+                          CStrRef context /* = null_string */) {
+  bool useGet = getAttribute(ObjectData::UseGet);
+  bool useSet = getAttribute(ObjectData::UseSet);
+  int flags = useSet ? ObjectData::RealPropWrite :
+    ObjectData::RealPropCreate | ObjectData::RealPropWrite;
+
+  if (Variant *t = o_realProp(propName, flags, context)) {
+    if (useGet && !t->isInitialized()) {
+      AttributeClearer a(ObjectData::UseGet, this);
+      *t = t___get(propName);
+    }
+
+    return (T)AssignOp<op>::assign(*t, val);
+  }
+
+  ASSERT(useSet);
+  Variant var;
+  if (useGet) {
+    AttributeClearer a(ObjectData::UseGet, this);
+    var = t___get(propName);
+  }
+
+  Variant ret = AssignOp<op>::assign(var, val);
+  AttributeClearer a(ObjectData::UseSet, this);
+  t___set(propName, var);
+  return (T)ret;
+}
+
+#define DECLARE_O_ASSIGN_OP_ONE(C,T,op)                         \
+  template T                                                  \
+  C::o_assign_op<T,op>(CStrRef propName, CVarRef val,           \
+                       CStrRef context /* = null_string */)
+
+#define DECLARE_O_ASSIGN_OP(op)                 \
+  DECLARE_O_ASSIGN_OP_ONE(Object,void,op);      \
+  DECLARE_O_ASSIGN_OP_ONE(Object,Variant,op);   \
+  DECLARE_O_ASSIGN_OP_ONE(Variant,void,op);     \
+  DECLARE_O_ASSIGN_OP_ONE(Variant,Variant,op)
+
+DECLARE_O_ASSIGN_OP(T_CONCAT_EQUAL);
+DECLARE_O_ASSIGN_OP(T_PLUS_EQUAL);
+DECLARE_O_ASSIGN_OP(T_MINUS_EQUAL);
+DECLARE_O_ASSIGN_OP(T_MUL_EQUAL);
+DECLARE_O_ASSIGN_OP(T_DIV_EQUAL);
+DECLARE_O_ASSIGN_OP(T_MOD_EQUAL);
+DECLARE_O_ASSIGN_OP(T_AND_EQUAL);
+DECLARE_O_ASSIGN_OP(T_OR_EQUAL);
+DECLARE_O_ASSIGN_OP(T_XOR_EQUAL);
+DECLARE_O_ASSIGN_OP(T_SL_EQUAL);
+DECLARE_O_ASSIGN_OP(T_SR_EQUAL);
+DECLARE_O_ASSIGN_OP(T_INC);
+DECLARE_O_ASSIGN_OP(T_DEC);
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -21,11 +21,11 @@
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/string_offset.h>
-#include <runtime/base/object_offset.h>
 #include <runtime/base/frame_injection.h>
 #include <runtime/base/intercept.h>
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/variable_unserializer.h>
 #include <util/case_insensitive.h>
 #ifdef TAINTED
 #include <runtime/base/propagate_tainting.h>
@@ -79,19 +79,17 @@ inline bool empty(CArrRef v) { return !toBoolean(v);}
 inline bool empty(CObjRef v) { return !toBoolean(v);}
 inline bool empty(CVarRef v) { return !toBoolean(v);}
 
-bool empty(CVarRef v, bool    offset, int64 prehash = -1);
-bool empty(CVarRef v, char    offset, int64 prehash = -1);
-bool empty(CVarRef v, short   offset, int64 prehash = -1);
-bool empty(CVarRef v, int     offset, int64 prehash = -1);
-bool empty(CVarRef v, int64   offset, int64 prehash = -1);
-bool empty(CVarRef v, double  offset, int64 prehash = -1);
-bool empty(CVarRef v, CArrRef offset, int64 prehash = -1);
-bool empty(CVarRef v, CObjRef offset, int64 prehash = -1);
-bool empty(CVarRef v, CVarRef offset, int64 prehash = -1);
-bool empty(CVarRef v, litstr  offset, int64 prehash = -1,
-           bool isString = false);
-bool empty(CVarRef v, CStrRef offset, int64 prehash = -1,
-           bool isString = false);
+bool empty(CVarRef v, bool    offset);
+bool empty(CVarRef v, char    offset);
+bool empty(CVarRef v, short   offset);
+bool empty(CVarRef v, int     offset);
+bool empty(CVarRef v, int64   offset);
+bool empty(CVarRef v, double  offset);
+bool empty(CVarRef v, CArrRef offset);
+bool empty(CVarRef v, CObjRef offset);
+bool empty(CVarRef v, CVarRef offset);
+bool empty(CVarRef v, litstr  offset, bool isString = false);
+bool empty(CVarRef v, CStrRef offset, bool isString = false);
 
 inline char toByte(bool    v) { return v ? 1 : 0;}
 inline char toByte(char    v) { return v;}
@@ -414,8 +412,6 @@ inline Variant &concat_assign(Variant &v1, CStrRef s2) {
   return v1;
 }
 
-String concat_assign(ObjectOffset v1, CStrRef s2);
-
 inline String &concat_assign(const StringOffset &s1, litstr s2) {
   return concat_assign(s1.lval(), s2);
 }
@@ -434,9 +430,6 @@ inline Variant &concat_assign_rev(litstr s2, Variant &v1) {
   return concat_assign(v1, s2);
 }
 inline Variant &concat_assign_rev(CStrRef s2, Variant &v1) {
-  return concat_assign(v1, s2);
-}
-inline String concat_assign_rev(CStrRef s2, ObjectOffset v1) {
   return concat_assign(v1, s2);
 }
 inline String &concat_assign_rev(litstr s2, const StringOffset &s1) {
@@ -495,7 +488,8 @@ inline void echo(CStrRef s) {
 
 String get_source_filename(litstr path);
 
-inline void throw_exception(CObjRef v) { throw v;}
+void throw_exception(CObjRef e);
+bool set_line(int line0, int char0 = 0, int line1 = 0, int char1 = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 // isset/unset
@@ -506,22 +500,19 @@ String getUndefinedConstant(CStrRef name);
 
 inline bool isset(CVarRef v) { return !v.isNull();}
 inline bool isset(CObjRef v) { return !v.isNull();}
-bool isset(CVarRef v, bool    offset, int64 prehash = -1);
-bool isset(CVarRef v, char    offset, int64 prehash = -1);
-bool isset(CVarRef v, short   offset, int64 prehash = -1);
-bool isset(CVarRef v, int     offset, int64 prehash = -1);
-bool isset(CVarRef v, int64   offset, int64 prehash = -1);
-bool isset(CVarRef v, double  offset, int64 prehash = -1);
-bool isset(CVarRef v, CArrRef offset, int64 prehash = -1);
-bool isset(CVarRef v, CObjRef offset, int64 prehash = -1);
-bool isset(CVarRef v, CVarRef offset, int64 prehash = -1);
-bool isset(CVarRef v, litstr  offset, int64 prehash = -1,
-           bool isString = false);
-bool isset(CVarRef v, CStrRef offset, int64 prehash = -1,
-           bool isString = false);
+bool isset(CVarRef v, bool    offset);
+bool isset(CVarRef v, char    offset);
+bool isset(CVarRef v, short   offset);
+bool isset(CVarRef v, int     offset);
+bool isset(CVarRef v, int64   offset);
+bool isset(CVarRef v, double  offset);
+bool isset(CVarRef v, CArrRef offset);
+bool isset(CVarRef v, CObjRef offset);
+bool isset(CVarRef v, CVarRef offset);
+bool isset(CVarRef v, litstr  offset, bool isString = false);
+bool isset(CVarRef v, CStrRef offset, bool isString = false);
 
 inline Variant unset(Variant &v)               { v.unset();   return null;}
-inline Variant unset(const ObjectOffset &v)    { v.unset();   return null;}
 inline Variant unset(CVarRef v)                {              return null;}
 inline Variant setNull(Variant &v)             { v.setNull(); return null;}
 inline Variant unset(Object &v)                { v.reset();   return null;}
@@ -551,16 +542,15 @@ inline Variant &lval(CVarRef  v) { // in case generating lval(1)
   throw FatalErrorException("taking reference from an r-value");
 }
 inline String  &lval(const StringOffset  &v) { return v.lval();}
-inline Variant &lval(const ObjectOffset  &v) { return v.lval();}
 
 template<class T>
-Variant &unsetLval(Variant &v, const T &key, int64 prehash = -1) {
+Variant &unsetLval(Variant &v, const T &key) {
   if (v.isNull()) {
     return v;
   }
   if (v.is(KindOfArray)) {
-    if (v.toArray().exists(key, prehash)) {
-      return v.lvalAt(key, prehash);
+    if (v.toArray().exists(key)) {
+      return v.lvalAt(key);
     }
     return Variant::lvalBlackHole();
   }
@@ -568,9 +558,9 @@ Variant &unsetLval(Variant &v, const T &key, int64 prehash = -1) {
 }
 
 template<class T>
-Variant &unsetLval(Array &v, const T &key, int64 prehash = -1) {
-  if (!v.isNull() && v.exists(key, prehash)) {
-    return v.lvalAt(key, prehash);
+Variant &unsetLval(Array &v, const T &key) {
+  if (!v.isNull() && v.exists(key)) {
+    return v.lvalAt(key);
   }
   return Variant::lvalBlackHole();
 }
@@ -583,7 +573,6 @@ Variant &unsetLval(Array &v, const T &key, int64 prehash = -1) {
  *   a = b;      // weak binding: a will copy or copy-on-write
  */
 inline CVarRef ref(CVarRef v) { v.setContagious(); return v;}
-inline CVarRef ref(const ObjectOffset  &v) { return ref(v.lval());}
 
 ///////////////////////////////////////////////////////////////////////////////
 // misc functions
@@ -683,8 +672,10 @@ Object f_clone(Object obj);
  * these two functions.
  */
 String f_serialize(CVarRef value);
-Variant f_unserialize(CStrRef str);
-
+Variant unserialize_ex(CStrRef str, VariableUnserializer::Type type);
+inline Variant f_unserialize(CStrRef str) {
+  return unserialize_ex(str, VariableUnserializer::Serialize);
+}
 
 class LVariableTable;
 Variant include(CStrRef file, bool once = false,

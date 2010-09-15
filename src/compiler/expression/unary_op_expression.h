@@ -58,8 +58,9 @@ protected:
   int m_localEffects;
 
 private:
-  bool preCompute(AnalysisResultPtr ar, CVarRef value, Variant &result);
+  bool preCompute(CVarRef value, Variant &result);
   void setExistContext();
+  bool outputCPPImplOpEqual(CodeGenerator &cg, AnalysisResultPtr ar);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

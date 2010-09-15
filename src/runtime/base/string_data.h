@@ -89,7 +89,8 @@ class StringData {
    */
   void destruct() const { if (!isStatic()) delete this; }
 
-  StringData() : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
+  StringData() : m_data(NULL), _count(0), m_len(0) {
+    m_hash = 0;
     #ifdef TAINTED
     m_tainting = default_tainting;
     m_tainted_metadata = NULL;
@@ -121,7 +122,9 @@ class StringData {
   bool isShared() const { return m_len & IsShared;}
   bool isLinear() const { return m_len & IsLinear;}
   bool isMalloced() const { return (m_len & IsMask) == 0 && m_data;}
-  bool isImmutable() const { return m_len & (IsLiteral | IsShared | IsLinear);}
+  bool isImmutable() const {
+    return (m_len & (IsLiteral | IsShared | IsLinear)) || isStatic();
+  }
   bool isNumeric() const;
   bool isInteger() const;
   bool isStrictlyInteger(int64 &res) {
@@ -162,6 +165,11 @@ class StringData {
   double toDouble () const;
   DataType toNumeric(int64 &ival, double &dval) const;
 
+  int64 getPrecomputedHash() const {
+    ASSERT(!isShared());
+    return m_hash & 0x7fffffffffffffffull;
+  }
+
   int64 hash() const {
     if (isStatic()) return getPrecomputedHash();
     if (isShared()) return getSharedStringHash();
@@ -171,7 +179,7 @@ class StringData {
     return m_hash;
   }
 
-  bool equal(const StringData *s) const {
+  bool same(const StringData *s) const {
     ASSERT(s);
     int len = size();
     if (s->size() != len) return false;
@@ -179,7 +187,7 @@ class StringData {
     return !memcmp(data(), s->data(), len);
   }
 
-  bool iequal(const StringData *s) const {
+  bool isame(const StringData *s) const {
     ASSERT(s);
     int len = size();
     if (s->size() != len) return false;
@@ -200,7 +208,7 @@ class StringData {
   void backup(LinearAllocator &allocator);
   void restore(const char *&data);
   void sweep();
-  void dump();
+  void dump() const;
 
   /**
    * The order of the data members is significant. The _count field must
@@ -231,11 +239,6 @@ class StringData {
   void escalate(); // change to malloc-ed string
   void setChar(int offset, char ch);
   void removeChar(int offset);
-
-  int64 getPrecomputedHash() const {
-    ASSERT(!isShared());
-    return m_hash & 0x7fffffffffffffffull;
-  }
 
   int64 getSharedStringHash() const;
 

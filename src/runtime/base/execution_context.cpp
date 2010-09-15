@@ -29,6 +29,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/debug/backtrace.h>
 #include <runtime/base/server/server_stats.h>
+#include <runtime/eval/debugger/debugger.h>
 #include <util/logger.h>
 #include <util/process.h>
 #include <util/text_color.h>
@@ -50,6 +51,7 @@ ExecutionContext::ExecutionContext()
     m_maxTime(RuntimeOption::RequestTimeoutSeconds),
     m_cwd(Process::CurrentWorkingDirectory),
     m_out(NULL), m_implicitFlush(false), m_protectedLevel(0),
+    m_stdout(NULL), m_stdoutData(NULL),
     m_errorState(ExecutionContext::NoError),
     m_errorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel),
     m_lastErrorNum(0), m_logErrors(false), m_throwAllErrors(false) {
@@ -192,13 +194,22 @@ void ExecutionContext::write(CStrRef s) {
   write(s.data(), s.size());
 }
 
-static void writeStdout(const char *s, int len) {
-  if (Util::s_stdout_color) {
-    fwrite(Util::s_stdout_color, strlen(Util::s_stdout_color), 1, stdout);
-    fwrite(s, len, 1, stdout);
-    fwrite(ANSI_COLOR_END, strlen(ANSI_COLOR_END), 1, stdout);
+void ExecutionContext::setStdout(PFUNC_STDOUT func, void *data) {
+  m_stdout = func;
+  m_stdoutData = data;
+}
+
+void ExecutionContext::writeStdout(const char *s, int len) {
+  if (m_stdout == NULL) {
+    if (Util::s_stdout_color) {
+      fwrite(Util::s_stdout_color, strlen(Util::s_stdout_color), 1, stdout);
+      fwrite(s, len, 1, stdout);
+      fwrite(ANSI_COLOR_END, strlen(ANSI_COLOR_END), 1, stdout);
+    } else {
+      fwrite(s, len, 1, stdout);
+    }
   } else {
-    fwrite(s, len, 1, stdout);
+    m_stdout(s, len, m_stdoutData);
   }
 }
 
@@ -548,11 +559,17 @@ void ExecutionContext::handleError(const std::string &msg,
     handled = callUserErrorHandler(ee, errnum, false);
   }
   if (mode == AlwaysThrow || (mode == ThrowIfUnhandled && !handled)) {
+    try {
+      if (!Eval::Debugger::InterruptException(String(msg))) return;
+    } catch (const Eval::DebuggerClientExitException &e) {}
     throw FatalErrorException(msg.c_str());
   }
   if (!handled &&
       (RuntimeOption::NoSilencer ||
        (getErrorReportingLevel() & errnum) != 0)) {
+    try {
+      if (!Eval::Debugger::InterruptException(String(msg))) return;
+    } catch (const Eval::DebuggerClientExitException &e) {}
     Logger::Log(prefix.c_str(), ee);
   }
 }
@@ -823,27 +840,32 @@ Variant Silencer::disable(CVarRef v) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Fast Method Call
-MethodIndexMap methodIndexMap;
-extern const MethodIndex methodIndexMapInit[] ;
-extern const char * methodIndexMapInitName[] ;
-static unsigned int maxCallIndex = 0;
 
-void MethodIndexMap::addEntry(const char * methodName, MethodIndex mi) {
-  insert(
-    std::pair<const char*,const MethodIndex>(methodName, mi));
-  methodIndexReverseMap.insert(
-    std::pair<const MethodIndex, const char *>(mi, methodName));
+static bool g_methodIndexUseSys ;
+void MethodIndexHMap::initialize(bool useSystem) {
+  g_methodIndexUseSys = useSystem;
 }
 
-void MethodIndexMap::initialize()  {
-  const MethodIndex *mip=methodIndexMapInit;
-  for (const char **name=methodIndexMapInitName; *name; name++, mip++) {
-    maxCallIndex = std::max(maxCallIndex, mip->m_callIndex);
-    addEntry(*name, *mip);
+MethodIndex MethodIndexHMap::methodIndexExists(const char * methodName) {
+  const MethodIndexHMap *map =
+    g_methodIndexUseSys ? methodIndexHMapSys : methodIndexHMap;
+  unsigned size =
+    g_methodIndexUseSys ? methodIndexHMapSizeSys : methodIndexHMapSize;
+  unsigned hash = (unsigned)(hash_string_i(methodName) % size);
+  while (map[hash].name && strcasecmp(map[hash].name, methodName)!=0) {
+    hash = hash ? hash - 1 : size - 1;
   }
-  methodIndexReverseMap.insert(
-    std::pair<const MethodIndex, const char *>(
-      MethodIndex::fail(),"<Nonexistant method>"));
+  if (!map[hash].name) return MethodIndex::fail();
+  return map[hash].methodIndex;
+}
+
+const char * methodIndexLookupReverse(MethodIndex methodIndex) {
+  const unsigned *callIndex = g_methodIndexUseSys
+    ? methodIndexReverseCallIndexSys : methodIndexReverseCallIndex;
+  const char **map = g_methodIndexUseSys
+    ?  methodIndexReverseIndexSys : methodIndexReverseIndex;
+  unsigned callIndexOffset = callIndex[methodIndex.m_callIndex - 1];
+  return map[methodIndex.m_overloadIndex + callIndexOffset - 1];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

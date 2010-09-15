@@ -37,7 +37,7 @@ Transport::Transport()
   : m_url(NULL), m_postData(NULL), m_postDataParsed(false),
     m_chunkedEncoding(false), m_headerSent(false),
     m_responseCode(-1), m_responseSize(0), m_sendContentType(true),
-    m_compression(true), m_compressor(NULL),
+    m_compression(true), m_compressor(NULL), m_isSSL(false),
     m_compressionDecision(NotDecidedYet), m_threadType(RequestThread) {
 }
 
@@ -564,7 +564,8 @@ void Transport::prepareHeaders(bool compressed, const void *data, int size) {
     }
   }
 
-  if (m_responseHeaders.find("Content-Type") == m_responseHeaders.end()) {
+  if (m_responseHeaders.find("Content-Type") == m_responseHeaders.end() &&
+      m_responseCode != 304) {
     addHeaderImpl("Content-Type", "text/html; charset=utf-8");
   }
 
@@ -649,6 +650,10 @@ void Transport::sendRaw(void *data, int size, int code /* = 200 */,
   ServerStatsHelper ssh("send");
   String response = prepareResponse(data, size, compressed, !chunked);
 
+  if (m_responseCode < 0) {
+    m_responseCode = code;
+  }
+
   // HTTP header handling
   if (!m_headerSent) {
     prepareHeaders(compressed, data, size);
@@ -656,9 +661,6 @@ void Transport::sendRaw(void *data, int size, int code /* = 200 */,
   }
 
   m_responseSize += response.size();
-  if (m_responseCode < 0) {
-    m_responseCode = code;
-  }
   ServerStats::SetThreadMode(ServerStats::Writing);
   sendImpl(response.data(), response.size(), m_responseCode, chunked);
   ServerStats::SetThreadMode(ServerStats::Processing);
@@ -718,10 +720,10 @@ bool Transport::moveUploadedFile(CStrRef filename, CStrRef destination) {
 
 const char *Transport::getThreadTypeName() const {
   switch (m_threadType) {
-    case RequestThread: return "REQUEST";
-    case PageletThread: return "PAGELET";
-    case XboxThread:    return "XBOX";
-    case RpcThread:     return "RPC";
+    case RequestThread: return "Web Request";
+    case PageletThread: return "Pagelet Thread";
+    case XboxThread:    return "Xbox Thread";
+    case RpcThread:     return "RPC Thread";
   }
   return "(unknown)";
 }

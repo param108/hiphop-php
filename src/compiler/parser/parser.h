@@ -18,7 +18,6 @@
 #define __HPHP_PARSER_H__
 
 #include <util/ylmm/basic_parser.hh>
-#include <util/ylmm/basic_location.hh>
 #include <compiler/parser/scanner.h>
 #include <compiler/hphp.h>
 #include <compiler/construct.h>
@@ -150,7 +149,6 @@ namespace HPHP {
     void addHphpSuppressError(Token *error);
 
   private:
-    ylmm::basic_location m_location;
     std::ostringstream m_err;
     std::ostringstream m_msg;
     ylmm::basic_messenger<ylmm::basic_lock> m_messenger;
@@ -158,7 +156,6 @@ namespace HPHP {
     Scanner &m_scanner;
     const char *m_fileName;
     AnalysisResultPtr m_ar;
-    LocationPtrVec m_locs; // for function/class/interface location stack
     ExpressionPtrVec m_objects; // for parsing object property/method calls
     std::vector<std::string> m_comments; // for docComment stack
     // parser output
@@ -167,8 +164,6 @@ namespace HPHP {
     void pushComment();
     std::string popComment();
 
-    void pushLocation();
-    LocationPtr popLocation();
     ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
     ExpressionPtr createDynamicVariable(ExpressionPtr exp);
   };

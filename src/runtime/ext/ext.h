@@ -37,6 +37,7 @@
 #include <runtime/ext/profile/extprofile_iconv.h>
 #include <runtime/ext/profile/extprofile_icu.h>
 #include <runtime/ext/profile/extprofile_image.h>
+#include <runtime/ext/profile/extprofile_imagesprite.h>
 #include <runtime/ext/profile/extprofile_intl.h>
 #include <runtime/ext/profile/extprofile_ipc.h>
 #include <runtime/ext/profile/extprofile_iterator.h>
@@ -64,8 +65,8 @@
 #include <runtime/ext/profile/extprofile_simplexml.h>
 #include <runtime/ext/profile/extprofile_soap.h>
 #include <runtime/ext/profile/extprofile_socket.h>
-#include <runtime/ext/profile/extprofile_spl.h>
 #include <runtime/ext/profile/extprofile_splfile.h>
+#include <runtime/ext/profile/extprofile_spl.h>
 #include <runtime/ext/profile/extprofile_sqlite3.h>
 #include <runtime/ext/profile/extprofile_stream.h>
 #include <runtime/ext/profile/extprofile_string.h>

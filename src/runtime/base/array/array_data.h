@@ -20,6 +20,7 @@
 #include <runtime/base/util/countable.h>
 #include <runtime/base/types.h>
 #include <runtime/base/macros.h>
+#include <util/pointer_list.h>
 #include <climits>
 
 namespace HPHP {
@@ -118,24 +119,20 @@ class ArrayData : public Countable {
   /**
    * Testing whether a key exists.
    */
-  virtual bool exists(int64   k, int64 prehash = -1) const = 0;
-  virtual bool exists(litstr  k, int64 prehash = -1) const = 0;
-  virtual bool exists(CStrRef k, int64 prehash = -1) const = 0;
-  virtual bool exists(CVarRef k, int64 prehash = -1) const = 0;
+  virtual bool exists(int64   k) const = 0;
+  virtual bool exists(litstr  k) const = 0;
+  virtual bool exists(CStrRef k) const = 0;
+  virtual bool exists(CVarRef k) const = 0;
 
   virtual bool idxExists(ssize_t idx) const = 0;
 
   /**
    * Getting value at specified key.
    */
-  virtual Variant get(int64   k, int64 prehash = -1,
-                      bool error = false) const = 0;
-  virtual Variant get(litstr  k, int64 prehash = -1,
-                      bool error = false) const = 0;
-  virtual Variant get(CStrRef k, int64 prehash = -1,
-                      bool error = false) const = 0;
-  virtual Variant get(CVarRef k, int64 prehash = -1,
-                      bool error = false) const = 0;
+  virtual Variant get(int64   k, bool error = false) const = 0;
+  virtual Variant get(litstr  k, bool error = false) const = 0;
+  virtual Variant get(CStrRef k, bool error = false) const = 0;
+  virtual Variant get(CVarRef k, bool error = false) const = 0;
 
   /**
    * Loading value at specified key to a variable, preserving reference,
@@ -147,10 +144,10 @@ class ArrayData : public Countable {
    * Get the numeric index for a key. Only these need to be
    * in ArrayData.
    */
-  virtual ssize_t getIndex(int64 k, int64 prehash = -1) const = 0;
-  virtual ssize_t getIndex(litstr k, int64 prehash = -1) const = 0;
-  virtual ssize_t getIndex(CStrRef k, int64 prehash = -1) const = 0;
-  virtual ssize_t getIndex(CVarRef k, int64 prehash = -1) const = 0;
+  virtual ssize_t getIndex(int64 k) const = 0;
+  virtual ssize_t getIndex(litstr k) const = 0;
+  virtual ssize_t getIndex(CStrRef k) const = 0;
+  virtual ssize_t getIndex(CVarRef k) const = 0;
 
   /**
    * Getting l-value (that Variant pointer) at specified key. Return NULL if
@@ -158,43 +155,58 @@ class ArrayData : public Countable {
    */
   virtual ArrayData *lval(Variant *&ret, bool copy) = 0;
   virtual ArrayData *lval(int64   k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false) = 0;
+                          bool checkExist = false) = 0;
   virtual ArrayData *lval(litstr  k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false) = 0;
+                          bool checkExist = false) = 0;
   virtual ArrayData *lval(CStrRef k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false) = 0;
+                          bool checkExist = false) = 0;
   virtual ArrayData *lval(CVarRef k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false) = 0;
+                          bool checkExist = false) = 0;
+
+  /**
+   * Helper function used for getting a reference to elements of
+   * the o_properties array
+   */
+  virtual ArrayData *lvalPtr(CStrRef k, Variant *&ret, bool copy,
+                             bool create);
 
   /**
    * Setting a value at specified key. If "copy" is true, make a copy first
    * then set the value. Return NULL if escalation is not needed, or an
    * escalated array data.
    */
-  virtual ArrayData *set(int64   k, CVarRef v,
-                         bool copy, int64 prehash = -1) = 0;
-  virtual ArrayData *set(litstr  k, CVarRef v,
-                         bool copy, int64 prehash = -1) = 0;
-  virtual ArrayData *set(CStrRef k, CVarRef v,
-                         bool copy, int64 prehash = -1) = 0;
-  virtual ArrayData *set(CVarRef k, CVarRef v,
-                         bool copy, int64 prehash = -1) = 0;
+  virtual ArrayData *set(int64   k, CVarRef v, bool copy) = 0;
+  virtual ArrayData *set(litstr  k, CVarRef v, bool copy) = 0;
+  virtual ArrayData *set(CStrRef k, CVarRef v, bool copy) = 0;
+  virtual ArrayData *set(CVarRef k, CVarRef v, bool copy) = 0;
+
+  /**
+   * Basically the same as set(), but for adding a new key to the array.
+   */
+  virtual ArrayData *add(int64   k, CVarRef v, bool copy);
+  virtual ArrayData *add(CStrRef k, CVarRef v, bool copy);
+  virtual ArrayData *add(CVarRef k, CVarRef v, bool copy);
+  virtual ArrayData *addLval(int64   k, Variant *&ret, bool copy);
+  virtual ArrayData *addLval(CStrRef k, Variant *&ret, bool copy);
+  virtual ArrayData *addLval(CVarRef k, Variant *&ret, bool copy);
 
   /**
    * Remove a value at specified key. If "copy" is true, make a copy first
    * then remove the value. Return NULL if escalation is not needed, or an
    * escalated array data.
    */
-  virtual ArrayData *remove(int64   k, bool copy, int64 prehash = -1) = 0;
-  virtual ArrayData *remove(litstr  k, bool copy, int64 prehash = -1) = 0;
-  virtual ArrayData *remove(CStrRef k, bool copy, int64 prehash = -1) = 0;
-  virtual ArrayData *remove(CVarRef k, bool copy, int64 prehash = -1) = 0;
+  virtual ArrayData *remove(int64   k, bool copy) = 0;
+  virtual ArrayData *remove(litstr  k, bool copy) = 0;
+  virtual ArrayData *remove(CStrRef k, bool copy) = 0;
+  virtual ArrayData *remove(CVarRef k, bool copy) = 0;
 
   virtual ssize_t iter_begin() const;
   virtual ssize_t iter_end() const;
   virtual ssize_t iter_advance(ssize_t prev) const;
   virtual ssize_t iter_rewind(ssize_t prev) const;
 
+  void newFullPos(FullPos &pos);
+  void freeFullPos(FullPos &pos);
   virtual void getFullPos(FullPos &pos);
   virtual bool setFullPos(const FullPos &pos);
   virtual CVarRef currentRef();
@@ -273,12 +285,15 @@ class ArrayData : public Countable {
 
  protected:
   ssize_t m_pos;
+  PointerList<FullPos> m_strongIterators;
 
   /**
    * Helpers.
    */
   static void dumpKey(std::ostream &out, int indent, unsigned int index);
   static void dumpKey(std::ostream &out, int indent, CStrRef key);
+
+  void freeStrongIterators();
 
 #ifdef FAST_REFCOUNT_FOR_VARIANT
  private:

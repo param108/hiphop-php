@@ -64,6 +64,27 @@ int get_modifiers(int attribute, bool cls) {
   return php_modifier;
 }
 
+static bool set_source_info(Array &ret, const char *file, int line1,
+                            int line2) {
+  if (!file) file = "";
+  if (file[0] != '/') {
+    ret.set("file", String(RuntimeOption::SourceRoot + file));
+  } else {
+    ret.set("file", file);
+  }
+  ret.set("line1", line1);
+  ret.set("line2", line2);
+  return file && *file;
+}
+
+static void set_doc_comment(Array &ret, const char *comment) {
+  if (comment) {
+    ret.set("doc", comment);
+  } else {
+    ret.set("doc", false);
+  }
+}
+
 static void set_property_info(Array &ret, ClassInfo::PropertyInfo *info,
                               const ClassInfo *cls) {
   ret.set("name", info->name);
@@ -71,12 +92,7 @@ static void set_property_info(Array &ret, ClassInfo::PropertyInfo *info,
   ret.set("modifiers", get_modifiers(info->attribute, false));
   ret.set("static", (bool)(info->attribute & ClassInfo::IsStatic));
   ret.set("class", cls->getName());
-  const char *dc = info->docComment;
-  if (dc) {
-    ret.set("doc", dc);
-  } else {
-    ret.set("doc", false);
-  }
+  set_doc_comment(ret, info->docComment);
 }
 
 static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
@@ -84,12 +100,8 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
   // return type
   ret.set("ref", (bool)(info->attribute & ClassInfo::IsReference));
 
-  const char *dc = info->docComment;
-  if (dc) {
-    ret.set("doc", dc);
-  } else {
-    ret.set("doc", false);
-  }
+  // doc comments
+  set_doc_comment(ret, info->docComment);
 
   // parameters
   {
@@ -114,8 +126,8 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
 
         ASSERT(p->attribute & ClassInfo::IsOptional);
         if (*p->value == '\x01') {
-          Object v((NEW(c_stdclass)())->create());
-          v.o_lval("msg") = String("unable to eval ") + defText;
+          Object v((NEW(c_stdClass)())->create());
+          v.o_set("msg", String("unable to eval ") + defText);
           param.set("default", v);
         } else {
           param.set("default", f_unserialize(p->value));
@@ -154,6 +166,7 @@ static void set_method_info(Array &ret, ClassInfo::MethodInfo *info,
   ret.set("hphp",     (bool)(cls->getAttribute() & ClassInfo::HipHopSpecific));
   ret.set("class", cls->getName());
   set_function_info(ret, info, cls->getName());
+  set_source_info(ret, info->file, info->line1, info->line2);
 }
 
 Array f_hphp_get_class_info(CVarRef name) {
@@ -238,7 +251,7 @@ Array f_hphp_get_class_info(CVarRef name) {
          iter != constants.end(); ++iter) {
       ClassInfo::ConstantInfo *info = *iter;
       if (info->valueText && *info->valueText) {
-        arr.set(info->name, info->value);
+        arr.set(info->name, info->getValue());
       } else {
         arr.set(info->name, get_class_constant(className.data(), info->name));
       }
@@ -247,23 +260,14 @@ Array f_hphp_get_class_info(CVarRef name) {
   }
 
   { // source info
-    int line = 0;
-    const char *file =
-      SourceInfo::TheSourceInfo.getClassDeclaringFile(className.data(), &line);
-    if (!file) file = "";
-    if (file[0] != '/') {
-      ret.set("file", String(RuntimeOption::SourceRoot + file));
-    } else {
-      ret.set("file", file);
+    if (!set_source_info(ret, cls->getFile(), cls->getLine1(),
+                         cls->getLine2())) {
+      int line = 0;
+      const char *file = SourceInfo::TheSourceInfo.
+        getClassDeclaringFile(className.data(), &line);
+      set_source_info(ret, file, line, line);
     }
-    ret.set("line1", line);
-    ret.set("line2", line);
-    const char *dc = cls->getDocComment();
-    if (dc) {
-      ret.set("doc", dc);
-    } else {
-      ret.set("doc", false);
-    }
+    set_doc_comment(ret, cls->getDocComment());
   }
 
   return ret;
@@ -288,25 +292,12 @@ Array f_hphp_get_function_info(CStrRef name) {
 
   // setting parameters and static variables
   set_function_info(ret, info, NULL);
-
-  int line = 0;
-  const char *file =
-    SourceInfo::TheSourceInfo.getFunctionDeclaringFile(name.data(), &line);
-  if (!file) file = "";
-  if (file[0] != '/') {
-    ret.set("file", String(RuntimeOption::SourceRoot + file));
-  } else {
-    ret.set("file", file);
+  if (!set_source_info(ret, info->file, info->line1, info->line2)) {
+    int line = 0;
+    const char *file = SourceInfo::TheSourceInfo.
+      getFunctionDeclaringFile(name.data(), &line);
+    set_source_info(ret, file, line, line);
   }
-  ret.set("line1", line);
-  ret.set("line2", line);
-  const char *dc = info->docComment;
-  if (dc) {
-    ret.set("doc", dc);
-  } else {
-    ret.set("doc", false);
-  }
-
   return ret;
 }
 
@@ -333,12 +324,12 @@ Object f_hphp_create_object(CStrRef name, CArrRef params) {
 }
 
 Variant f_hphp_get_property(CObjRef obj, CStrRef cls, CStrRef prop) {
-  return obj->o_get(prop.data(), -1);
+  return obj->o_get(prop);
 }
 
 void f_hphp_set_property(CObjRef obj, CStrRef cls, CStrRef prop,
                          CVarRef value) {
-  obj->o_set(prop.data(), -1, value);
+  obj->o_set(prop, value);
 }
 
 Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop) {

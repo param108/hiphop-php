@@ -63,7 +63,6 @@ ScalarExpression::ScalarExpression
   switch (value.getType()) {
   case KindOfStaticString:
   case KindOfString:
-  case LiteralString:
     m_type = T_STRING;
     break;
   case KindOfByte:
@@ -331,8 +330,9 @@ std::string ScalarExpression::getLiteralString() const {
 
 std::string ScalarExpression::getIdentifier() const {
   if (isLiteralString()) {
-    if (IsIdentifier(m_value)) {
-      return m_value;
+    std::string id = getLiteralString();
+    if (IsIdentifier(id)) {
+      return id;
     }
   }
   return "";

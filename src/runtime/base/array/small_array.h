@@ -55,44 +55,53 @@ public:
   virtual Variant value(ssize_t &pos) const;
   virtual Variant each();
 
-  virtual bool exists(int64   k, int64 prehash = -1) const;
-  virtual bool exists(litstr  k, int64 prehash = -1) const;
-  virtual bool exists(CStrRef k, int64 prehash = -1) const;
-  virtual bool exists(CVarRef k, int64 prehash = -1) const;
+  virtual bool exists(int64   k) const;
+  virtual bool exists(litstr  k) const;
+  virtual bool exists(CStrRef k) const;
+  virtual bool exists(CVarRef k) const;
 
   virtual bool idxExists(ssize_t idx) const;
 
-  virtual Variant get(int64   k, int64 prehash = -1, bool error = false) const;
-  virtual Variant get(litstr  k, int64 prehash = -1, bool error = false) const;
-  virtual Variant get(CStrRef k, int64 prehash = -1, bool error = false) const;
-  virtual Variant get(CVarRef k, int64 prehash = -1, bool error = false) const;
+  virtual Variant get(int64   k, bool error = false) const;
+  virtual Variant get(litstr  k, bool error = false) const;
+  virtual Variant get(CStrRef k, bool error = false) const;
+  virtual Variant get(CVarRef k, bool error = false) const;
 
   virtual void load(CVarRef k, Variant &v) const;
 
-  virtual ssize_t getIndex(int64 k, int64 prehash = -1) const;
-  virtual ssize_t getIndex(litstr k, int64 prehash = -1) const;
-  virtual ssize_t getIndex(CStrRef k, int64 prehash = -1) const;
-  virtual ssize_t getIndex(CVarRef k, int64 prehash = -1) const;
+  virtual ssize_t getIndex(int64 k) const;
+  virtual ssize_t getIndex(litstr k) const;
+  virtual ssize_t getIndex(CStrRef k) const;
+  virtual ssize_t getIndex(CVarRef k) const;
 
   virtual ArrayData *lval(Variant *&ret, bool copy);
   virtual ArrayData *lval(int64   k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false);
+                          bool checkExist = false);
   virtual ArrayData *lval(litstr  k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false);
+                          bool checkExist = false);
   virtual ArrayData *lval(CStrRef k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false);
+                          bool checkExist = false);
   virtual ArrayData *lval(CVarRef k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false);
+                          bool checkExist = false);
+  virtual ArrayData *lvalPtr(CStrRef k, Variant *&ret, bool copy,
+                             bool create);
 
-  virtual ArrayData *set(int64   k, CVarRef v, bool copy, int64 prehash = -1);
-  virtual ArrayData *set(litstr  k, CVarRef v, bool copy, int64 prehash = -1);
-  virtual ArrayData *set(CStrRef k, CVarRef v, bool copy, int64 prehash = -1);
-  virtual ArrayData *set(CVarRef k, CVarRef v, bool copy, int64 prehash = -1);
+  virtual ArrayData *set(int64   k, CVarRef v, bool copy);
+  virtual ArrayData *set(litstr  k, CVarRef v, bool copy);
+  virtual ArrayData *set(CStrRef k, CVarRef v, bool copy);
+  virtual ArrayData *set(CVarRef k, CVarRef v, bool copy);
 
-  virtual ArrayData *remove(int64   k, bool copy, int64 prehash = -1);
-  virtual ArrayData *remove(litstr  k, bool copy, int64 prehash = -1);
-  virtual ArrayData *remove(CStrRef k, bool copy, int64 prehash = -1);
-  virtual ArrayData *remove(CVarRef k, bool copy, int64 prehash = -1);
+  virtual ArrayData *add(int64   k, CVarRef v, bool copy);
+  virtual ArrayData *add(CStrRef k, CVarRef v, bool copy);
+  virtual ArrayData *add(CVarRef k, CVarRef v, bool copy);
+  virtual ArrayData *addLval(int64   k, Variant *&ret, bool copy);
+  virtual ArrayData *addLval(CStrRef k, Variant *&ret, bool copy);
+  virtual ArrayData *addLval(CVarRef k, Variant *&ret, bool copy);
+
+  virtual ArrayData *remove(int64   k, bool copy);
+  virtual ArrayData *remove(litstr  k, bool copy);
+  virtual ArrayData *remove(CStrRef k, bool copy);
+  virtual ArrayData *remove(CVarRef k, bool copy);
 
   virtual ArrayData *copy() const;
   virtual ArrayData *append(CVarRef v, bool copy);
@@ -142,20 +151,21 @@ public:
     }
   };
 
+  // these two constructors should never be called directly, they are
+  // only called from generated code.
+  SmallArray(unsigned int nSize, unsigned long n,
+             StringData *keys[], const Variant *values[]);
+  SmallArray(unsigned int nSize, unsigned long n,
+             int64 keys[], const Variant *values[]);
+
 private:
   int8            m_nNumOfElements;
   int8            m_nListHead;
   int8            m_nListTail;
+  int8            m_siPastEnd;
   unsigned long   m_nNextFreeElement;
 
   Bucket  m_arBuckets[SARR_TABLE_SIZE];
-
-  static int int_ihash(int64 h) { return h & (SARR_TABLE_SIZE - 1); }
-  static int str_ihash(int   h) { return h & (SARR_TABLE_SIZE - 1); }
-  static int str_ohash(const char *k, int len) {
-    if (len == 0) return 0;
-    return k[0] ^ k[len - 1] ^ k[len >> 1];
-  }
 
   void connect_to_global_dllist(int p, Bucket &b) {
     ASSERT(p >= 0 && p < SARR_TABLE_SIZE);
@@ -165,12 +175,17 @@ private:
     if (b.prev >= 0) m_arBuckets[(int)b.prev].next = p;
     if (m_nListHead < 0) m_nListHead = p;
     if (m_pos < 0) m_pos = p;
+
+    if (m_siPastEnd) updateStrongIterators(p);
   }
+
+  void updateStrongIterators(int p);
 
   ArrayData *escalateToZendArray() const;
 
   inline int find(int64 h) const;
-  inline int find(const char *k, int len) const;
+  inline int find(const char *k, int len, int64 prehash) const;
+  inline int findEmpty(int64 h) const;
 
   SmallArray *copyImpl() const {
     SmallArray *a = NEW(SmallArray)(*this);
@@ -180,13 +195,11 @@ private:
 
   // m_arBuckets[p].kind == Empty
   inline Bucket *addKey(int p, int64 h);
-  inline Bucket *addKey(int p, litstr key, int len);
   inline Bucket *addKey(int p, StringData *key);
 
   // no-op if the key already exists
-  inline bool add(int64 h, CVarRef data);
-  inline bool add(litstr key, int64 h, CVarRef data);
-  inline bool add(StringData *key, int64 h, CVarRef data);
+  inline bool addVal(int64 h, CVarRef data);
+  inline bool addVal(StringData *key, CVarRef data);
 
   inline void erase(Bucket *pb);
   inline void nextInsert(CVarRef v);

@@ -119,20 +119,31 @@ bool CmdVariable::onClient(DebuggerClient *client) {
   return true;
 }
 
-bool CmdVariable::onServer(DebuggerProxy *proxy) {
-  FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
-  for (int i = 0; i < m_frame && frame; i++) {
-    frame = frame->getPrev();
-  }
-  m_global = (!frame || !frame->getPrev());
+Array CmdVariable::GetGlobalVariables() {
+  Array ret = get_globals()->getDefinedVars();
+  ret.remove("GLOBALS");
+  return ret;
+}
 
-  if (frame) {
+Array CmdVariable::GetLocalVariables(FrameInjection* frame, bool &global) {
+  Array ret;
+  if (!frame || FrameInjection::IsGlobalScope(frame)) {
+    global = true;
+    ret = GetGlobalVariables();
+  } else {
+    global = false;
     EvalFrameInjection *eframe = dynamic_cast<EvalFrameInjection*>(frame);
     if (eframe) {
-      m_variables = eframe->getEnv().getDefinedVariables();
-      m_variables.remove("GLOBALS");
+      ret = eframe->getEnv().getDefinedVariables();
+      ret.remove("GLOBALS");
     }
   }
+  return ret;
+}
+
+bool CmdVariable::onServer(DebuggerProxy *proxy) {
+  FrameInjection *frame = FrameInjection::GetStackFrame(m_frame);
+  m_variables = GetLocalVariables(frame, m_global);
   return proxy->send(this);
 }
 

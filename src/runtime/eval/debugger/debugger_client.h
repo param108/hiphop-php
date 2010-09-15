@@ -35,6 +35,7 @@ public:
   static const char *LocalPrompt;
   static const char *ConfigFileName;
   static const char *HistoryFileName;
+  static std::string SourceRoot;
 
   static bool UseColor;
   static bool NoPrompt;
@@ -43,15 +44,20 @@ public:
   static const char *OutputColor;
   static const char *ErrorColor;
   static const char *ItemNameColor;
+  static const char *HighlightForeColor;
+  static const char *HighlightBgColor;
   static const char *DefaultCodeColors[];
 
 public:
+  static void LoadColors(Hdf hdf);
+  static const char *LoadColor(Hdf hdf, const char *defaultName);
+  static const char *LoadBgColor(Hdf hdf, const char *defaultName);
+  static void LoadCodeColor(CodeColor index, Hdf hdf, const char *defaultName);
+
   /**
    * Starts/stops a debugger client.
    */
-  static SmartPtr<Socket> Start(const std::string &host, int port,
-                                const std::string &extension,
-                                const StringVec &cmds);
+  static SmartPtr<Socket> Start(const DebuggerClientOptions &options);
   static void Stop();
 
   /**
@@ -99,8 +105,7 @@ public:
   /**
    * Thread functions.
    */
-  void start(const std::string &host, int port,
-             const std::string &extension, const StringVec &cmds);
+  void start(const DebuggerClientOptions &options);
   void stop();
   void run();
 
@@ -134,7 +139,9 @@ public:
   void output (CStrRef s);
   void error  (CStrRef s);
 
-  void code(CStrRef source, int line1 = 0, int line2 = 0);
+  bool code(CStrRef source, int lineFocus = 0, int line1 = 0, int line2 = 0,
+            int charFocus0 = 0, int lineFocus1 = 0, int charFocus1 = 0);
+  void shortCode(BreakPointInfoPtr bp);
   char ask(const char *fmt, ...);
 
   std::string wrap(const std::string &s);
@@ -172,18 +179,25 @@ public:
   void send(DebuggerCommand *cmd) { send(cmd, 0);}
 
   /**
-   * Machine functions.
+   * Machine functions. True if we're switching to a machine that's not
+   * interrupting, therefore, we need to throw DebuggerConsoleExitException
+   * to pump more interrupts. False if we're switching to a machine that
+   * was already interrupting, OR, there was a failure to switch. We then
+   * need to call initializeMachine() immediately without waiting.
    */
-  void connect(const std::string &host, int port, bool rpc);
-  void disconnect();
+  bool connect(const std::string &host, int port);
+  bool connectRPC(const std::string &host, int port);
+  bool disconnect();
+  bool initializeMachine();
+  bool isLocal();
 
   /**
    * Sandbox functions.
    */
-  void updateSandboxes(const StringVec &sandboxes) {
+  void updateSandboxes(DSandboxInfoPtrVec &sandboxes) {
     m_sandboxes = sandboxes;
   }
-  std::string getSandbox(int index) const;
+  DSandboxInfoPtr getSandbox(int index) const;
 
   /**
    * Thread functions.
@@ -200,8 +214,10 @@ public:
   void setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints);
   void setCurrentLocation(int64 threadId, BreakPointInfoPtr breakpoint);
   BreakPointInfoPtrVec *getMatchedBreakPoints() { return &m_matched;}
-  void getListLocation(std::string &file, int &line);
-  void setListLocation(const std::string &file, int line);
+  void getListLocation(std::string &file, int &line, int &lineFocus0,
+                       int &charFocus0, int &lineFocus1, int &charFocus1);
+  void setListLocation(const std::string &file, int line, bool center);
+  void setSourceRoot(const std::string &sourceRoot);
 
   /**
    * Watch expressions.
@@ -217,7 +233,7 @@ public:
    */
   Array getStackTrace() { return m_stacktrace;}
   void setStackTrace(CArrRef stacktrace);
-  void moveToFrame(int index);
+  void moveToFrame(int index, bool display = true);
   void printFrame(int index, CArrRef frame);
   int getFrame() const { return m_frame;}
 
@@ -230,7 +246,6 @@ public:
   void addCompletion(const char **list);
   void addCompletion(const char *name);
   void addCompletion(const std::vector<String> &items);
-  void phpCompletion(const char *text);
   void setLiveLists(LiveListsPtr liveLists) { m_acLiveLists = liveLists;}
 
   /**
@@ -245,7 +260,8 @@ public:
 private:
   enum InputState {
     TakingCommand,
-    TakingCode
+    TakingCode,
+    TakingInterrupt
   };
   enum RunState {
     NotYet,
@@ -258,14 +274,14 @@ private:
   int m_tutorial;
   std::set<std::string> m_tutorialVisited;
 
-  std::string m_extension;
-  StringVec m_quickCmds;
+  DebuggerClientOptions m_options;
   AsyncFunc<DebuggerClient> m_mainThread;
   bool m_stopped;
 
   InputState m_inputState;
   RunState m_runState;
   int m_signum;
+  int m_sigTime;
 
   // auto-completion states
   int m_acLen;
@@ -276,6 +292,7 @@ private:
   std::vector<String> m_acItems;
   bool m_acLiveListsDirty;
   LiveListsPtr m_acLiveLists;
+  bool m_acProtoTypePrompted;
 
   std::string m_line;
   std::string m_command;
@@ -291,7 +308,7 @@ private:
   DMachineInfoPtr m_machine;     // current
   std::string m_rpcHost;         // current RPC host
 
-  StringVec m_sandboxes;
+  DSandboxInfoPtrVec m_sandboxes;
   DThreadInfoPtrVec m_threads;
   int64 m_threadId;
   std::map<int64, int> m_threadIdMap; // maps threadId to index
@@ -303,6 +320,7 @@ private:
   // list command's current location, which may be different from m_breakpoint
   std::string m_listFile;
   int m_listLine;
+  int m_listLineFocus;
 
   WatchPtrVec m_watches;
 
@@ -323,6 +341,7 @@ private:
   DebuggerCommand *createCommand();
 
   void updateLiveLists();
+  void promptFunctionPrototype();
   char *getCompletion(const std::vector<String> &items,
                       const char *text);
   char *getCompletion(const std::vector<const char *> &items,
@@ -330,16 +349,14 @@ private:
 
   // config and macros
   void defineColors();
-  const char *loadColor(Hdf hdf, const char *defaultName);
-  void loadCodeColor(CodeColor index, Hdf hdf, const char *defaultName);
   void loadConfig();
   void saveConfig();
   void record(const char *line);
 
-  // communications
+  // connections
   void switchMachine(DMachineInfoPtr machine);
   SmartPtr<Socket> connectLocal();
-  void connectRemote(const std::string &host, int port);
+  bool connectRemote(const std::string &host, int port);
 
   DebuggerCommandPtr send(DebuggerCommand *cmd, int expected);
   DebuggerCommandPtr xend(DebuggerCommand *cmd);

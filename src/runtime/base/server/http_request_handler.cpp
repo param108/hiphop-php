@@ -176,6 +176,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
           str.assign(data, len, AttachString);
         }
         sendStaticContent(transport, data, len, st.st_mtime, compressed, path);
+        StaticContentCache::TheFileCache->adviseOutMemory();
         ServerStats::LogPage(path, 200);
         return;
       }
@@ -239,6 +240,10 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   try {
     ret = executePHPRequest(transport, reqURI, sourceRootInfo,
                             cachableDynamicContent);
+  } catch (const Eval::DebuggerException &e) {
+    transport->sendString(e.what(), 200);
+    transport->onSendEnd();
+    hphp_context_exit(g_context.get(), true, true, transport->getUrl());
   } catch (...) {
     Logger::Error("Unhandled exception in HPHP server engine.");
   }

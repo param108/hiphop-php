@@ -45,8 +45,8 @@ void ClassVariable::set(VariableEnvironment &env, EvalObjectData *self) const {
     Variant val(m_value ? m_value->eval(env) : null_variant);
     if (m_modifiers & ClassStatement::Private) {
       self->o_setPrivate(m_cls->name().c_str(), m_name.c_str(), m_hash, val);
-    } else if (!self->o_exists(m_name.c_str(), m_hash)) {
-      self->o_set(m_name.c_str(), m_hash, val, true);
+    } else if (!self->o_exists(m_name.c_str())) {
+      self->o_set(m_name.c_str(), val, true);
     }
   }
 }
@@ -132,7 +132,8 @@ loadMethodTable(ClassEvalState &ce) const {
     if (mit != mtable.end()) {
       int mods = mit->second ? mit->second->getModifiers() : Public;
       if (mods & Final) {
-        throw FatalErrorException("Cannot override final method %s::%s() at "
+        throw FatalErrorException(0,
+                                  "Cannot override final method %s::%s() at "
                                   "%s:%d",
                                   mit->second->getClass()->name().c_str(),
                                   (*it)->name().c_str(), (*it)->loc()->file,
@@ -145,7 +146,8 @@ loadMethodTable(ClassEvalState &ce) const {
         } else if (mods & Private) {
           al = "private";
         }
-        throw FatalErrorException("Access level to %s must be %s or weaker "
+        throw FatalErrorException(0,
+                                  "Access level to %s must be %s or weaker "
                                   "(as in class %s) at %s:%d",
                                   (*it)->name().c_str(), al,
                                   mit->second ?
@@ -252,7 +254,7 @@ void ClassStatement::evalImpl(VariableEnvironment &env) const {
 Object ClassStatement::create(ClassEvalState &ce, CArrRef params,
                               bool init, ObjectData* root /* = NULL*/) const {
   if (getModifiers() & Abstract) {
-    throw FatalErrorException("Cannot instantiate abstract class %s",
+    throw FatalErrorException(0, "Cannot instantiate abstract class %s",
                               name().c_str());
   }
 
@@ -480,6 +482,9 @@ void ClassStatement::getInfo(ClassInfoEvaled &info) const {
 
   info.m_attribute = (ClassInfo::Attribute)attr;
   info.m_name = m_name.c_str();
+  info.m_file = m_loc.file;
+  info.m_line1 = m_loc.line0;
+  info.m_line2 = m_loc.line1;
   info.m_parentClass = m_parent.c_str();
   if (!m_docComment.empty()) {
     info.m_docComment = m_docComment.c_str();
@@ -495,8 +500,8 @@ void ClassStatement::getInfo(ClassInfoEvaled &info) const {
        it != m_constants.end(); ++it) {
     ClassInfo::ConstantInfo *c = new ClassInfo::ConstantInfo;
     c->name = it->first.c_str();
-    c->value = it->second->eval(dv);
-    String sv = c->value.toString();
+    c->setValue(it->second->eval(dv));
+    String sv = c->getValue().toString();
     char* buf = new char[sv.size()+1];
     memcpy(buf, sv.data(), sv.size()+1);
     c->valueLen = sv.size();
@@ -561,7 +566,7 @@ void ClassStatement::failPropertyAccess(CStrRef prop, const char *context,
   if (mods & Private) level = Private;
   else if (mods & Protected) level = Protected;
   if (level == ClassStatement::Private) mod = "private";
-  throw FatalErrorException("Attempt to access %s %s::%s%s%s",
+  throw FatalErrorException(0, "Attempt to access %s %s::%s%s%s",
       mod, m_name.c_str(), prop.data(),
       *context ? " from " : "",
       *context ? context : "");
@@ -667,12 +672,12 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
             }
           }
           if (!found) {
-            throw FatalErrorException("Class %s does not implement abstract "
+            throw FatalErrorException(0,"Class %s does not implement abstract "
                 "method %s::%s", cls->name().c_str(),
                 name().c_str(), (*it)->name().c_str());
           }
           if (incompatible) {
-            throw FatalErrorException("Declaration of %s::%s() must be "
+            throw FatalErrorException(0,"Declaration of %s::%s() must be "
                 "compatible with that of %s::%s()",
                 cls->name().c_str(), m->name().c_str(),
                 name().c_str(), (*it)->name().c_str());
@@ -737,11 +742,14 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
     }
     if (parent && parent->getModifiers() & Final) {
       // Extended a final class
-      throw FatalErrorException("Class %s may not inherit from final class "
+      throw FatalErrorException(0,"Class %s may not inherit from final class "
                                 "(%s)",
                                 name().c_str(), parent->name().c_str());
     }
-
+    if (parent) {
+      set<const ClassStatement *> seen;
+      recursiveParentCheck(seen);
+    }
     // checking against parent methods
     if (parent || !m_basesVec.empty()) {
       bool iface = getModifiers() & Interface;
@@ -787,7 +795,27 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
                 (*it)->loc()->line1);
           }
         }
+        int m1 = (*it)->getModifiers();
+        int m2 = m->getModifiers();
+        // Access levels
+        int p1 = m1 & (Public|Protected|Private);
+        if (!p1) p1 = Public;
+        int p2 = m2 & (Public|Protected|Private);
+        if (!p2) p2 = Public;
+        if (p1 > p2) {
+          const char *pn;
+          if (p1 == Private) pn = "private";
+          else if (p1 == Protected) pn = "protected";
+          else pn = "public";
+          // Illegal strengthening of privacy
+          raise_error("Access level to %s::%s() must be %s (as in class %s) "
+              "or weaker", name().c_str(), (*it)->name().c_str(), pn,
+              mClass->name().c_str());
+        }
       }
+      // Check for multiple abstract function declarations
+      hphp_const_char_imap<const char*> abstracts;
+      abstractMethodCheck(abstracts, true);
     }
     cls = this;
   }
@@ -829,11 +857,76 @@ const MethodStatement* ClassStatement::findParentMethod(const char* name,
   return NULL;
 }
 
+void ClassStatement::abstractMethodCheck(
+    hphp_const_char_imap<const char*> &abstracts, bool ifaces) const {
+  bool iface = getModifiers() & Interface;
+  if (iface || getModifiers() & Abstract)  {
+    for (vector<MethodStatementPtr>::const_iterator it = m_methodsVec.begin();
+        it != m_methodsVec.end(); ++it) {
+      if (iface || (*it)->getModifiers() & Abstract) {
+        hphp_const_char_imap<const char*>::const_iterator ait =
+          abstracts.find((*it)->name().c_str());
+        if (ait != abstracts.end() && ait->second != name().c_str()) {
+          raise_error("Can't inherit abstract function %s::%s (previously "
+              "declared abstract in %s)", name().c_str(), ait->first,
+              ait->second);
+        }
+        abstracts[(*it)->name().c_str()] = name().c_str();
+      }
+    }
+  }
+  const ClassStatement *parent = parentStatement();
+  if (parent && parent->getModifiers() & Abstract) {
+    // No builtin abstract classes
+    // Only recurse into abstract parents since other parents don't
+    // contribute abstract methods
+    parent->abstractMethodCheck(abstracts, false);
+  }
+  if (ifaces) {
+    for (vector<string>::const_iterator it = m_basesVec.begin();
+        it != m_basesVec.end(); ++it) {
+      const ClassStatement *iface = RequestEvalState::findClass(it->c_str());
+      if (iface) {
+        iface->abstractMethodCheck(abstracts, false);
+      } else {
+        // may be built in
+        const ClassInfo *ici = ClassInfo::FindInterface(it->c_str());
+        if (ici) {
+          const ClassInfo::MethodVec &meths = ici->getMethodsVec();
+          for (ClassInfo::MethodVec::const_iterator mit = meths.begin();
+              mit != meths.end(); ++mit) {
+            hphp_const_char_imap<const char*>::const_iterator ait =
+              abstracts.find((*mit)->name);
+            if (ait != abstracts.end() && ait->second != ici->getName()) {
+              raise_error("Can't inherit abstract function %s::%s (previously "
+                  "declared abstract in %s)", it->c_str(), (*mit)->name,
+                  ait->second);
+            }
+            abstracts[(*mit)->name] = ici->getName();
+          }
+        }
+      }
+    }
+  }
+}
 const ClassInfo *ClassStatement::getBuiltinParentInfo() const {
   const ClassStatement *parent = parentStatement();
   if (parent) return parent->getBuiltinParentInfo();
   if (!m_parent.empty()) return ClassInfo::FindClass(m_parent.c_str());
   return NULL;
+}
+
+void ClassStatement::recursiveParentCheck(
+    std::set<const ClassStatement*> &seen) const {
+  if (seen.find(this) != seen.end()) {
+    raise_error("%s is defined as its own parent", name().c_str());
+  } else {
+    seen.insert(this);
+  }
+  const ClassStatement *parent = parentStatement();
+  if (parent) {
+    parent->recursiveParentCheck(seen);
+  }
 }
 
 ClassStatementMarkerPtr ClassStatement::getMarker() const {

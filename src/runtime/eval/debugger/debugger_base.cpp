@@ -28,9 +28,17 @@ namespace HPHP { namespace Eval {
 
 const std::string &DSandboxInfo::id() const {
   if (m_cached_id.empty() && !m_user.empty()) {
-    m_cached_id = m_user + "\t" + m_name + "\t" + m_path;
+    m_cached_id = m_user + "\t" + m_name;
   }
   return m_cached_id;
+}
+
+const std::string DSandboxInfo::desc() const {
+  string ret = m_user + "'s " + m_name + " sandbox";
+  if (!m_path.empty()) {
+    ret += " at " + m_path;
+  }
+  return ret;
 }
 
 void DSandboxInfo::set(const std::string &id) {
@@ -41,24 +49,43 @@ void DSandboxInfo::set(const std::string &id) {
   if (!id.empty()) {
     vector<string> tokens;
     Util::split('\t', id.c_str(), tokens);
-    if (tokens.size() == 3) {
+    if (tokens.size() == 2) {
       m_user = tokens[0];
       m_name = tokens[1];
-      m_path = tokens[2];
     }
   }
+}
+
+void DSandboxInfo::update(const DSandboxInfo &src) {
+  if (!src.m_path.empty() && m_path.empty()) {
+    m_path = src.m_path;
+  }
+}
+
+void DSandboxInfo::sendImpl(ThriftBuffer &thrift) {
+  thrift.write(m_user);
+  thrift.write(m_name);
+  thrift.write(m_path);
+}
+
+void DSandboxInfo::recvImpl(ThriftBuffer &thrift) {
+  thrift.read(m_user);
+  thrift.read(m_name);
+  thrift.read(m_path);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void DThreadInfo::sendImpl(ThriftBuffer &thrift) {
   thrift.write(m_id);
+  thrift.write(m_desc);
   thrift.write(m_type);
   thrift.write(m_url);
 }
 
 void DThreadInfo::recvImpl(ThriftBuffer &thrift) {
   thrift.read(m_id);
+  thrift.read(m_desc);
   thrift.read(m_type);
   thrift.read(m_url);
 }
@@ -381,16 +408,30 @@ static void get_color(int tokid, int prev, int next,
   }
 }
 
+static void color_line_no(StringBuffer &sb, int line, int lineFocus0,
+                          int lineFocus1, const char *color) {
+  if (((line == lineFocus0 && lineFocus1 == 0) ||
+       (line >= lineFocus0 && line <= lineFocus1)) &&
+      DebuggerClient::HighlightBgColor) {
+    sb.append(Util::add_bgcolor(DebuggerClient::HighlightForeColor,
+                                DebuggerClient::HighlightBgColor));
+  } else {
+    sb.append(color);
+  }
+}
+
 static void append_line_no(StringBuffer &sb, const char *text,
                            int &line, const char *color, const char *end,
-                           const char **palette =
+                           int lineFocus0, int charFocus0, int lineFocus1,
+                           int charFocus1, const char **palette =
                            DebuggerClient::DefaultCodeColors) {
   const char *colorLineNo = palette[CodeColorLineNo * 2];
   const char *endLineNo = palette[CodeColorLineNo * 2 + 1];
 
   // beginning
   if (line && sb.empty()) {
-    if (colorLineNo) sb.append(colorLineNo);
+    if (colorLineNo) color_line_no(sb, line, lineFocus0, lineFocus1,
+                                   colorLineNo);
     sb.printf(DebuggerClient::LineNoFormat, line);
     if (endLineNo) sb.append(endLineNo);
   }
@@ -398,7 +439,8 @@ static void append_line_no(StringBuffer &sb, const char *text,
   // ending
   if (text == NULL) {
     if (line) {
-      if (colorLineNo) sb.append(colorLineNo);
+      if (colorLineNo) color_line_no(sb, line, lineFocus0, lineFocus1,
+                                     colorLineNo);
       sb.append("(END)\n");
       if (endLineNo) sb.append(endLineNo);
     }
@@ -414,11 +456,13 @@ static void append_line_no(StringBuffer &sb, const char *text,
     const char *p = begin;
     for (; *p; p++) {
       if (*p == '\n') {
+        ++line;
         sb.append(begin, p - begin);
-        if (end) sb.append(end);
+        sb.append(ANSI_COLOR_END);
         sb.append('\n');
-        if (colorLineNo) sb.append(colorLineNo);
-        sb.printf(DebuggerClient::LineNoFormat, ++line);
+        if (colorLineNo) color_line_no(sb, line, lineFocus0, lineFocus1,
+                                       colorLineNo);
+        sb.printf(DebuggerClient::LineNoFormat, line);
         if (endLineNo) sb.append(endLineNo);
         if (color) sb.append(color);
         begin = p + 1;
@@ -432,7 +476,35 @@ static void append_line_no(StringBuffer &sb, const char *text,
   if (end) sb.append(end);
 }
 
-String highlight_php(CStrRef source, int line) {
+String highlight_code(CStrRef source, int line /* = 0 */,
+                      int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
+                      int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
+  String prepended = "<?php\n";
+  prepended += source;
+  String highlighted = highlight_php(prepended, line, lineFocus0, charFocus0,
+                                     lineFocus1, charFocus1);
+  int pos = highlighted.find("\n");
+  return highlighted.substr(pos + 1);
+}
+
+string check_char_highlight(int lineFocus0, int charFocus0,
+                            int lineFocus1, int charFocus1,
+                            ylmm::basic_location loc) {
+  if (DebuggerClient::HighlightBgColor &&
+      lineFocus0 && charFocus0 && lineFocus1 && charFocus1 &&
+      loc.first_line() * 1000 + loc.first_column()
+      >= lineFocus0 * 1000 + charFocus0 &&
+      loc.last_line() * 1000 + loc.last_column()
+      <= lineFocus1 * 1000 + charFocus1) {
+    return Util::add_bgcolor(DebuggerClient::HighlightForeColor,
+                             DebuggerClient::HighlightBgColor);
+  }
+  return "";
+}
+
+String highlight_php(CStrRef source, int line /* = 0 */,
+                     int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
+                     int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
   Lock lock(Eval::Parser::s_lock);
 
   const char *input = source.data();
@@ -442,46 +514,75 @@ String highlight_php(CStrRef source, int line) {
   Eval::Scanner scanner(new ylmm::basic_buffer(iss, false, true),
                         true, false, true);
   Eval::Token tok1, tok2;
-  std::vector<pair<int, Eval::Token> > ahead_tokens;
-  ylmm::basic_location loc;
+  std::vector<pair<int, string> > ahead_tokens;
+  ylmm::basic_location loc1, loc2;
 
   const char *colorComment = NULL, *endComment = NULL;
   get_color(365 /* T_COMMENT */, 0, 0, colorComment, endComment);
 
   int prev = 0;
-  int tokid = scanner.getNextToken(tok1, loc);
+  int tokid = scanner.getNextToken(tok1, loc1);
   int next = 0;
   while (tokid) {
     // look ahead
-    next = scanner.getNextToken(tok2, loc);
+    next = scanner.getNextToken(tok2, loc2);
     while (next == 370 /* T_WHITESPACE */ ||
            next == 365 /* T_COMMENT */ ||
            next == 366 /* T_DOC_COMMENT */) {
-      ahead_tokens.push_back(pair<int, Eval::Token>(next, tok2));
-      next = scanner.getNextToken(tok2, loc);
+
+      string text = tok2.getText();
+      string hcolor = check_char_highlight(lineFocus0, charFocus0,
+                                           lineFocus1, charFocus1, loc2);
+      if (!hcolor.empty()) {
+        text = hcolor + text + ANSI_COLOR_END;
+      }
+
+      ahead_tokens.push_back(pair<int, string>(next, text));
+      next = scanner.getNextToken(tok2, loc2);
     }
 
+    string hcolor = check_char_highlight(lineFocus0, charFocus0,
+                                         lineFocus1, charFocus1, loc1);
+
     if (tokid < 256) {
-      res.append((char)tokid);
+      if (!hcolor.empty()) {
+        res.append(hcolor);
+        res.append((char)tokid);
+        res.append(ANSI_COLOR_END);
+      } else {
+        res.append((char)tokid);
+      }
     } else {
       const char *color = NULL, *end = NULL;
       get_color(tokid, prev, next, color, end);
+      if (!hcolor.empty()) {
+        color = hcolor.c_str();
+        end = ANSI_COLOR_END;
+      }
 
       const std::string &text = tok1.getText();
       int offset = 0;
       if (text[0] == '$') {
-        res.append('$');
+        if (!hcolor.empty()) {
+          res.append(hcolor);
+          res.append('$');
+          res.append(ANSI_COLOR_END);
+        } else {
+          res.append('$');
+        }
         offset = 1;
       }
-      append_line_no(res, text.c_str() + offset, line, color, end);
+      append_line_no(res, text.c_str() + offset, line, color, end,
+                     lineFocus0, charFocus0, lineFocus1, charFocus1);
     }
 
     if (!ahead_tokens.empty()) {
       for (unsigned int i = 0; i < ahead_tokens.size(); i++) {
         bool comment = ahead_tokens[i].first != 370 /* T_WHITESPACE */;
-        append_line_no(res, ahead_tokens[i].second.getText().c_str(), line,
+        append_line_no(res, ahead_tokens[i].second.c_str(), line,
                        comment ? colorComment : NULL,
-                       comment ? endComment : NULL);
+                       comment ? endComment : NULL,
+                       lineFocus0, charFocus0, lineFocus1, charFocus1);
       }
       ahead_tokens.clear();
     }
@@ -492,10 +593,12 @@ String highlight_php(CStrRef source, int line) {
       prev = tokid;
     }
     tok1 = tok2;
+    loc1 = loc2;
     tokid = next;
   }
 
-  append_line_no(res, NULL, line, NULL, NULL);
+  append_line_no(res, NULL, line, NULL, NULL,
+                 lineFocus0, charFocus0, lineFocus1, charFocus1);
   return res.detach();
 }
 

@@ -231,7 +231,9 @@ void MethodStatement::onParse(AnalysisResultPtr ar) {
   if (m_name == "__call") {
     classScope->setAttribute(ClassScope::HasUnknownMethodHandler);
   } else if (m_name == "__get") {
-    classScope->setAttribute(ClassScope::HasUnknownPropHandler);
+    classScope->setAttribute(ClassScope::HasUnknownPropGetter);
+  } else if (m_name == "__set") {
+    classScope->setAttribute(ClassScope::HasUnknownPropSetter);
   }
 
   m_className = classScope->getName();
@@ -486,9 +488,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       } else {
         cg_printf("void");
       }
-      if (m_name == "__lval") {
-        cg_printf(" &___lval(");
-      } else if (m_name == "__offsetget_lval") {
+      if (m_name == "__offsetget_lval") {
         cg_printf(" &___offsetget_lval(");
       } else if (m_modifiers->isStatic() && m_stmt) {
         // Static method wrappers get generated as support methods
@@ -530,10 +530,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                   funcSection.c_str());
       }
 
-      if (m_name == "__lval") {
-        cg_printf(" &%s%s::___lval(",
-                  Option::ClassPrefix, scope->getId(cg).c_str());
-      } else if (m_name == "__offsetget_lval") {
+      if (m_name == "__offsetget_lval") {
         cg_printf(" &%s%s::___offsetget_lval(",
                   Option::ClassPrefix, scope->getId(cg).c_str());
       } else if (m_modifiers->isStatic()) {
@@ -562,7 +559,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
       outputCPPArgInjections(cg, ar, origFuncName.c_str(), ar->getClassScope(),
                              funcScope);
-      if (m_name == "__lval" || m_name == "__offsetget_lval") {
+      if (m_name == "__offsetget_lval") {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*m_params)[0]);
         cg_printf("Variant &v = %s->__lvalProxy;\n", cg.getGlobals(ar));
@@ -596,6 +593,37 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   ar->popScope();
 }
 
+bool MethodStatement::hasRefParam() {
+  for (int i = 0; i < m_params->getCount(); i++) {
+    ParameterExpressionPtr param =
+      dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+    if (param->isRef()) return true;
+  }
+  return false;
+}
+
+void MethodStatement::outputParamArrayInit(CodeGenerator &cg) {
+  int n = m_params->getCount();
+  ASSERT(n > 0);
+  cg_printf("array_create%d(%d, ", n, n);
+  for (int i = 0; i < n; i++) {
+    ParameterExpressionPtr param =
+      dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+    const string &paramName = param->getName();
+    cg_printf("%d, ", i);
+    if (param->isRef()) {
+      cg_printf("ref(%s%s)", Option::VariablePrefix, paramName.c_str());
+    } else {
+      cg_printf("%s%s", Option::VariablePrefix, paramName.c_str());
+    }
+    if (i < n - 1) {
+      cg_printf(", ");
+    } else {
+      cg_printf(")");
+    }
+  }
+}
+
 void MethodStatement::outputCPPArgInjections(CodeGenerator &cg,
                                              AnalysisResultPtr ar,
                                              const char *name,
@@ -603,18 +631,24 @@ void MethodStatement::outputCPPArgInjections(CodeGenerator &cg,
                                              FunctionScopePtr funcScope) {
   if (cg.getOutput() != CodeGenerator::SystemCPP) {
     if (m_params) {
-      cg_printf("INTERCEPT_INJECTION(\"%s\", (Array(ArrayInit(%d, true)",
-                name, m_params->getCount());
-      string params;
-      for (int i = 0; i < m_params->getCount(); i++) {
-        ParameterExpressionPtr param =
-          dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
-        const string &paramName = param->getName();
-        cg_printf(".set%s(%d, %s%s)", param->isRef() ? "Ref" : "",
-                  i, Option::VariablePrefix, paramName.c_str());
+      int n = m_params->getCount();
+      cg_printf("INTERCEPT_INJECTION(\"%s\", ", name);
+      if (Option::GenArrayCreate && !hasRefParam()) {
+        ar->m_arrayIntegerKeySizes.insert(n);
+        outputParamArrayInit(cg);
+        cg_printf(", %s);\n", funcScope->isRefReturn() ? "ref(r)" : "r");
+      } else {
+        cg_printf("(Array(ArrayInit(%d, true)", n);
+        for (int i = 0; i < n; i++) {
+          ParameterExpressionPtr param =
+            dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+          const string &paramName = param->getName();
+          cg_printf(".set%s(%d, %s%s)", param->isRef() ? "Ref" : "",
+                    i, Option::VariablePrefix, paramName.c_str());
+        }
+        cg_printf(".create())), %s);\n",
+                  funcScope->isRefReturn() ? "ref(r)" : "r");
       }
-      cg_printf(".create())), %s);\n",
-                funcScope->isRefReturn() ? "ref(r)" : "r");
     } else {
       cg_printf("INTERCEPT_INJECTION(\"%s\", null_array, %s);\n",
                 name, funcScope->isRefReturn() ? "ref(r)" : "r");
@@ -747,7 +781,7 @@ void MethodStatement::outputCPPFFIStub(CodeGenerator &cg,
     return;
   }
 
-  if (fname == "__lval" || fname == "__offsetget_lval") {
+  if (fname == "__offsetget_lval") {
     return;
   }
 
@@ -1088,7 +1122,7 @@ void MethodStatement::outputJavaFFICPPStub(CodeGenerator &cg,
     return;
   }
 
-  if (fname == "__lval" || fname == "__offsetget_lval") return;
+  if (fname == "__offsetget_lval") return;
 
   const char *clsName;
   if (inClass) {

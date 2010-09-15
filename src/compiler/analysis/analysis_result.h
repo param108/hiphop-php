@@ -94,6 +94,10 @@ public:
   void setPackage(Package *package) { m_package = package;}
   void setParseOnDemand(bool v) { m_parseOnDemand = v;}
   bool isParseOnDemand() { return m_package && m_parseOnDemand;}
+  void setParseOnDemandDirs(const std::vector<std::string> &dirs) {
+    ASSERT(m_package && !m_parseOnDemand);
+    m_parseOnDemandDirs = dirs;
+  }
 
   /**
    * create_function() generates extra PHP code that defines the lambda.
@@ -180,11 +184,15 @@ public:
   /**
    * Scalar array handling.
    */
-  int registerScalarArray(ExpressionPtr pairs);
+  int registerScalarArray(ExpressionPtr pairs, int &hash, int &index);
+  int checkScalarArray(const std::string &text, int &index);
+  int getScalarArrayId(const std::string &text);
+  void outputCPPNamedScalarArrays(const std::string &file);
 
   void setInsideScalarArray(bool flag);
   bool getInsideScalarArray();
   std::string getScalarArrayCompressedText();
+  std::string getScalarArrayName(int hash, int index);
 
   /**
    * Force all class variables to be variants, since l-val or reference
@@ -217,6 +225,7 @@ public:
   void outputCPPScalarArrayDecl(CodeGenerator &cg);
   void outputCPPScalarArrayImpl(CodeGenerator &cg);
   void outputCPPScalarArrayInit(CodeGenerator &cg, int fileCount, int part);
+  void outputCPPScalarArrayId(CodeGenerator &cg, int id, int hash, int index);
   void outputCPPClassStaticInitializerFlags(CodeGenerator &cg,
                                             bool constructor);
   void outputCPPClassDeclaredFlags(CodeGenerator &cg);
@@ -309,7 +318,7 @@ public:
   bool isBaseSysRsrcClass(const std::string &className);
   void addNonFinal(const std::string &className);
   bool isNonFinalClass(const std::string &className);
-  bool needStaticArray(ClassScopePtr cls);
+  bool needStaticArray(ClassScopePtr cls, FunctionScopePtr func);
 
   /**
    * For function declaration parsing.
@@ -366,12 +375,15 @@ public:
 
   std::set<std::string> m_variableTableFunctions;
   std::set<int> m_concatLengths;
+  std::set<int> m_arrayLitstrKeySizes;
+  std::set<int> m_arrayIntegerKeySizes;
 
   void setSystem() { m_system = true; }
   bool isSystem() const { return m_system; }
 private:
   Package *m_package;
   bool m_parseOnDemand;
+  std::vector<std::string> m_parseOnDemandDirs;
   Phase m_phase;
   int m_newlyInferred;
   DependencyGraphPtr m_dependencyGraph;
@@ -406,6 +418,7 @@ private:
   int m_optCounter;
 
   std::map<std::string, int> m_scalarArrays;
+  std::map<int, std::vector<std::string> > m_namedScalarArrays;
   int m_scalarArraysCounter;
   std::vector<ExpressionPtr> m_scalarArrayIds;
   std::map<std::string, int> m_paramRTTIs;
@@ -452,6 +465,11 @@ private:
   int m_funcTableSize;
   CodeGenerator::MapIntToStringVec m_funcTable;
   bool m_system;
+
+  /**
+   * Checks whether the file is in one of the on-demand parsing directories.
+   */
+  bool inParseOnDemandDirs(const std::string &filename);
 
   /**
    * Checks circular class derivations that can cause stack overflows for
@@ -539,7 +557,7 @@ private:
   void outputHexBuffer(CodeGenerator &cg, const char *name,
                        const char *buf, int len);
   void outputCPPLiteralStringPrecomputation();
-  void outputCPPNamedLiteralStrings();
+  void outputCPPNamedLiteralStrings(bool genStatic, const std::string &file);
   void outputCPPSepExtensionMake();
   void outputCPPSepExtensionIncludes(CodeGenerator &cg);
 
@@ -549,6 +567,9 @@ private:
   void outputConcatNumDecl(CodeGenerator &cg, int num);
   void outputConcatDecl(CodeGenerator &cg);
   void outputConcatImpl(CodeGenerator &cg);
+  void outputArrayCreateNumDecl(CodeGenerator &cg, int num, const char *type);
+  void outputArrayCreateDecl(CodeGenerator &cg);
+  void outputArrayCreateImpl(CodeGenerator &cg);
 
   void cloneRTTIFuncs(ClassScopePtr cls,
                       const StringToFunctionScopePtrVecMap &functions);
@@ -559,6 +580,7 @@ private:
   }
 
   StringToMethodSlotMap stringToMethodSlotMap;
+  CallIndexVectSet callIndexVectSet; // set of methods at this callIndex
   friend class MethodSlot;
   public:
   const MethodSlot* getMethodSlot(const std::string & mname) const ;

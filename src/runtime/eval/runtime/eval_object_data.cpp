@@ -35,7 +35,10 @@ EvalObjectData::EvalObjectData(ClassEvalState &cls, const char* pname,
   if (r == NULL) {
     RequestEvalState::registerObject(this);
   }
+  if (getMethodStatement("__get")) setAttribute(UseGet);
+  if (getMethodStatement("__set")) setAttribute(UseSet);
 }
+
 // Only used for cloning and so should not register object
 EvalObjectData::EvalObjectData(ClassEvalState &cls) :
   DynamicObjectData(NULL, this), m_cls(cls) {
@@ -100,12 +103,41 @@ Array EvalObjectData::o_toArray() const {
   return props;
 }
 
-bool EvalObjectData::o_exists(CStrRef s, int64 phash,
-    const char *context, int64 hash) const {
-  return (m_privates.exists(context, hash, true) &&
-          m_privates.rvalAt(context, hash, false, true).getArrayData()
-              ->exists(s, phash)) ||
-         DynamicObjectData::o_exists(s, phash, context, hash);
+Variant *EvalObjectData::o_realProp(CStrRef s, int flags,
+                                    CStrRef context /* = null_string */) const {
+  CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  if (Variant *priv =
+      const_cast<Array&>(m_privates).lvalPtr(c, flags & RealPropWrite, false)) {
+    if (Variant *ret = priv->lvalPtr(s, flags & RealPropWrite, false)) {
+      return ret;
+    }
+  }
+  int mods;
+  if (!(flags & RealPropUnchecked) &&
+      !m_cls.getClass()->attemptPropertyAccess(s, c, mods)) {
+    return NULL;
+  }
+  return DynamicObjectData::o_realProp(s, flags);
+}
+
+Variant EvalObjectData::o_getError(CStrRef prop, CStrRef context) {
+  CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  int mods;
+  if (!m_cls.getClass()->attemptPropertyAccess(prop, c, mods)) {
+    m_cls.getClass()->failPropertyAccess(prop, c, mods);
+  } else {
+    DynamicObjectData::o_getError(prop, context);
+  }
+  return null;
+}
+
+Variant EvalObjectData::o_setError(CStrRef prop, CStrRef context) {
+  CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  int mods;
+  if (!m_cls.getClass()->attemptPropertyAccess(prop, c, mods)) {
+    m_cls.getClass()->failPropertyAccess(prop, c, mods);
+  }
+  return null;
 }
 
 void EvalObjectData::o_getArray(Array &props) const {
@@ -131,75 +163,14 @@ void EvalObjectData::o_setArray(CArrRef props) {
       int subLen = k.find('\0', 1) + 1;
       String cls = k.substr(1, subLen - 2);
       String key = k.substr(subLen);
-      props->load(k, o_lval(key, -1, cls));
+      props->load(k, o_lval(key, Variant(), cls));
     }
   }
   DynamicObjectData::o_setArray(props);
 }
 
-Variant EvalObjectData::o_get(CStrRef s, int64 phash, bool error,
-    const char *context, int64 hash) {
-  Variant priv = m_privates.rvalAt(context, hash, false, true);
-  if (priv.is(KindOfArray) && priv.getArrayData()->exists(s, phash)) {
-    return priv.rvalAt(s, phash, false, true);
-  }
-  int mods;
-  if (!m_cls.getClass()->attemptPropertyAccess(s, context, mods)) {
-    const MethodStatement *ms = getMethodStatement("__get");
-    if (ms) {
-      return doGet(s, false);
-    }
-    m_cls.getClass()->failPropertyAccess(s, context, mods);
-  }
-  return DynamicObjectData::o_get(s, phash, error, context, hash);
-}
-
-Variant EvalObjectData::o_getUnchecked(CStrRef s, int64 phash,
-    const char *context, int64 hash) {
-  Variant priv = m_privates.rvalAt(context, hash, false, true);
-  if (priv.is(KindOfArray) && priv.getArrayData()->exists(s, phash)) {
-    return priv.rvalAt(s, phash, false, true);
-  }
-  return DynamicObjectData::o_get(s, phash, true, context, hash);
-}
-
-
-Variant &EvalObjectData::o_lval(CStrRef s, int64 phash,
-    const char *context, int64 hash) {
-  if (m_privates.exists(context, hash, true)) {
-    Variant &priv = m_privates.lvalAt(context, hash, false, true);
-    if (priv.getArrayData()->exists(s, phash)) {
-      return priv.lvalAt(s, phash, false, true);
-    }
-  }
-  int mods;
-  if (!m_cls.getClass()->attemptPropertyAccess(s, context, mods)) {
-    m_cls.getClass()->failPropertyAccess(s, context, mods);
-  }
-  return DynamicObjectData::o_lval(s, phash, context, hash);
-}
-
-Variant EvalObjectData::o_set(CStrRef s, int64 phash, CVarRef v, bool forInit,
-    const char *context, int64 hash) {
-  if (m_privates.exists(context, hash, true)) {
-    Variant &priv = m_privates.lvalAt(context, hash, false, true);
-    if (priv.is(KindOfArray) && priv.getArrayData()->exists(s, phash)) {
-      return priv.set(s, v, phash, true);
-    }
-  }
-  int mods;
-  if (!forInit && !m_cls.getClass()->attemptPropertyAccess(s, context, mods)) {
-    const MethodStatement *ms = getMethodStatement("__set");
-    if (ms) {
-      return t___set(s, v);
-    }
-    m_cls.getClass()->failPropertyAccess(s, context, mods);
-  }
-  return DynamicObjectData::o_set(s, phash, v, forInit, context, hash);
-}
-
 void EvalObjectData::o_setPrivate(const char *cls, const char *s, int64 hash,
-    CVarRef v) {
+                                  CVarRef v) {
   m_privates.lvalAt(cls).set(s, v, hash);
 }
 
@@ -314,58 +285,57 @@ Variant EvalObjectData::o_invoke_few_args_mil(const char *s,
     return o_invoke_mil(s, Array(), hash);
   }
   case 1: {
-    Array params(ArrayInit(1, true).set(0, a0).create());
+    Array params(ArrayInit(1, true).set(a0).create());
     return o_invoke_mil(s, params, hash);
   }
   case 2: {
-    Array params(ArrayInit(2, true).set(0, a0).set(1, a1).create());
+    Array params(ArrayInit(2, true).set(a0).set(a1).create());
     return o_invoke_mil(s, params, hash);
   }
   case 3: {
-    Array params(ArrayInit(3, true).set(0, a0).set(1, a1).set(2, a2).create());
+    Array params(ArrayInit(3, true).set(a0).set(a1).set(a2).create());
     return o_invoke_mil(s, params, hash);
   }
 #if INVOKE_FEW_ARGS_COUNT > 3
   case 4: {
-    Array params(ArrayInit(4, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).create());
+    Array params(ArrayInit(4, true).set(a0).set(a1).set(a2).set(a3).create());
     return o_invoke_mil(s, params, hash);
   }
   case 5: {
-    Array params(ArrayInit(5, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).create());
+    Array params(ArrayInit(5, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).create());
     return o_invoke_mil(s, params, hash);
   }
   case 6: {
-    Array params(ArrayInit(6, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).create());
+    Array params(ArrayInit(6, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).set(a5).create());
     return o_invoke_mil(s, params, hash);
   }
 #endif
 #if INVOKE_FEW_ARGS_COUNT > 6
   case 7: {
-    Array params(ArrayInit(7, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).
-                                    set(6, a6).create());
+    Array params(ArrayInit(7, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).set(a5).
+                                    set(a6).create());
     return o_invoke_mil(s, params, hash);
   }
   case 8: {
-    Array params(ArrayInit(8, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).
-                                    set(6, a6).set(7, a7).create());
+    Array params(ArrayInit(8, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).set(a5).
+                                    set(a6).set(a7).create());
     return o_invoke_mil(s, params, hash);
   }
   case 9: {
-    Array params(ArrayInit(9, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).
-                                    set(6, a6).set(7, a7).set(8, a8).create());
+    Array params(ArrayInit(9, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).set(a5).
+                                    set(a6).set(a7).set(a8).create());
     return o_invoke_mil(s, params, hash);
   }
   case 10: {
-    Array params(ArrayInit(10, true).set(0, a0).set(1, a1).set(2, a2).
-                                     set(3, a3).set(4, a4).set(5, a5).
-                                     set(6, a6).set(7, a7).set(8, a8).
-                                     set(9, a9).create());
+    Array params(ArrayInit(10, true).set(a0).set(a1).set(a2).
+                                     set(a3).set(a4).set(a5).
+                                     set(a6).set(a7).set(a8).
+                                     set(a9).create());
     return o_invoke_mil(s, params, hash);
   }
 #endif
@@ -386,15 +356,6 @@ Variant EvalObjectData::doCall(Variant v_name, Variant v_arguments,
                               CREATE_VECTOR2(v_name, v_arguments), false);
   } else {
     return DynamicObjectData::doCall(v_name, v_arguments, fatal);
-  }
-}
-
-Variant EvalObjectData::doGet(Variant v_name, bool error) {
-  const MethodStatement *ms = getMethodStatement("__get");
-  if (ms) {
-    return ms->invokeInstance(Object(root), CREATE_VECTOR1(v_name), false);
-  } else {
-    return DynamicObjectData::doGet(v_name, error);
   }
 }
 
@@ -506,16 +467,6 @@ ObjectData* EvalObjectData::cloneImpl() {
   return e;
 }
 
-Variant &EvalObjectData::___lval(Variant v_name) {
-  const MethodStatement *ms = getMethodStatement("__get");
-  if (ms) {
-    Variant &v = get_globals()->__lvalProxy;
-    v = ms->invokeInstance(Object(root), CREATE_VECTOR1(v_name), false);
-    return v;
-  } else {
-    return DynamicObjectData::___lval(v_name);
-  }
-}
 Variant &EvalObjectData::___offsetget_lval(Variant v_name) {
   const MethodStatement *ms = getMethodStatement("offsetget");
   if (ms) {

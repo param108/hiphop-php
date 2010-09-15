@@ -160,7 +160,7 @@ char *string_concat(const char *s1, int len1, const char *s2, int len2,
   len = len1 + len2;
   char *buf = (char *)malloc(len + 1);
   if (buf == NULL) {
-    throw FatalErrorException("malloc failed: %d", len);
+    throw FatalErrorException(0, "malloc failed: %d", len);
   }
   memcpy(buf, s1, len1);
   memcpy(buf + len1, s2, len2);
@@ -553,7 +553,7 @@ int string_rfind(const char *input, int len, char ch, int pos,
       start = pos;
     }
 
-    for (int i = start; i > stop; i--) {
+    for (int i = start; i >= stop; i--) {
       if (input[i] == ch) {
         return i;
       }
@@ -1625,12 +1625,11 @@ char *string_quoted_printable_decode(const char *input, int &len) {
   int i = 0, j = 0, k;
   const char *str_in = input;
   char *str_out = (char *)malloc(len + 1);
-  while (str_in[i]) {
+  while (i < len && str_in[i]) {
     switch (str_in[i]) {
     case '=':
-      if (str_in[i + 1] && str_in[i + 2] &&
-          isxdigit((int) str_in[i + 1]) &&
-          isxdigit((int) str_in[i + 2]))
+      if (i + 2 < len && str_in[i + 1] && str_in[i + 2] &&
+          isxdigit((int) str_in[i + 1]) && isxdigit((int) str_in[i + 2]))
         {
           str_out[j++] = (string_hex2int((int) str_in[i + 1]) << 4)
             + string_hex2int((int) str_in[i + 2]);

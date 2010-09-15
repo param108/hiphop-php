@@ -29,35 +29,41 @@ enum InterruptType {
   RequestStarted,
   RequestEnded,
   PSPEnded,
+  HardBreakPoint,
   BreakPointReached,
   ExceptionThrown,
 };
 
 class InterruptSite {
 public:
-  InterruptSite(FrameInjection *frame, CObjRef e = Object())
+  InterruptSite(FrameInjection *frame, CVarRef e = null_variant,
+                int char0 = 0, int line1 = 0, int char1 = 0)
       : m_frame(frame), m_exception(e), m_function(NULL), m_file_strlen(-1),
-        m_jumping(false) {
+        m_jumping(false), m_char0(char0), m_line1(line1), m_char1(char1) {
     ASSERT(m_frame);
   }
 
   FrameInjection *getFrame() const { return m_frame;}
   const char *getFile() const;
-  int getLine() const { return m_frame->getLine();}
-  Object getException() { return m_exception;}
+  int32 getLine0() const { return m_frame->getLine();}
+  int32 getChar0() const { return m_char0;}
+  int32 getLine1() const { return m_line1;}
+  int32 getChar1() const { return m_char1;}
+  CVarRef getException() { return m_exception;}
   const char *getNamespace() const { return NULL;}
   const char *getClass() const { return m_frame->getClass();}
   const char *getFunction() const;
   int getFileLen() const;
 
   std::string &url() const { return m_url;}
+  std::string desc() const;
 
   bool isJumping() const { return m_jumping;}
   void setJumping() { m_jumping = true;}
 
 private:
   FrameInjection *m_frame;
-  Object m_exception;
+  Variant m_exception;
 
   // cached
   mutable String m_file;
@@ -67,6 +73,11 @@ private:
 
   // jump instruction
   bool m_jumping;
+
+  // additional source location only available from hphpi
+  int32 m_char0;
+  int32 m_line1;
+  int32 m_char1;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -81,17 +92,20 @@ public:
     Disabled = 0,
   };
 
+  static const char *ErrorClassName;
+
   static const char *GetInterruptName(InterruptType interrupt);
   static bool MatchFile(const char *haystack, int haystack_len,
                         const std::string &needle);
 
 public:
-  BreakPointInfo() {} // for thrift
+  BreakPointInfo() : m_index(0) {} // for thrift
   BreakPointInfo(bool regex, State state, const std::string &file, int line);
   BreakPointInfo(bool regex, State state, InterruptType interrupt,
                  const std::string &url);
   BreakPointInfo(bool regex, State state, InterruptType interrupt,
                  const std::string &exp, const std::string &file);
+  ~BreakPointInfo();
 
   void setClause(const std::string &clause, bool check);
   void toggle();
@@ -100,6 +114,7 @@ public:
   bool same(BreakPointInfoPtr bpi);
   bool match(InterruptType interrupt, InterruptSite &site);
 
+  int index() const { return m_index;}
   std::string state(bool padding) const;
   std::string desc() const;
   std::string site() const;
@@ -113,6 +128,8 @@ public:
   static void RecvImpl(BreakPointInfoPtrVec &bps,
                        DebuggerThriftBuffer &thrift);
 
+  int16 m_index; // client side index number
+
   int8 m_state;
   bool m_valid;
   int8 m_interrupt;
@@ -121,6 +138,8 @@ public:
   std::string m_file;
   int32 m_line1;
   int32 m_line2;
+  int32 m_char1;
+  int32 m_char2;
 
   // class::func()
   DFunctionInfoPtrVec m_funcs;
@@ -152,7 +171,10 @@ private:
 
   static bool Match(const char *haystack, int haystack_len,
                     const std::string &needle, bool regex, bool exact);
+  static bool MatchClass(const char *fcls, const std::string &bcls,
+                         bool regex, const char *func);
 
+  void createIndex();
   std::string descBreakPointReached() const;
   std::string descExceptionThrown() const;
 
@@ -160,7 +182,7 @@ private:
   void parseBreakPointReached(const std::string &exp, const std::string &file);
   bool parseLines(const std::string &token);
 
-  bool checkException(CObjRef e);
+  bool checkException(CVarRef e);
   bool checkUrl(std::string &url);
   bool checkLines(int line);
   bool checkStack(InterruptSite &site);

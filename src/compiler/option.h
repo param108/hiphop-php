@@ -53,6 +53,13 @@ public:
   static std::set<std::string> PackageExcludeDirs;
   static std::set<std::string> PackageExcludeFiles;
   static std::set<std::string> PackageExcludeStaticFiles;
+  static std::set<std::string> PackageExcludePatterns;
+
+  /**
+   * Directories in which files are parsed on-demand, when parse-on-demand
+   * is off.
+   */
+  static std::vector<std::string> ParseOnDemandDirs;
 
   /**
    * Whether to store PHP source files in static file cache.
@@ -132,11 +139,17 @@ public:
   static bool GenConcat;
 
   /**
+   * Generate array_createN service routines
+   */
+  static bool GenArrayCreate;
+
+  /**
    * Separate compilation
    */
   static bool SeparateCompilation;
   static bool SeparateCompLib;
   static bool UseNamedLiteralString;
+  static bool UseNamedScalarArray;
 
   /**
    * CodeGenerator options for PHP.
@@ -197,6 +210,7 @@ public:
   static const char *ObjectStaticPrefix;
   static const char *SmartPtrPrefix;
   static const char *MethodPrefix;
+  static const char *MethodWrapperPrefix;
   static const char *MethodImplPrefix;
   static const char *PropertyPrefix;
   static const char *StaticPropertyPrefix;
@@ -287,7 +301,6 @@ public:
   static std::string ProgramName;
 
   static bool EnableXHP;
-  static std::string FlibDirectory;
 
   /**
    * "Dynamic" means a function or a method can be invoked dynamically.
@@ -304,16 +317,25 @@ public:
   static bool FlattenInvoke;
   static int InlineFunctionThreshold;
   static bool ControlEvalOrder;
-  static bool GenerateSourceInfo;
   static bool UseVirtualDispatch;
-
   static bool EliminateDeadCode;
   static bool LocalCopyProp;
   static bool StringLoopOpts;
   static bool AutoInline;
 
-  static bool FlAnnotate; // annotate emitted code withe compiler file-line info
+  /**
+   * Output options
+   */
+  static bool GenerateCppLibCode;
+  static bool GenerateSourceInfo;
+  static bool GenerateDocComments;
+  static bool FlAnnotate; // annotate emitted code with compiler file-line info
   static bool SystemGen; // -t cpp -f sys
+
+  static void setHookHandler(void (*hookHandler)(Hdf &config)) {
+    m_hookHandler = hookHandler;
+  }
+
 private:
   /**
    * Directory that has system HPHP files for loading builtin classes, etc.
@@ -329,6 +351,8 @@ private:
   static bool IsDynamic(const std::string &name,
                         const std::vector<std::string> &prefixes,
                         const std::vector<std::string> &postfixes);
+
+  static void (*m_hookHandler)(Hdf &config);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

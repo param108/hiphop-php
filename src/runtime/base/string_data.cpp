@@ -18,6 +18,7 @@
 #include <runtime/base/shared/shared_variant.h>
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/util/exceptions.h>
+#include <runtime/base/util/alloc.h>
 #include <math.h>
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/zend/zend_strtod.h>
@@ -35,7 +36,9 @@ IMPLEMENT_SMART_ALLOCATION(StringData, SmartAllocatorImpl::NeedRestoreOnce);
 
 StringData::StringData(const char *data,
                        StringDataMode mode /* = AttachLiteral */)
-  : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
+  : m_data(NULL), _count(0), m_len(0) {
+  m_hash = 0;
+
   #ifdef TAINTED
   m_tainting = default_tainting;
   m_tainted_metadata = NULL;
@@ -44,7 +47,8 @@ StringData::StringData(const char *data,
 }
 
 StringData::StringData(SharedVariant *shared)
-  : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
+  : m_data(NULL), _count(0), m_len(0) {
+  m_hash = 0;
   #ifdef TAINTED
   m_tainting = default_tainting;
   m_tainted_metadata = NULL;
@@ -58,7 +62,8 @@ StringData::StringData(SharedVariant *shared)
 }
 
 StringData::StringData(const char *data, int len, StringDataMode mode)
-  : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
+  : m_data(NULL), _count(0), m_len(0) {
+  m_hash = 0;
   #ifdef TAINTED
   m_tainting = default_tainting;
   m_tainted_metadata = NULL;
@@ -78,6 +83,7 @@ void StringData::releaseData() {
       free((void*)m_data);
     }
   }
+  m_hash = 0;
 }
 
 void StringData::assign(const char *data, StringDataMode mode) {
@@ -95,7 +101,7 @@ void StringData::assign(const char *data, int len, StringDataMode mode) {
   }
 
   releaseData();
-  m_shared = NULL;
+  m_hash = 0;
   m_len = len;
   if (m_len) {
     switch (mode) {
@@ -137,6 +143,8 @@ void StringData::append(const char *s, int len) {
     throw InvalidArgumentException("len: %d", len);
   }
 
+  ASSERT(!isStatic()); // never mess around with static strings!
+
   if (!isMalloced()) {
     int newlen;
     m_data = string_concat(data(), size(), s, len, newlen);
@@ -144,6 +152,7 @@ void StringData::append(const char *s, int len) {
       m_shared->decRef();
     }
     m_len = newlen;
+    m_hash = 0;
   } else if (m_data == s) {
     int newlen;
     char *newdata = string_concat(data(), size(), s, len, newlen);
@@ -158,6 +167,7 @@ void StringData::append(const char *s, int len) {
     m_data = (const char*)realloc((void*)m_data, m_len + 1);
     memcpy((void*)(m_data + dataLen), s, len);
     ((char*)m_data)[m_len] = '\0';
+    m_hash = 0;
   }
 }
 
@@ -180,7 +190,7 @@ StringData *StringData::copy(bool sharedMemory /* = false */) const {
 }
 
 void StringData::escalate() {
-  ASSERT(isImmutable());
+  ASSERT(isImmutable() && !isStatic());
 
   int len = size();
   ASSERT(len);
@@ -190,16 +200,19 @@ void StringData::escalate() {
   buf[len] = '\0';
   m_len = len;
   m_data = buf;
+  // clear precomputed hashcode
+  m_hash = 0;
 }
 
-void StringData::dump() {
+void StringData::dump() const {
   const char *p = data();
   int len = size();
 
-  printf("StringData(%d) (%s%s%s%d): [", _count,
+  printf("StringData(%d) (%s%s%s%s%d): [", _count,
          isLiteral() ? "literal " : "",
          isShared() ? "shared " : "",
          isLinear() ? "linear " : "",
+         isStatic() ? "static " : "",
          len);
   for (int i = 0; i < len; i++) {
     char ch = p[i];
@@ -228,6 +241,7 @@ StringData *StringData::getChar(int offset) const {
 }
 
 void StringData::setChar(int offset, CStrRef substring) {
+  ASSERT(!isStatic());
   if (offset >= 0) {
     int len = size();
     if (len == 0) {
@@ -241,9 +255,11 @@ void StringData::setChar(int offset, CStrRef substring) {
       } else {
         removeChar(offset);
       }
+    } else if (offset > RuntimeOption::StringOffsetLimit) {
+      throw OffsetOutOfRangeException();
     } else {
       int newlen = offset + 1;
-      char *buf = (char *)malloc(newlen + 1);
+      char *buf = (char *)Util::safe_malloc(newlen + 1);
       memset(buf, ' ', newlen);
       buf[newlen] = 0;
       memcpy(buf, data(), len);
@@ -255,6 +271,7 @@ void StringData::setChar(int offset, CStrRef substring) {
 
 void StringData::setChar(int offset, char ch) {
   ASSERT(offset >= 0 && offset < size());
+  ASSERT(!isStatic());
   if (isImmutable()) {
     escalate();
   }
@@ -263,6 +280,7 @@ void StringData::setChar(int offset, char ch) {
 
 void StringData::removeChar(int offset) {
   ASSERT(offset >= 0 && offset < size());
+  ASSERT(!isStatic());
   int len = size();
   if (isImmutable()) {
     char *data = (char*)malloc(len);
@@ -279,10 +297,12 @@ void StringData::removeChar(int offset) {
   } else {
     m_len = ((m_len & IsMask) | (len - 1));
     memmove((void*)(m_data + offset), m_data + offset + 1, len - offset);
+    m_hash = 0;
   }
 }
 
 void StringData::inc() {
+  ASSERT(!isStatic());
   if (empty()) {
     m_len = (IsLiteral | 1);
     m_data = "1";

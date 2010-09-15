@@ -39,7 +39,7 @@ ObjectPropertyExpression::ObjectPropertyExpression
  ExpressionPtr object, ExpressionPtr property)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
     m_object(object), m_property(property),
-    m_valid(false), m_static(false), m_localEffects(AccessorEffect) {
+    m_valid(false), m_localEffects(AccessorEffect) {
   m_object->setContext(Expression::ObjectContext);
 }
 
@@ -57,6 +57,10 @@ ExpressionPtr ObjectPropertyExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
+bool ObjectPropertyExpression::isTemporary() const {
+  return !m_valid && !(m_context & (LValue | RefValue | UnsetContext));
+}
+
 void ObjectPropertyExpression::setContext(Context context) {
   m_context |= context;
   switch (context) {
@@ -68,6 +72,7 @@ void ObjectPropertyExpression::setContext(Context context) {
     case Expression::DeepAssignmentLHS:
     case Expression::DeepOprLValue:
     case Expression::ExistContext:
+    case Expression::UnsetContext:
     case Expression::DeepReference:
       m_object->setContext(context);
       break;
@@ -208,8 +213,16 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     // what ->property has told us
     cls = ar->findClass(name, AnalysisResult::PropertyName);
     if (cls) {
-      m_object->inferAndCheck(ar, Type::CreateObjectType(cls->getName()),
-                              false);
+      objectType =
+        m_object->inferAndCheck(ar, Type::CreateObjectType(cls->getName()),
+                                false);
+    }
+    if ((m_context & LValue) &&
+        objectType && !objectType->is(Type::KindOfObject) &&
+                      !objectType->is(Type::KindOfVariant) &&
+                      !objectType->is(Type::KindOfSome) &&
+                      !objectType->is(Type::KindOfAny)) {
+      m_object->inferAndCheck(ar, NEW_TYPE(Object), true);
     }
   }
 
@@ -249,20 +262,17 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   if (!cls->derivesFromRedeclaring()) { // Have to use dynamic.
     ret = cls->checkProperty(name, type, coerce, ar, self, present);
     // Private only valid if in the defining class
-    if (present && (getOriginalScope(ar) == cls ||
-                    !(present & VariableTable::VariablePrivate))) {
-      m_valid = true;
-      m_static = present & VariableTable::VariableStatic;
-      if (m_static) {
-        ar->getScope()->getVariables()->
-          setAttribute(VariableTable::NeedGlobalPointer);
-      }
+    if (present &&
+        !(present & VariableTable::VariableStatic) &&
+        (getOriginalScope(ar) == cls ||
+         !(present & VariableTable::VariablePrivate))) {
+      m_valid = m_object->getType()->isSpecificObject();
       m_class = cls;
     }
   }
 
   // get() will return Variant
-  if (!m_valid || !m_object->getType()->isSpecificObject()) {
+  if (!m_valid) {
     m_actualType = Type::Variant;
     return m_actualType;
   }
@@ -318,6 +328,16 @@ bool ObjectPropertyExpression::directVariantProxy(AnalysisResultPtr ar) {
   return false;
 }
 
+void ObjectPropertyExpression::preOutputStash(CodeGenerator &cg,
+                                              AnalysisResultPtr ar,
+                                              int state) {
+  if (!m_valid && (m_context & (LValue | RefValue | UnsetContext))) {
+    m_lvalTmp = genCPPTemp(cg, ar);
+    cg_printf("Variant %s;\n", m_lvalTmp.c_str());
+  }
+  Expression::preOutputStash(cg, ar, state);
+}
+
 bool ObjectPropertyExpression::preOutputCPP(CodeGenerator &cg,
                                             AnalysisResultPtr ar, int state) {
   return preOutputOffsetLHS(cg, ar, state);
@@ -332,10 +352,71 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
                                                     AnalysisResultPtr ar,
                                                     bool directVariant,
                                                     int doExist) {
+  string func = Option::ObjectPrefix;
+  const char *error = ", true";
+  ClassScopePtr cls = ar->getClassScope();
+  std::string context = "";
+
+  if (cg.getOutput() != CodeGenerator::SystemCPP) {
+    if (cls) {
+      context = ", s_class_name";
+    } else if (FunctionScopePtr funcScope = ar->getFunctionScope()) {
+      if (!funcScope->inPseudoMain()) {
+        context = ", empty_string";
+      }
+    }
+  }
+  if (doExist) {
+    func = doExist > 0 ? "o_isset" : "o_empty";
+    error = "";
+  } else {
+    if (m_context & ExistContext) {
+      error = ", false";
+    }
+    if (m_context & (LValue | RefValue | UnsetContext)) {
+      if (m_context & UnsetContext) {
+        assert(!(m_context & LValue)); // call outputCPPUnset instead
+        func += "unsetLval";
+      } else {
+        func += "lval";
+      }
+      error = "";
+      context = ", " + (m_lvalTmp.empty() ? "Variant()" : m_lvalTmp) + context;
+    } else {
+      func += "get";
+      if (!cls || !cls->getVariables()->hasPrivate()) {
+        func += "Public";
+        context = "";
+      }
+    }
+  }
+
+  if (m_valid && doExist) cg_printf(doExist > 0 ? "isset(" : "empty(");
+  outputCPPObject(cg, ar, directVariant);
+  if (m_valid) {
+    assert(m_object->getType()->isSpecificObject());
+    ScalarExpressionPtr name =
+      dynamic_pointer_cast<ScalarExpression>(m_property);
+    cg_printf("%s%s", Option::PropertyPrefix, name->getString().c_str());
+    if (doExist) cg_printf(")");
+  } else {
+    cg_printf("%s(", func.c_str());
+    outputCPPProperty(cg, ar);
+    cg_printf("%s%s)", error, context.c_str());
+  }
+}
+
+void ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
+                                               AnalysisResultPtr ar,
+                                               int directVariant) {
+  if (directVariant < 0) {
+    directVariant = directVariantProxy(ar);
+  }
+
   bool bThis = m_object->isThis();
   bool useGetThis = false;
-  FunctionScopePtr funcScope = ar->getFunctionScope();
   if (bThis) {
+    FunctionScopePtr funcScope = ar->getFunctionScope();
     if (funcScope && funcScope->isStatic()) {
       cg_printf("GET_THIS_ARROW()");
     } else {
@@ -343,91 +424,11 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       useGetThis = true;
     }
   }
-
-  const char *op = ".";
-  string func = Option::ObjectPrefix;
-  const char *error = ", true";
-  ClassScopePtr cls = ar->getClassScope();
-  const char *context = "";
-  if (cg.getOutput() != CodeGenerator::SystemCPP) {
-    if (cls) {
-      context = ", s_class_name";
-    } else if (funcScope && !funcScope->inPseudoMain()) {
-      context = ", empty_string";
-    }
-  }
-  if (doExist) {
-    func = doExist > 0 ? "doIsSet" : "doEmpty";
-    error = "";
-  } else {
-    if (bThis && funcScope && funcScope->isStatic()) {
-      func = Option::ObjectStaticPrefix;
-      error = "";
-      context = "";
-    } else if (m_context & ExistContext) {
-      error = ", false";
-    }
-    if (m_context & (LValue | RefValue | UnsetContext)) {
-      func += "lval";
-      error = "";
-    } else {
-      func += "get";
-    }
-  }
-
-  if (m_property->getKindOf() == Expression::KindOfScalarExpression) {
-    ScalarExpressionPtr name =
-      dynamic_pointer_cast<ScalarExpression>(m_property);
-    const char *propName = name->getString().c_str();
-    if (m_valid && m_object->getType()->isSpecificObject()) {
-      if (m_static) {
-        if (!bThis) {
-          ASSERT(m_class);
-          if (doExist) cg_printf(doExist > 0 ? "isset(" : "empty(");
-          cg_printf("g->%s%s%s%s",
-                    Option::StaticPropertyPrefix, m_class->getName().c_str(),
-                    Option::IdPrefix.c_str(), propName);
-          if (doExist) cg_printf(")");
-        } else {
-          // if $val is a class static variable (static $val), then $val
-          // cannot be declared as a class variable (var $val), $this->val
-          // refers to a non-static class variable and has to use get/lval.
-          uint64 hash = hash_string(propName);
-          if (useGetThis) cg_printf("GET_THIS_DOT()");
-          cg_printf("%s(", func.c_str());
-          cg_printString(propName, ar);
-          cg_printf(", 0x%016llXLL%s%s)", hash, error, context);
-        }
-      } else {
-        if (doExist) cg_printf(doExist > 0 ? "isset(" : "empty(");
-        if (!bThis) {
-          ASSERT(!directVariant);
-          m_object->outputCPP(cg, ar);
-          cg_printf("->");
-        }
-        cg_printf("%s%s", Option::PropertyPrefix, propName);
-        if (doExist) cg_printf(")");
-      }
-    } else {
-      if (!bThis) {
-        if (directVariant) {
-          TypePtr expectedType = m_object->getExpectedType();
-          ASSERT(expectedType->is(Type::KindOfObject));
-          // Clear m_expectedType to avoid type cast (toObject).
-          m_object->setExpectedType(TypePtr());
-          m_object->outputCPP(cg, ar);
-          m_object->setExpectedType(expectedType);
-        } else {
-          m_object->outputCPP(cg, ar);
-        }
-        cg_printf(op);
-      } else {
-        if (useGetThis) cg_printf("GET_THIS_DOT()");
-      }
-      uint64 hash = hash_string(propName);
-      cg_printf("%s(", func.c_str());
-      cg_printString(propName, ar);
-      cg_printf(", 0x%016llXLL%s%s)", hash, error, context);
+  if (m_valid) {
+    if (!bThis) {
+      ASSERT(!directVariant);
+      m_object->outputCPP(cg, ar);
+      cg_printf("->");
     }
   } else {
     if (!bThis) {
@@ -441,13 +442,21 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       } else {
         m_object->outputCPP(cg, ar);
       }
-      cg_printf(op);
+      cg_printf(".");
     } else {
       if (useGetThis) cg_printf("GET_THIS_DOT()");
     }
-    cg_printf("%s(", func.c_str());
+  }
+}
+
+void ObjectPropertyExpression::outputCPPProperty(CodeGenerator &cg,
+                                                 AnalysisResultPtr ar) {
+  if (m_property->getKindOf() == Expression::KindOfScalarExpression) {
+    ScalarExpressionPtr name =
+      dynamic_pointer_cast<ScalarExpression>(m_property);
+    cg_printString(name->getString(), ar);
+  } else {
     m_property->outputCPP(cg, ar);
-    cg_printf(", -1LL%s%s)", error, context);
   }
 }
 
@@ -456,26 +465,17 @@ void ObjectPropertyExpression::outputCPPExistTest(CodeGenerator &cg,
                                                   int op) {
   outputCPPObjProperty(cg, ar, false, op == T_ISSET ? 1 : -1);
 }
+
 void ObjectPropertyExpression::outputCPPUnset(CodeGenerator &cg,
                                               AnalysisResultPtr ar) {
   bool bThis = m_object->isThis();
   if (bThis) {
-    FunctionScopePtr func = ar->getFunctionScope();
-    if (func && func->isStatic()) {
-      cg.printf("GET_THIS_ARROW()");
-    }
+    cg.printf("GET_THIS_ARROW()");
   } else {
     m_object->outputCPP(cg, ar);
     cg_printf("->");
   }
-  cg_printf("t___unset(");
-  bool direct = m_property->isUnquotedScalar();
-  if (direct) {
-    cg_printf("\"");
-  }
-  m_property->outputCPP(cg, ar);
-  if (direct) {
-    cg_printf("\"");
-  }
+  cg_printf("o_unset(");
+  outputCPPProperty(cg, ar);
   cg_printf(")");
 }

@@ -112,12 +112,12 @@ class Object : public SmartPtr<ObjectData> {
   /**
    * Type conversions
    */
-  bool   toBoolean() const { return m_px != NULL;}
+  bool   toBoolean() const { return m_px ? m_px->o_toBoolean() : false;}
   char   toByte   () const { return m_px ? m_px->o_toInt64() : 0;}
   short  toInt16  () const { return m_px ? m_px->o_toInt64() : 0;}
   int    toInt32  () const { return m_px ? m_px->o_toInt64() : 0;}
   int64  toInt64  () const { return m_px ? m_px->o_toInt64() : 0;}
-  double toDouble () const { return m_px ? m_px->o_toInt64() : 0;}
+  double toDouble () const { return m_px ? m_px->o_toDouble() : 0;}
   String toString () const { return m_px ? m_px->t___tostring() : String();}
   Array  toArray  () const;
   Variant toKey   () const;
@@ -134,14 +134,19 @@ class Object : public SmartPtr<ObjectData> {
    * Unresolved objects will go through these two functions than the ones
    * on SmartObject<T>.
    */
-  Variant o_get(CStrRef propName, int64 hash = -1, bool error = true,
+  Variant o_get(CStrRef propName, bool error = true,
                 CStrRef context = null_string) const;
-  ObjectOffset o_lval(CStrRef propName, int64 hash = -1,
-                      CStrRef context = null_string);
-  bool doIsSet(CStrRef propName, int64 hash,
-               CStrRef context = null_string) const;
-  bool doEmpty(CStrRef propName, int64 hash,
-               CStrRef context = null_string) const;
+  Variant o_getPublic(CStrRef propName, bool error = true) const;
+  Variant o_set(CStrRef s, CVarRef v, CStrRef context = null_string);
+  Variant &o_lval(CStrRef propName, CVarRef tmpForGet,
+                  CStrRef context = null_string);
+  Variant &o_unsetLval(CStrRef s, CVarRef tmpForGet,
+                       CStrRef context = null_string);
+  bool o_isset(CStrRef propName, CStrRef context = null_string) const;
+  bool o_empty(CStrRef propName, CStrRef context = null_string) const;
+  Variant o_unset(CStrRef propName, CStrRef context = null_string) const;
+  template<typename T, int op>
+  T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);
   /**
    * Input/Output
    */

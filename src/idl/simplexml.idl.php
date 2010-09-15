@@ -258,7 +258,8 @@ DefineFunction(
 BeginClass(
   array(
     'name'   => "SimpleXMLElement",
-    'desc'   => "Represents an element in XML document.",
+    'ifaces' => array('ArrayAccess', 'IteratorAggregate', 'Countable'),
+    'desc'   => "Represents an element in an XML document.",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
@@ -272,9 +273,11 @@ BeginClass(
   bool m_is_attribute;
   bool m_is_children;
   bool m_is_property;
-  virtual Array o_toArray() const;
+  virtual bool o_toBoolean() const;
   virtual int64 o_toInt64() const;
-  virtual Variant &___lval(Variant v_name);
+  virtual double o_toDouble() const;
+  virtual Array o_toArray() const;
+  virtual Variant *___lval(Variant v_name);
  private:
   xmlXPathContextPtr m_xpath;
 EOT
@@ -318,7 +321,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "offsetexists",
+    'name'   => "offsetExists",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -333,7 +336,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "offsetget",
+    'name'   => "offsetGet",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
@@ -348,7 +351,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "offsetset",
+    'name'   => "offsetSet",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
@@ -367,7 +370,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "offsetunset",
+    'name'   => "offsetUnset",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
@@ -382,7 +385,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getiterator",
+    'name'   => "getIterator",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
@@ -419,7 +422,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "registerxpathnamespace",
+    'name'   => "registerXPathNamespace",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -438,7 +441,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "asxml",
+    'name'   => "asXML",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
@@ -454,7 +457,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getnamespaces",
+    'name'   => "getNamespaces",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringMap,
@@ -470,7 +473,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getdocnamespaces",
+    'name'   => "getDocNamespaces",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringMap,
@@ -510,7 +513,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getname",
+    'name'   => "getName",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
@@ -542,7 +545,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "addchild",
+    'name'   => "addChild",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
@@ -567,7 +570,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "addattribute",
+    'name'   => "addAttribute",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
@@ -592,7 +595,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "__tostring",
+    'name'   => "__toString",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
@@ -710,14 +713,16 @@ EndClass(
 BeginClass(
   array(
     'name'   => "SimpleXMLElementIterator",
+    'ifaces' => array('Iterator'),
+    'bases'  => array('Sweepable'),
     'desc'   => "",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
 public:
-  void reset_iterator(c_simplexmlelement *parent);
+  void reset_iterator(c_SimpleXMLElement *parent);
 
-  c_simplexmlelement *m_parent;
+  c_SimpleXMLElement *m_parent;
   ArrayIter *m_iter1;
   ArrayIter *m_iter2;
   Object     m_temp;

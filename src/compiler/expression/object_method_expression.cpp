@@ -323,21 +323,17 @@ bool ObjectMethodExpression::directVariantProxy(AnalysisResultPtr ar) {
 void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
   bool isThis = m_object->isThis();
-
   if (isThis && ar->getFunctionScope()->isStatic()) {
-    bool linemap = outputLineMap(cg, ar, true);
-    cg_printf("throw_fatal(\"Using $this when not in object context\")");
-    if (linemap) cg_printf(")");
-    return;
+    cg_printf("GET_THIS_ARROW()");
   }
 
   bool fewParams = canInvokeFewArgs();
-  bool linemap = outputLineMap(cg, ar, true);
 
   if (!isThis) {
-    if (directVariantProxy(ar) && !m_object->hasCPPTemp()) {
+    if (!m_object->getActualType() ||
+        (directVariantProxy(ar) && !m_object->hasCPPTemp())) {
       TypePtr expectedType = m_object->getExpectedType();
-      ASSERT(expectedType->is(Type::KindOfObject));
+      ASSERT(!expectedType || expectedType->is(Type::KindOfObject));
       // Clear m_expectedType to avoid type cast (toObject).
       m_object->setExpectedType(TypePtr());
       m_object->outputCPP(cg, ar);
@@ -353,6 +349,8 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       TypePtr type = m_object->getType();
       if (type->isSpecificObject() && !m_name.empty() && m_valid) {
         objType = type->getName();
+        ClassScopePtr cls = ar->findClass(objType);
+        objType = cls->getId(cg);
       } else {
         objType = "ObjectData";
       }
@@ -372,11 +370,11 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
     if (m_valid && m_object->getType()->isSpecificObject()) {
       cg_printf("%s%s(", Option::MethodPrefix, m_name.c_str());
       FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
-                                        m_variableArgument, m_argArrayId);
+                                        m_variableArgument, m_argArrayId,
+                                        m_argArrayHash, m_argArrayIndex);
       cg_printf(")");
     } else {
-      // FMC: test fail case , both of them
-      const MethodSlot *ms = ar->getOrAddMethodSlot(m_name);
+      const MethodSlot *ms = ar->getOrAddMethodSlot(m_origName);
       if (fewParams) {
         cg_printf("%s%sinvoke_few_args%s(%s \"%s\"",
                   Option::ObjectPrefix, isThis ? "root_" : "",
@@ -395,7 +393,7 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       } else {
         cg_printf("%s%sinvoke%s(%s \"%s\"",
                   Option::ObjectPrefix, isThis ? "root_" : "",
-                  (ms->isError() ? "_mil(" : ""),
+                  (ms->isError() ? "_mil" : ""),
                   ms->runObjParam().c_str(), m_origName.c_str());
         cg_printf(", ");
         if (m_params && m_params->getCount()) {
@@ -409,7 +407,6 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
     }
   } else {
     if (fewParams) {
-      // FMC must verify the fail case
       cg_printf("%s%sinvoke_few_args_mil(",
                 Option::ObjectPrefix, isThis ? "root_" : "");
       m_nameExp->outputCPP(cg, ar);
@@ -422,7 +419,6 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       }
       cg_printf(")");
     } else {
-      // FMC must verify the fail case
       cg_printf("%s%sinvoke_mil(",
           Option::ObjectPrefix, isThis ? "root_" : "");
       m_nameExp->outputCPP(cg, ar);
@@ -435,5 +431,4 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       cg_printf(", -1LL)");
     }
   }
-  if (linemap) cg_printf(")");
 }

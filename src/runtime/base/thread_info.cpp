@@ -58,13 +58,22 @@ void ThreadInfo::onSessionInit() {
   m_stacklimit = &marker - (m_stacksize - RecursionInjection::StackSlack);
 }
 
+void ThreadInfo::onSessionExit() {
+  m_reqInjectionData.reset();
+}
+
 void RequestInjectionData::onSessionInit() {
-  started     = time(0);
+  reset();
+  started = time(0);
+}
+
+void RequestInjectionData::reset() {
   memExceeded = false;
   timedout    = false;
   signaled    = false;
   surprised   = false;
   debugger    = false;
+  interrupt   = NULL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

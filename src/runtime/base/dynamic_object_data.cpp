@@ -32,6 +32,7 @@ DynamicObjectData::DynamicObjectData(const char* pname,
   if (pname) {
     CountableHelper h(root);
     parent = create_object(pname, Array(), false, root);
+    setAttributes(parent.get());
   }
 }
 
@@ -84,33 +85,21 @@ ObjectData* DynamicObjectData::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // instance methods and properties
 
-bool DynamicObjectData::o_exists(CStrRef propName, int64 phash,
-                                 const char *context, int64 hash) const {
+Variant *DynamicObjectData::o_realProp(
+  CStrRef propName, int flags, CStrRef context /* = null_string */) const {
   if (!parent.isNull()) {
-    return parent->o_exists(propName, phash, context, hash);
+    return parent->o_realProp(propName, flags, context);
   } else {
-    return ObjectData::o_exists(propName, phash, context, hash);
+    return ObjectData::o_realProp(propName, flags, context);
   }
 }
 
-Variant DynamicObjectData::o_get(CStrRef propName, int64 phash, bool error,
-    const char *context, int64 hash) {
+Variant *DynamicObjectData::o_realPropPublic(CStrRef propName,
+                                             int flags) const {
   if (!parent.isNull()) {
-    return parent->o_get(propName, phash, error, context, hash);
+    return parent->o_realPropPublic(propName, flags);
   } else {
-    if (propName.size() == 0) {
-      return null;
-    }
-    // property names are definitely strings
-    if (o_properties && o_properties->exists(propName, phash, true)) {
-      return o_properties->rvalAt(propName, phash, false, true);
-    }
-    if (root->getAttribute(InGet)) {
-      return ObjectData::doGet(propName, error);
-    } else {
-      AttributeSetter a(InGet, root);
-      return root->doGet(propName, error);
-    }
+    return ObjectData::o_realPropPublic(propName, flags);
   }
 }
 
@@ -127,39 +116,6 @@ void DynamicObjectData::o_setArray(CArrRef props) {
     return parent->o_setArray(props);
   } else {
     return ObjectData::o_setArray(props);
-  }
-}
-
-Variant DynamicObjectData::o_set(CStrRef propName, int64 phash, CVarRef v,
-    bool forInit, const char *context, int64 hash) {
-  if (!parent.isNull()) {
-    return parent->o_set(propName, phash, v, forInit, context, hash);
-  } else {
-    if (propName.size() == 0) {
-      throw EmptyObjectPropertyException();
-    }
-    if (o_properties && o_properties->exists(propName, phash, true)) {
-      o_properties->set(propName, v, phash, true);
-      return v;
-    }
-    if (forInit || root->getAttribute(InSet)) {
-      return ObjectData::t___set(propName, v);
-    } else {
-      AttributeSetter a(InSet, root);
-      return root->t___set(propName, v);
-    }
-  }
-}
-
-Variant &DynamicObjectData::o_lval(CStrRef propName, int64 phash,
-    const char *context, int64 hash) {
-  if (!parent.isNull()) {
-    return parent->o_lval(propName, phash, context, hash);
-  } else {
-    if (o_properties && o_properties->exists(propName, phash, true)) {
-      return o_properties->lvalAt(propName, phash, false, true);
-    }
-    return root->___lval(propName);
   }
 }
 
@@ -187,7 +143,7 @@ Variant DynamicObjectData::o_invoke(MethodIndex methodIndex,
   } else {
     // FMC need test case
     if (RuntimeOption::FastMethodCall) {
-      s = methodIndexLookupReverse(methodIndex);
+      s = g_bypassMILR ? s : methodIndexLookupReverse(methodIndex);
     }
     return root->doCall(s, params, fatal);
   }
@@ -247,59 +203,58 @@ Variant DynamicObjectData::o_invoke_few_args(MethodIndex methodIndex,
       return DynamicObjectData::o_invoke(methodIndex, s, Array(), hash);
     }
     case 1: {
-      Array params(ArrayInit(1, true).set(0, a0).create());
+      Array params(ArrayInit(1, true).set(a0).create());
       return DynamicObjectData::o_invoke(methodIndex, s, params, hash);
     }
     case 2: {
-      Array params(ArrayInit(2, true).set(0, a0).set(1, a1).create());
+      Array params(ArrayInit(2, true).set(a0).set(a1).create());
       return DynamicObjectData::o_invoke(methodIndex, s, params, hash );
     }
     case 3: {
-      Array params(ArrayInit(3, true).set(0, a0).set(1, a1).set(2, a2).
-                                      create());
+      Array params(ArrayInit(3, true).set(a0).set(a1).set(a2).create());
       return DynamicObjectData::o_invoke(methodIndex, s, params, hash );
     }
 #if INVOKE_FEW_ARGS_COUNT > 3
     case 4: {
-      Array params(ArrayInit(4, true).set(0, a0).set(1, a1).set(2, a2).
-                                      set(3, a3).create());
+      Array params(ArrayInit(4, true).set(a0).set(a1).set(a2).
+                                      set(a3).create());
       return DynamicObjectData::o_invoke(methodIndex, s, params, hash );
     }
     case 5: {
-      Array params(ArrayInit(5, true).set(0, a0).set(1, a1).set(2, a2).
-                                      set(3, a3).set(4, a4).create());
+      Array params(ArrayInit(5, true).set(a0).set(a1).set(a2).
+                                      set(a3).set(a4).create());
       return DynamicObjectData::o_invoke(methodIndex, s, params, hash );
     }
     case 6: {
-      Array params(ArrayInit(6, true).set(0, a0).set(1, a1).set(2, a2).
-                                      set(3, a3).set(4, a4).set(5, a5).
+      Array params(ArrayInit(6, true).set(a0).set(a1).set(a2).
+                                      set(a3).set(a4).set(a5).
                                       create());
       return DynamicObjectData::o_invoke(methodIndex, s, params, hash);
     }
 #endif
 #if INVOKE_FEW_ARGS_COUNT > 6
     case 7: {
-      Array params(ArrayInit(7, true).set(0, a0).set(1, a1).set(2, a2).
-                                      set(3, a3).set(4, a4).set(5, a5).
-                                      set(6, a6).create());
+      Array params(ArrayInit(7, true).set(a0).set(a1).set(a2).
+                                      set(a3).set(a4).set(a5).
+                                      set(a6).create());
       return DynamicObjectData::o_invoke(methodIndex, s, params, hash);
     }
     case 8: {
-      Array params(ArrayInit(8, true).set(0, a0).set(1, a1).set(2, a2).
-                                      set(3, a3).set(4, a4).set(5, a5).
-                                      set(6, a6).set(7, a7).create());
+      Array params(ArrayInit(8, true).set(a0).set(a1).set(a2).
+                                      set(a3).set(a4).set(a5).
+                                      set(a6).set(a7).create());
       return DynamicObjectData::o_invoke(methodIndex, s, params, hash);
     }
     case 9: {
-      Array params(ArrayInit(9, true).set(0, a0).set(1, a1).set(2, a2).
-                                      set(3, a3).set(4, a4).set(5, a5).
-                                      set(6, a6).set(7, a7).set(8, a8).
+      Array params(ArrayInit(9, true).set(a0).set(a1).set(a2).
+                                      set(a3).set(a4).set(a5).
+                                      set(a6).set(a7).set(a8).
                                       create());
       return DynamicObjectData::o_invoke(methodIndex, s, params, hash);
     }
     case 10: {
-      Array params(ArrayInit(10, true).set(0, a0).set(1, a1).set(2, a2).
-                                       set(3, a3).set(4, a4).set(5, a5).
+      Array params(ArrayInit(10, true).set(a0).set(a1).set(a2).
+                                       set(a3).set(a4).set(a5).
                                        set(6, a6).set(7, a7).set(8, a8).
                                        set(9, a9).create());
       return DynamicObjectData::o_invoke(methodIndex, s, params, hash);
@@ -393,15 +348,6 @@ Variant DynamicObjectData::doRootCall(Variant v_name, Variant v_arguments,
   return root->doCall(v_name, v_arguments, fatal);
 }
 
-
-Variant DynamicObjectData::doGet(Variant v_name, bool error) {
-  if (!parent.isNull()) {
-    return parent->doGet(v_name, error);
-  } else {
-    return ObjectData::doGet(v_name, error);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // magic methods that user classes can override, and these are default handlers
 // or actions to take:
@@ -492,14 +438,6 @@ Variant DynamicObjectData::t___clone() {
     return parent->t___clone();
   } else {
     return ObjectData::t___clone();
-  }
-}
-
-Variant &DynamicObjectData::___lval(Variant v_name) {
-  if (!parent.isNull()) {
-    return parent->___lval(v_name);
-  } else {
-    return ObjectData::___lval(v_name);
   }
 }
 

@@ -1595,12 +1595,14 @@ DefineFunction(
 BeginClass(
   array(
     'name'   => "DOMNode",
+    'bases'  => array('Sweepable'),
     'desc'   => "",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
 public:
-  sp_domdocument m_doc;
+  virtual ObjectData *clone();
+  p_DOMDocument m_doc;
   xmlNodePtr m_node;
 EOT
 ,
@@ -1617,7 +1619,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "appendchild",
+    'name'   => "appendChild",
     'desc'   => "This functions appends a child to an existing list of children or creates a new list of children. The child can be created with e.g. DOMDocument::createElement(), DOMDocument::createTextNode() etc. or simply by using any other node.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1635,12 +1637,12 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "clonenode",
+    'name'   => "cloneNode",
     'desc'   => "Creates a copy of the node.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The cloned node. DOMNode::getLineNo DOMNode::appendChild Last updated: Fri, 13 Aug 2010  ",
+      'desc'   => "The cloned node.",
     ),
     'args'   => array(
       array(
@@ -1654,7 +1656,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getlineno",
+    'name'   => "getLineNo",
     'desc'   => "Gets line number for where the node is defined.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1665,7 +1667,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "hasattributes",
+    'name'   => "hasAttributes",
     'desc'   => "This method checks if the node has attributes. The tested node have to be an XML_ELEMENT_NODE.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1676,7 +1678,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "haschildnodes",
+    'name'   => "hasChildNodes",
     'desc'   => "This function checks if the node has children.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1687,7 +1689,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "insertbefore",
+    'name'   => "insertBefore",
     'desc'   => "This function inserts a new node right before the reference node. If you plan to do further modifications on the appended child you must use the returned node.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1711,7 +1713,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "isdefaultnamespace",
+    'name'   => "isDefaultNamespace",
     'desc'   => "Tells whether namespaceURI is the default namespace.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1729,7 +1731,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "issamenode",
+    'name'   => "isSameNode",
     'desc'   => "This function indicates if two nodes are the same node. The comparison is not based on content",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1747,7 +1749,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "issupported",
+    'name'   => "isSupported",
     'desc'   => "Checks if the asked feature is supported for the specified version.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1770,7 +1772,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "lookupnamespaceuri",
+    'name'   => "lookupNamespaceUri",
     'desc'   => "Gets the namespace URI of the node based on the prefix.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1788,7 +1790,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "lookupprefix",
+    'name'   => "lookupPrefix",
     'desc'   => "Gets the namespace prefix of the node based on the namespace URI.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1817,7 +1819,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "removechild",
+    'name'   => "removeChild",
     'desc'   => "This functions removes a child from a list of children.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1835,7 +1837,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "replacechild",
+    'name'   => "replaceChild",
     'desc'   => "This function replaces the child oldnode with the passed new node. If the new node is already a child it will not be added a second time. If the replacement succeeds the old node is returned.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1924,7 +1926,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getnodepath",
+    'name'   => "getNodePath",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
@@ -2009,7 +2011,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "isid",
+    'name'   => "isId",
     'desc'   => "This function checks if the attribute is a defined ID.\n\nAccording to the DOM standard this requires a DTD which defines the attribute ID to be of type ID. You need to validate your document with DOMDocument::validate or DOMDocument::validateOnParse before using this function.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2085,7 +2087,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "appenddata",
+    'name'   => "appendData",
     'desc'   => "Append the string data to the end of the character data of the node.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2103,7 +2105,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "deletedata",
+    'name'   => "deleteData",
     'desc'   => "Deletes count characters starting from position offset.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2126,7 +2128,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "insertdata",
+    'name'   => "insertData",
     'desc'   => "Inserts string data at position offset.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2149,7 +2151,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "replacedata",
+    'name'   => "replaceData",
     'desc'   => "Replace count characters starting from position offset with data.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2177,7 +2179,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "substringdata",
+    'name'   => "substringData",
     'desc'   => "Returns the specified substring.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2310,7 +2312,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "iswhitespaceinelementcontent",
+    'name'   => "isWhitespaceInElementContent",
     'desc'   => "Indicates whether this text node contains whitespace. The text node is determined to contain whitespace in element content during the load of the document.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2321,7 +2323,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "splittext",
+    'name'   => "splitText",
     'desc'   => "Breaks this node into two nodes at the specified offset, keeping both in the tree as siblings.\n\nAfter being split, this node will contain all the content up to the offset. If the original node had a parent node, the new node is inserted as the next sibling of the original node. When the offset is equal to the length of this node, the new node has no data.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2387,7 +2389,7 @@ EndClass(
 
 BeginClass(
   array(
-    'name'   => "DOMCdataSection",
+    'name'   => "DOMCDATASection",
     'parent' => "DOMText",
     'desc'   => "",
     'flags'  =>  HasDocComment,
@@ -2468,7 +2470,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "createattribute",
+    'name'   => "createAttribute",
     'desc'   => "This function creates a new instance of class DOMAttr. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2486,7 +2488,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "createattributens",
+    'name'   => "createAttributens",
     'desc'   => "This function creates a new instance of class DOMAttr. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2509,7 +2511,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "createcdatasection",
+    'name'   => "createCDATASection",
     'desc'   => "This function creates a new instance of class DOMCDATASection. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2527,7 +2529,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "createcomment",
+    'name'   => "createComment",
     'desc'   => "This function creates a new instance of class DOMComment. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2545,7 +2547,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "createdocumentfragment",
+    'name'   => "createDocumentFragment",
     'desc'   => "This function creates a new instance of class DOMDocumentFragment. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2556,7 +2558,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "createelement",
+    'name'   => "createElement",
     'desc'   => "This function creates a new instance of class DOMElement. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2580,7 +2582,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "createelementns",
+    'name'   => "createElementNS",
     'desc'   => "This function creates a new element node with an associated namespace. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2609,7 +2611,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "createentityreference",
+    'name'   => "createEntityReference",
     'desc'   => "This function creates a new instance of class DOMEntityReference. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2627,7 +2629,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "createprocessinginstruction",
+    'name'   => "createProcessingInstruction",
     'desc'   => "This function creates a new instance of class DOMProcessingInstruction. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2651,7 +2653,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "createtextnode",
+    'name'   => "createTextNode",
     'desc'   => "This function creates a new instance of class DOMText. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2669,7 +2671,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getelementbyid",
+    'name'   => "getElementById",
     'desc'   => "This function is similar to DOMDocument::getElementsByTagName but searches for an element with a given id.\n\nFor this function to work, you will need either to set some ID attributes with DOMElement::setIdAttribute or a DTD which defines an attribute to be of type ID. In the later case, you will need to validate your document with DOMDocument::validate or DOMDocument->validateOnParse before using this function.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2687,7 +2689,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getelementsbytagname",
+    'name'   => "getElementsByTagName",
     'desc'   => "This function returns a new instance of class DOMNodeList containing the elements with a given tag name.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2705,7 +2707,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getelementsbytagnamens",
+    'name'   => "getElementsByTagNameNS",
     'desc'   => "Returns a DOMNodeList of all elements with a given local name and a namespace URI.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2728,7 +2730,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "importnode",
+    'name'   => "importNode",
     'desc'   => "This function returns a copy of the node to import and associates it with the current document.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2776,7 +2778,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "loadhtml",
+    'name'   => "loadHTML",
     'desc'   => "The function parses the HTML contained in the string source. Unlike loading XML, HTML does not have to be well-formed to load. This function may also be called statically to load and create a DOMDocument object. The static invocation may be used when no DOMDocument properties need to be set prior to loading.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2794,7 +2796,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "loadhtmlfile",
+    'name'   => "loadHTMLFile",
     'desc'   => "The function parses the HTML document in the file named filename. Unlike loading XML, HTML does not have to be well-formed to load.\n\nThough not recommended, this function may also be called statically to load and create a DOMDocument object. The static invocation may be used when no DOMDocument properties need to be set prior to loading. However, doing so will result an in E_STRICT error being generated.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2812,7 +2814,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "loadxml",
+    'name'   => "loadXML",
     'desc'   => "Loads an XML document from a string.\n\nThis method may also be called statically to load and create a DOMDocument object. The static invocation may be used when no DOMDocument properties need to be set prior to loading.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2836,7 +2838,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "normalizedocument",
+    'name'   => "normalizeDocument",
     'desc'   => "This method acts as if you saved and then loaded the document, putting the document in a \"normal\" form.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2847,7 +2849,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "registernodeclass",
+    'name'   => "registerNodeClass",
     'desc'   => "This method allows you to register your own extended DOM class to be used afterward by the PHP DOM extension.\n\nThis method is not part of the DOM standard.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2870,7 +2872,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "relaxngvalidate",
+    'name'   => "relaxNGValidate",
     'desc'   => "Performs » relaxNG validation on the document based on the given RNG schema.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2888,7 +2890,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "relaxngvalidatesource",
+    'name'   => "relaxNGValidateSource",
     'desc'   => "Performs » relaxNG validation on the document based on the given RNG source.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2930,7 +2932,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "savehtml",
+    'name'   => "saveHTML",
     'desc'   => "Creates an HTML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2941,7 +2943,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "savehtmlfile",
+    'name'   => "saveHTMLFile",
     'desc'   => "Creates an HTML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2959,7 +2961,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "savexml",
+    'name'   => "saveXML",
     'desc'   => "Creates an XML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2984,7 +2986,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "schemavalidate",
+    'name'   => "schemaValidate",
     'desc'   => "Validates a document based on the given schema file.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3002,7 +3004,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "schemavalidatesource",
+    'name'   => "schemaValidateSource",
     'desc'   => "Validates a document based on a schema defined in the given string.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3115,7 +3117,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "appendxml",
+    'name'   => "appendXML",
     'desc'   => "Appends raw XML data to a DOMDocumentFragment.\n\nThis method is not part of the DOM standard. It was created as a simpler approach for appending an XML DocumentFragment in a DOMDocument.\n\nIf you want to stick to the standards, you will have to create a temporary DOMDocument with a dummy root and then loop through the child nodes of the root of your XML data to append them.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3245,7 +3247,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getattribute",
+    'name'   => "getAttribute",
     'desc'   => "Gets the value of the attribute with name name for the current node.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3263,7 +3265,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getattributenode",
+    'name'   => "getAttributeNode",
     'desc'   => "Returns the attribute node with name name for the current element.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3281,7 +3283,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getattributenodens",
+    'name'   => "getAttributeNodeNS",
     'desc'   => "Returns the attribute node in namespace namespaceURI with local name localName for the current node.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3304,7 +3306,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getattributens",
+    'name'   => "getAttributeNS",
     'desc'   => "Gets the value of the attribute in namespace namespaceURI with local name localName for the current node.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3327,7 +3329,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getelementsbytagname",
+    'name'   => "getElementsByTagName",
     'desc'   => "This function returns a new instance of the class DOMNodeList of all descendant elements with a given tag name, in the order in which they are encountered in a preorder traversal of this element tree.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3345,7 +3347,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getelementsbytagnamens",
+    'name'   => "getElementsByTagNameNS",
     'desc'   => "This function fetch all the descendant elements with a given localName and namespaceURI.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3368,7 +3370,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "hasattribute",
+    'name'   => "hasAttribute",
     'desc'   => "Indicates whether attribute named name exists as a member of the element.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3386,7 +3388,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "hasattributens",
+    'name'   => "hasAttributeNS",
     'desc'   => "Indicates whether attribute in namespace namespaceURI named localName exists as a member of the element.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3409,7 +3411,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "removeattribute",
+    'name'   => "removeAttribute",
     'desc'   => "Removes attribute named name from the element.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3427,7 +3429,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "removeattributenode",
+    'name'   => "removeAttributeNode",
     'desc'   => "Removes attribute oldnode from the element.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3445,7 +3447,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "removeattributens",
+    'name'   => "removeAttributeNS",
     'desc'   => "Removes attribute is namespace namespaceURI named localName from the element.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3468,7 +3470,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "setattribute",
+    'name'   => "setAttribute",
     'desc'   => "Sets an attribute with name name to the given value. If the attribute does not exist, it will be created.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3491,7 +3493,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "setattributenode",
+    'name'   => "setAttributeNode",
     'desc'   => "Adds new attribute node attr to element.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3509,7 +3511,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "setattributenodens",
+    'name'   => "setAttributeNodeNS",
     'desc'   => "Adds new attribute node attr to element.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3527,7 +3529,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "setattributens",
+    'name'   => "setAttributeNS",
     'desc'   => "Sets an attribute with namespace namespaceURI and name name to the given value. If the attribute does not exist, it will be created.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3555,7 +3557,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "setidattribute",
+    'name'   => "setIDAttribute",
     'desc'   => "Declares the attribute name to be of type ID.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3578,7 +3580,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "setidattributenode",
+    'name'   => "setIDAttributeNode",
     'desc'   => "Declares the attribute specified by attr to be of type ID.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3601,7 +3603,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "setidattributens",
+    'name'   => "setIDAttributeNS",
     'desc'   => "Declares the attribute specified by localName and namespaceURI to be of type ID.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3921,6 +3923,8 @@ EndClass(
 BeginClass(
   array(
     'name'   => "DOMNodeIterator",
+    'ifaces' => array('Iterator'),
+    'bases'  => array('Sweepable'),
     'desc'   => "",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
@@ -4007,6 +4011,8 @@ EndClass(
 BeginClass(
   array(
     'name'   => "DOMNamedNodeMap",
+    'ifaces' => array('IteratorAggregate'),
+    'bases'  => array('dom_iterable'),
     'desc'   => "",
     'flags'  =>  HasDocComment,
   ));
@@ -4022,7 +4028,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getnameditem",
+    'name'   => "getNamedItem",
     'desc'   => "Retrieves a node specified by its nodeName.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -4040,7 +4046,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getnameditemns",
+    'name'   => "getNamedItemNS",
     'desc'   => "Retrieves a node specified by localName and namespaceURI.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -4115,7 +4121,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getiterator",
+    'name'   => "getIterator",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
@@ -4139,6 +4145,8 @@ EndClass(
 BeginClass(
   array(
     'name'   => "DOMNodeList",
+    'ifaces' => array('IteratorAggregate'),
+    'bases'  => array('dom_iterable'),
     'desc'   => "",
     'flags'  =>  HasDocComment,
   ));
@@ -4206,7 +4214,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getiterator",
+    'name'   => "getIterator",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
@@ -4288,7 +4296,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "createdocument",
+    'name'   => "createDocument",
     'desc'   => "Creates a DOMDocument object of the specified type with its document element.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -4319,7 +4327,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "createdocumenttype",
+    'name'   => "createDocumentType",
     'desc'   => "Creates an empty DOMDocumentType object. Entity declarations and notations are not made available. Entity reference expansions and default attribute additions do not occur.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -4350,7 +4358,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "hasfeature",
+    'name'   => "hasFeature",
     'desc'   => "Test if the DOM implementation implements a specific feature.\n\nYou can find a list of all features in the » Conformance section of the DOM specification.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -4388,13 +4396,14 @@ EndClass(
 BeginClass(
   array(
     'name'   => "DOMXPath",
+    'bases'  => array('Sweepable'),
     'desc'   => "Supports XPath 1.0",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
  public:
   xmlNodePtr m_node;
-  sp_domdocument m_doc;
+  p_DOMDocument m_doc;
   Array m_node_list;
   int m_registerPhpFunctions;
   Array m_registered_phpfunctions;
@@ -4467,12 +4476,12 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "registernamespace",
+    'name'   => "registerNamespace",
     'desc'   => "Registers the namespaceURI and prefix with the DOMXPath object.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure. DOMXPath::registerPhpFunctions DOMXPath::query Last updated: Fri, 13 Aug 2010  ",
+      'desc'   => "Returns TRUE on success or FALSE on failure.",
     ),
     'args'   => array(
       array(
@@ -4490,7 +4499,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "registerphpfunctions",
+    'name'   => "registerPHPFunctions",
     'desc'   => "This method enables the ability to use PHP functions within XPath expressions.",
     'flags'  =>  HasDocComment,
     'return' => array(

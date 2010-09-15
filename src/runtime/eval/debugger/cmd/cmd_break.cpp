@@ -101,13 +101,13 @@ bool CmdBreak::help(DebuggerClient *client) {
     "\tfunction call: {namespace}::{cls}::{func}\n"
     "\turl matching:  @{url}\n"
     "\n"
-    "(1) Url has to be specified at end.\n"
+    "1) Url has to be specified at end.\n"
     "\n"
-    "(2) Function calls can be 1, 2 or more, matching a call chain. If more "
+    "2) Function calls can be 1, 2 or more, matching a call chain. If more "
     "than one function are specified, they don't have to be direct callers "
     "to match. It will match any caller on the stack.\n"
     "\n"
-    "(3) Pay attention to those delimiters, and they are required to tell "
+    "3) Pay attention to those delimiters, and they are required to tell "
     "what a field should be interpreted as, unless it is a number, then it "
     "must be line numbers. Otherwise, use them to indicate what the names "
     "are:\n"
@@ -133,7 +133,7 @@ bool CmdBreak::help(DebuggerClient *client) {
     "\tb html/mypage.php:MyClass::foo()\n"
     "\tb mypage.php:123@index.php\n"
     "\n"
-    "(4) You may also use regular expressions to match any of these names, "
+    "4) You may also use regular expressions to match any of these names, "
     "except line numbers. For examples,\n"
     "\n"
     "\tb r Feed.*::on.*()\n"
@@ -186,6 +186,14 @@ bool CmdBreak::help(DebuggerClient *client) {
     "different machines, sandboxes and threads."
   );
 
+  client->helpTitle("Hard Breakpoints");
+  client->helpSection(
+    "From within PHP code, you can place a function call hphpd_break() to "
+    "embed a breakpoint. You may also specify a condition as the function's "
+    "parameter, so it breaks when the condition is met. Please read about "
+    "this function for more details with '[i]nfo hphpd_break'."
+  );
+
   client->help("");
   return true;
 }
@@ -193,9 +201,9 @@ bool CmdBreak::help(DebuggerClient *client) {
 bool CmdBreak::processList(DebuggerClient *client) {
   m_breakpoints = client->getBreakPoints();
   for (int i = 0; i < (int)m_breakpoints->size(); i++) {
-    client->print("  %d\t%s  %s", i + 1,
-                  (*m_breakpoints)[i]->state(true).c_str(),
-                  (*m_breakpoints)[i]->desc().c_str());
+    BreakPointInfoPtr bpi = m_breakpoints->at(i);
+    client->print("  %d\t%s  %s", bpi->index(), bpi->state(true).c_str(),
+                  bpi->desc().c_str());
   }
   if (m_breakpoints->empty()) {
     client->tutorial(
@@ -244,7 +252,7 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
           action = "updated";
           bp->toggle();
         }
-        client->info("Breakpoint %d is %s %s", index + 1,
+        client->info("Breakpoint %d is %s %s", bp->index(),
                      action, bp->site().c_str());
         found = true;
       }
@@ -288,27 +296,34 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
     return true;
   }
 
-  int num = atoi(snum.c_str()) - 1;
-  if (num < 0 || num >= (int)m_breakpoints->size()) {
+  int index = -1;
+  int num = atoi(snum.c_str());
+  for (unsigned int i = 0; i < m_breakpoints->size(); i++) {
+    if (m_breakpoints->at(i)->index() == num) {
+      index = i;
+      break;
+    }
+  }
+  if (index < 0) {
     client->error("\"%s\" is not a valid breakpoint index. Choose one from "
                   "this list:", snum.c_str());
     processList(client);
     return true;
   }
 
-  BreakPointInfoPtr bpi = (*m_breakpoints)[num];
+  BreakPointInfoPtr bpi = (*m_breakpoints)[index];
   if (client->arg(1, "clear")) {
-    m_breakpoints->erase(m_breakpoints->begin() + num);
+    m_breakpoints->erase(m_breakpoints->begin() + index);
     m_body = "update";
     client->send(this);
-    client->info("Breakpoint %d cleared %s", num + 1,
+    client->info("Breakpoint %d cleared %s", bpi->index(),
                  bpi->desc().c_str());
   } else {
     ASSERT(client->arg(1, "toggle"));
     bpi->toggle();
     m_body = "update";
     client->send(this);
-    client->info("Breakpoint %d's state is changed to %s.", num + 1,
+    client->info("Breakpoint %d's state is changed to %s.", bpi->index(),
                  bpi->state(false).c_str());
   }
 
@@ -342,8 +357,7 @@ bool CmdBreak::validate(DebuggerClient *client, BreakPointInfoPtr bpi,
     m_breakpoints->push_back(bpi);
     m_body = "update";
     client->send(this);
-    client->info("Breakpoint %d set %s", (int)m_breakpoints->size(),
-                 bpi->desc().c_str());
+    client->info("Breakpoint %d set %s", bpi->index(), bpi->desc().c_str());
     return true;
   }
 

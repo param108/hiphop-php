@@ -99,7 +99,6 @@ const char *BuiltinSymbols::SystemClasses[] = {
   "exception",
   "arrayaccess",
   "iterator",
-  "pear_error",
   "reflection",
   "splobjectstorage",
   "directory",
@@ -109,8 +108,8 @@ const char *BuiltinSymbols::SystemClasses[] = {
 };
 
 const char *BuiltinSymbols::BaseSysRsrcClasses[] = {
-  "splfileinfo",
-  "recursiveiteratoriterator",
+  "SplFileInfo",
+  "RecursiveIteratorIterator",
   NULL
 };
 

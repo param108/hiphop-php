@@ -22,14 +22,19 @@
 #include <php/classes/splobjectstorage.fw.h>
 
 // Declarations
-#include <cls/splobjectstorage.h>
+#include <cls/SplObjectStorage.h>
 #include <php/classes/iterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+// Includes and Functions
 Variant pm_php$classes$splobjectstorage_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
-Object co_splobjectstorage(CArrRef params, bool init = true);
+
+// Redeclared Functions
+
+// Dynamic Class Declarations
+Object co_SplObjectStorage(CArrRef params, bool init = true);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

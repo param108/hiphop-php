@@ -45,7 +45,7 @@ public:
   // implementing IParseHandler
   virtual void onParse(AnalysisResultPtr ar);
 
-  std::string getOriginalName() const { return m_originalName;}
+  const std::string &getOriginalName() const { return m_originalName;}
   std::string getName() const { return m_name;}
   void setName(const std::string name) { m_name = name; }
   std::string getFullName() const;
@@ -67,6 +67,8 @@ public:
   void outputCPPStaticMethodWrapper(CodeGenerator &cg,
                                     AnalysisResultPtr ar,
                                     const char *cls);
+  bool hasRefParam();
+  void outputParamArrayInit(CodeGenerator &cg);
 
 protected:
   bool m_method;

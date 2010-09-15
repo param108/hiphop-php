@@ -904,6 +904,10 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
     mysql_result = mysql_use_result(conn);
   }
   if (!mysql_result) {
+    if (mysql_field_count(conn) > 0) {
+      raise_warning("Unable to save result set");
+      return false;
+    }
     return true;
   }
 
@@ -1226,7 +1230,7 @@ Variant f_mysql_fetch_field(CVarRef result, int field /* = -1 */) {
   MySQLFieldInfo *info;
   if (!(info = res->fetchFieldInfo())) return false;
 
-  Object obj(NEW(c_stdclass)());
+  Object obj(NEW(c_stdClass)());
   obj->set("name",         *(info->name));
   obj->set("table",        *(info->table));
   obj->set("def",          *(info->def));

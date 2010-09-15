@@ -96,7 +96,7 @@ class Variant {
   void destruct();
 
   // g++ does not inline !isPrimitive()
-  ~Variant() { if (m_type > LiteralString) destruct(); }
+  ~Variant() { if (IS_REFCOUNTED_TYPE(m_type)) destruct(); }
 
   void reset(); // only for special memory sweeping!
 
@@ -114,8 +114,8 @@ class Variant {
   Variant(uint64  v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
   Variant(long    v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
   Variant(double  v) : _count(0), m_type(KindOfDouble ) { m_data.dbl = v;}
-  Variant(litstr  v) : _count(0), m_type(LiteralString) { m_data.str = v;}
 
+  Variant(litstr  v);
   Variant(const std::string & v);
   Variant(const StaticString & v);
 
@@ -136,7 +136,7 @@ class Variant {
    * Break bindings and set to null.
    */
   void unset() {
-    if (m_type > LiteralString) destruct();
+    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
     m_data.num = 1;
     m_type = KindOfNull;
   }
@@ -206,9 +206,7 @@ class Variant {
   }
   bool isString() const {
     DataType type = getType();
-    return type == LiteralString ||
-           type == KindOfStaticString ||
-           type == KindOfString;
+    return type == KindOfStaticString || type == KindOfString;
   }
   bool isInteger() const;
   bool isNumeric(bool checkString = false) const;
@@ -293,7 +291,7 @@ class Variant {
     return *this;
   }
 
-  Variant  operator +  ();
+  Variant  operator +  () const;
   Variant unary_plus() const { return Variant(*this).operator+();}
   Variant  operator +  (CVarRef v) const;
   Variant &operator += (CVarRef v);
@@ -304,7 +302,7 @@ class Variant {
   Variant &operator += (double  n);
 
   Variant negate() const { return Variant(*this).operator-();}
-  Variant  operator -  ();
+  Variant  operator -  () const;
   Variant  operator -  (CVarRef v) const;
   Variant &operator -= (CVarRef v);
   Variant &operator -= (char    n) { return operator-=((int64)n);}
@@ -519,31 +517,29 @@ class Variant {
   /**
    * Offset functions
    */
-  Variant rvalAt(bool offset, int64 prehash = -1, bool error = false) const;
-  Variant rvalAt(char offset, int64 prehash = -1, bool error = false) const {
-    return rvalAt((int64)offset, prehash, error);
+  Variant rvalAt(bool offset, bool error = false) const;
+  Variant rvalAt(char offset, bool error = false) const {
+    return rvalAt((int64)offset, error);
   }
-  Variant rvalAt(short offset, int64 prehash = -1, bool error = false) const {
-    return rvalAt((int64)offset, prehash, error);
+  Variant rvalAt(short offset, bool error = false) const {
+    return rvalAt((int64)offset, error);
   }
-  Variant rvalAt(int offset, int64 prehash = -1, bool error = false) const {
-    return rvalAt((int64)offset, prehash, error);
+  Variant rvalAt(int offset, bool error = false) const {
+    return rvalAt((int64)offset, error);
   }
-  Variant rvalAtHelper(int64 offset, int64 prehash = -1,
-      bool error = false) const;
-  Variant rvalAt(int64 offset, int64 prehash = -1, bool error = false) const {
+  Variant rvalAtHelper(int64 offset, bool error = false) const;
+  Variant rvalAt(int64 offset, bool error = false) const {
     if (m_type == KindOfArray) {
-      return m_data.parr->get(offset, prehash, error);
+      return m_data.parr->get(offset, error);
     }
-    return rvalAtHelper(offset, prehash, error);
+    return rvalAtHelper(offset, error);
   }
-  Variant rvalAt(double offset, int64 prehash = -1, bool error = false) const;
-  Variant rvalAt(litstr offset, int64 prehash = -1, bool error = false,
+  Variant rvalAt(double offset, bool error = false) const;
+  Variant rvalAt(litstr offset, bool error = false,
       bool isString = false) const;
-  Variant rvalAt(CStrRef offset, int64 prehash = -1, bool error = false,
+  Variant rvalAt(CStrRef offset, bool error = false,
       bool isString = false) const;
-  Variant rvalAt(CVarRef offset, int64 prehash = -1, bool error = false)
-    const;
+  Variant rvalAt(CVarRef offset, bool error = false) const;
 
   const Variant operator[](bool    key) const { return rvalAt(key);}
   const Variant operator[](char    key) const { return rvalAt(key);}
@@ -598,37 +594,41 @@ class Variant {
     return lval();
   }
 
+  Variant *lvalPtr(CStrRef key, bool forWrite, bool create);
+
   static Variant &lvalInvalid();
   static Variant &lvalBlackHole();
 
-  Variant &lvalAt(bool    key, int64 prehash = -1, bool checkExist = false);
-  Variant &lvalAt(char    key, int64 prehash = -1, bool checkExist = false);
-  Variant &lvalAt(short   key, int64 prehash = -1, bool checkExist = false);
-  Variant &lvalAt(int     key, int64 prehash = -1, bool checkExist = false);
-  Variant &lvalAt(int64   key, int64 prehash = -1, bool checkExist = false);
-  Variant &lvalAt(double  key, int64 prehash = -1, bool checkExist = false);
-  Variant &lvalAt(litstr  key, int64 prehash = -1, bool checkExist = false,
-                  bool    isString = false);
-  Variant &lvalAt(CStrRef key, int64 prehash = -1, bool checkExist = false,
-                  bool    isString = false);
-  Variant &lvalAt(CVarRef key, int64 prehash = -1, bool checkExist = false);
+  Variant &lvalAt(bool    key, bool checkExist = false);
+  Variant &lvalAt(char    key, bool checkExist = false);
+  Variant &lvalAt(short   key, bool checkExist = false);
+  Variant &lvalAt(int     key, bool checkExist = false);
+  Variant &lvalAt(int64   key, bool checkExist = false);
+  Variant &lvalAt(double  key, bool checkExist = false);
+  Variant &lvalAt(litstr  key, bool checkExist = false, bool isString = false);
+  Variant &lvalAt(CStrRef key, bool checkExist = false, bool isString = false);
+  Variant &lvalAt(CVarRef key, bool checkExist = false);
 
-  Variant refvalAt(bool    key, int64 prehash = -1);
-  Variant refvalAt(char    key, int64 prehash = -1);
-  Variant refvalAt(short   key, int64 prehash = -1);
-  Variant refvalAt(int     key, int64 prehash = -1);
-  Variant refvalAt(int64   key, int64 prehash = -1);
-  Variant refvalAt(double  key, int64 prehash = -1);
-  Variant refvalAt(litstr  key, int64 prehash = -1, bool isString = false);
-  Variant refvalAt(CStrRef key, int64 prehash = -1, bool isString = false);
-  Variant refvalAt(CVarRef key, int64 prehash = -1);
+  Variant refvalAt(bool    key);
+  Variant refvalAt(char    key);
+  Variant refvalAt(short   key);
+  Variant refvalAt(int     key);
+  Variant refvalAt(int64   key);
+  Variant refvalAt(double  key);
+  Variant refvalAt(litstr  key, bool isString = false);
+  Variant refvalAt(CStrRef key, bool isString = false);
+  Variant refvalAt(CVarRef key);
 
   Variant &bindClass(ThreadInfo *info) const;
 
-  Variant o_get(CStrRef propName, int64 prehash = -1,
-                bool error = true, CStrRef context = null_string) const;
-  ObjectOffset o_lval(CStrRef propName, int64 prehash = -1,
-                      CStrRef context = null_string);
+  Variant o_get(CStrRef propName, bool error = true,
+                CStrRef context = null_string) const;
+  Variant o_set(CStrRef s, CVarRef v, CStrRef context = null_string);
+  Variant o_getPublic(CStrRef propName, bool error = true) const;
+  Variant &o_lval(CStrRef propName, CVarRef tmpForGet,
+                  CStrRef context = null_string);
+  Variant &o_unsetLval(CStrRef s, CVarRef tmpForGet,
+                       CStrRef context = null_string);
 
   Variant o_invoke(CStrRef s, CArrRef params, int64 hash = -1);
   Variant o_root_invoke(CStrRef s, CArrRef params, int64 hash = -1);
@@ -663,47 +663,46 @@ class Variant {
    * The whole purpose of VariantOffset is to collect "v" parameter to call
    * this function.
    */
-  CVarRef set(bool    key, CVarRef v, int64 prehash = -1);
-  CVarRef set(char    key, CVarRef v, int64 prehash = -1) {
-    return set((int64)key, v, prehash);
+  CVarRef set(bool    key, CVarRef v);
+  CVarRef set(char    key, CVarRef v) {
+    return set((int64)key, v);
   }
-  CVarRef set(short   key, CVarRef v, int64 prehash = -1) {
-    return set((int64)key, v, prehash);
+  CVarRef set(short   key, CVarRef v) {
+    return set((int64)key, v);
   }
-  CVarRef set(int     key, CVarRef v, int64 prehash = -1) {
-    return set((int64)key, v, prehash);
+  CVarRef set(int     key, CVarRef v) {
+    return set((int64)key, v);
   }
-  CVarRef set(int64 key, CVarRef v, int64 prehash = -1);
-  CVarRef set(double  key, CVarRef v, int64 prehash = -1);
-  CVarRef set(litstr  key, CVarRef v, int64 prehash = -1,
-              bool isString = false);
-  CVarRef set(CStrRef key, CVarRef v, int64 prehash = -1,
-              bool isString = false);
-  CVarRef set(CVarRef key, CVarRef v, int64 prehash = -1);
+  CVarRef set(int64 key, CVarRef v);
+  CVarRef set(double  key, CVarRef v);
+  CVarRef set(litstr  key, CVarRef v, bool isString = false);
+  CVarRef set(CStrRef key, CVarRef v, bool isString = false);
+  CVarRef set(CVarRef key, CVarRef v);
 
   CVarRef append(CVarRef v);
 
-  CVarRef setOpEqual(int op, bool key, CVarRef v, int64 prehash = -1);
-  CVarRef setOpEqual(int op, char key, CVarRef v, int64 prehash = -1) {
-    return setOpEqual(op, (int64)key, v, prehash);
+  CVarRef setOpEqual(int op, bool key, CVarRef v);
+  CVarRef setOpEqual(int op, char key, CVarRef v) {
+    return setOpEqual(op, (int64)key, v);
   }
-  CVarRef setOpEqual(int op, short key, CVarRef v, int64 prehash = -1) {
-    return setOpEqual(op, (int64)key, v, prehash);
+  CVarRef setOpEqual(int op, short key, CVarRef v) {
+    return setOpEqual(op, (int64)key, v);
   }
-  CVarRef setOpEqual(int op, int key, CVarRef v, int64 prehash = -1) {
-    return setOpEqual(op, (int64)key, v, prehash);
+  CVarRef setOpEqual(int op, int key, CVarRef v) {
+    return setOpEqual(op, (int64)key, v);
   }
-  CVarRef setOpEqual(int op, int64 key, CVarRef v, int64 prehash = -1);
-  CVarRef setOpEqual(int op, double  key, CVarRef v, int64 prehash = -1);
-  CVarRef setOpEqual(int op, litstr  key, CVarRef v, int64 prehash = -1,
-                     bool isString = false);
-  CVarRef setOpEqual(int op, CStrRef key, CVarRef v, int64 prehash = -1,
-                     bool isString = false);
-  CVarRef setOpEqual(int op, CVarRef key, CVarRef v, int64 prehash = -1);
+  CVarRef setOpEqual(int op, int64 key, CVarRef v);
+  CVarRef setOpEqual(int op, double  key, CVarRef v);
+  CVarRef setOpEqual(int op, litstr  key, CVarRef v, bool isString = false);
+  CVarRef setOpEqual(int op, CStrRef key, CVarRef v, bool isString = false);
+  CVarRef setOpEqual(int op, CVarRef key, CVarRef v);
   CVarRef appendOpEqual(int op, CVarRef v);
 
+  template<typename T, int op>
+  T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);
+
   template<typename T>
-  void removeImpl(const T &key, int64 prehash, bool isString = false) {
+  void removeImpl(const T &key, bool isString = false) {
     switch (getType()) {
     case KindOfNull:
       break;
@@ -713,10 +712,9 @@ class Variant {
         if (arr) {
           ArrayData *escalated;
           if (isString) {
-            escalated = arr->remove(key, (arr->getCount() > 1), prehash);
+            escalated = arr->remove(key, (arr->getCount() > 1));
           } else {
-            escalated = arr->remove(ToKey(key), (arr->getCount() > 1),
-                                    prehash);
+            escalated = arr->remove(ToKey(key), (arr->getCount() > 1));
           }
           if (escalated) {
             set(escalated);
@@ -732,24 +730,24 @@ class Variant {
       break;
     }
   }
-  void remove(bool    key, int64 prehash = -1) { removeImpl(key, prehash);}
-  void remove(char    key, int64 prehash = -1) { remove((int64)key, prehash);}
-  void remove(short   key, int64 prehash = -1) { remove((int64)key, prehash);}
-  void remove(int     key, int64 prehash = -1) { remove((int64)key, prehash);}
-  void remove(int64   key, int64 prehash = -1) { removeImpl(key, prehash);}
-  void remove(double  key, int64 prehash = -1) { removeImpl(key, prehash);}
-  void remove(litstr  key, int64 prehash = -1, bool isString = false) {
-    removeImpl(key, prehash, isString);
+  void remove(bool    key) { removeImpl(key);}
+  void remove(char    key) { remove((int64)key);}
+  void remove(short   key) { remove((int64)key);}
+  void remove(int     key) { remove((int64)key);}
+  void remove(int64   key) { removeImpl(key);}
+  void remove(double  key) { removeImpl(key);}
+  void remove(litstr  key, bool isString = false) {
+    removeImpl(key, isString);
   }
-  void remove(CStrRef key, int64 prehash = -1, bool isString = false) {
-    removeImpl(key, prehash, isString);
+  void remove(CStrRef key, bool isString = false) {
+    removeImpl(key, isString);
   }
-  void remove(CVarRef key, int64 prehash = -1);
+  void remove(CVarRef key);
 
-  void weakRemove(litstr key, int64 prehash = -1, bool isStr = false) {
+  void weakRemove(litstr key, bool isStr = false) {
     if (is(KindOfArray) ||
         (is(KindOfObject) && getObjectData()->o_instanceof("arrayaccess"))) {
-      remove(key, prehash, isStr);
+      remove(key, isStr);
       return;
     }
     if (isString()) {
@@ -758,10 +756,10 @@ class Variant {
     }
   }
 
-  void weakRemove(CStrRef key, int64 prehash = -1, bool isStr = false) {
+  void weakRemove(CStrRef key, bool isStr = false) {
     if (is(KindOfArray) ||
         (is(KindOfObject) && getObjectData()->o_instanceof("arrayaccess"))) {
-      remove(key, prehash, isStr);
+      remove(key, isStr);
       return;
     }
     if (isString()) {
@@ -771,10 +769,10 @@ class Variant {
   }
 
   template<typename T>
-  void weakRemove(const T &key, int64 prehash = -1) {
+  void weakRemove(const T &key) {
     if (is(KindOfArray) ||
         (is(KindOfObject) && getObjectData()->o_instanceof("arrayaccess"))) {
-      remove(key, prehash);
+      remove(key);
       return;
     }
     if (isString()) {
@@ -799,7 +797,6 @@ class Variant {
   Variant array_iter_next();
   Variant array_iter_end();
   Variant array_iter_key() const;
-  Variant array_iter_value(ssize_t &pos) const;
   Variant array_iter_each();
 
   /**
@@ -812,10 +809,6 @@ class Variant {
   double *getDoubleData() const {
     ASSERT(getType() == KindOfDouble);
     return m_type == KindOfVariant ? &m_data.pvar->m_data.dbl : &m_data.dbl;
-  }
-  litstr getLiteralString() const {
-    ASSERT(getType() == LiteralString);
-    return m_type == KindOfVariant ? m_data.pvar->m_data.str : m_data.str;
   }
   StringData *getStringData() const {
     ASSERT(getType() == KindOfString || getType() == KindOfStaticString);
@@ -868,7 +861,13 @@ class Variant {
  private:
   mutable DataType m_type;
 
-  bool isPrimitive() const { return m_type <= LiteralString; }
+  bool isPrimitive() const { return !IS_REFCOUNTED_TYPE(m_type); }
+  bool isObjectConvertable() {
+    return isNull() ||
+           (is(KindOfBoolean) && !toBoolean()) ||
+           (is(KindOfString) && getStringData()->empty()) ||
+           (is(KindOfStaticString) && getStringData()->empty());
+  }
 
   CVarRef set(bool    v);
   CVarRef set(char    v);
@@ -880,13 +879,10 @@ class Variant {
   CVarRef set(StringData  *v);
   CVarRef set(ArrayData   *v);
   CVarRef set(ObjectData  *v);
-  CVarRef set(const ObjectOffset& v);
 
   CVarRef set(CStrRef v) { return set(v.get()); }
   CVarRef set(CArrRef v) { return set(v.get()); }
   CVarRef set(CObjRef v) { return set(v.get()); }
-
-  void escalateString() const;
 
   template<typename T>
   CVarRef set(const SmartObject<T> &v) {
@@ -896,7 +892,7 @@ class Variant {
   // Internal helper for weakly binding a variable. m_type should be viewed
   // as KindOfNull and for complex types the old data already released.
   void bind(CVarRef v) {
-    if (v.m_type <= LiteralString) {
+    if (!IS_REFCOUNTED_TYPE(v.m_type)) {
       m_type = v.m_type;
       /* drop uninitialized flag */
       m_data.num = m_type == KindOfNull ? 0 : v.m_data.num;
@@ -975,7 +971,7 @@ class Variant {
     ASSERT(v != this);
     if (v) {
       v->incRefCount(); // in case destruct() triggers deletion of v
-      if (m_type > LiteralString) destruct();
+      if (IS_REFCOUNTED_TYPE(m_type)) destruct();
       m_type = KindOfVariant;
       m_data.pvar = v;
     } else {
@@ -1004,16 +1000,11 @@ class Variant {
   void split();  // breaking weak binding by making a real copy
 
   template<typename T>
-  Variant &lvalAtImpl(const T &key, int64 prehash = -1,
-                      bool checkExist = false) {
+  Variant &lvalAtImpl(const T &key, bool checkExist = false) {
     if (m_type == KindOfVariant) {
-      return m_data.pvar->lvalAtImpl(key, prehash);
+      return m_data.pvar->lvalAtImpl(key);
     }
-    if (isNull() ||
-        (m_type == KindOfBoolean && !toBoolean()) ||
-        (m_type == LiteralString && !*getLiteralString()) ||
-        (m_type == KindOfString && getStringData()->empty()) ||
-        (m_type == KindOfStaticString && getStringData()->empty())) {
+    if (isObjectConvertable()) {
       unset();
       set(toArray());
     }
@@ -1021,7 +1012,7 @@ class Variant {
       Variant *ret = NULL;
       ArrayData *arr = m_data.parr;
       ArrayData *escalated =
-        arr->lval(ToKey(key), ret, arr->getCount() > 1, prehash, checkExist);
+        arr->lval(ToKey(key), ret, arr->getCount() > 1, checkExist);
       if (escalated) {
         set(escalated);
       }
@@ -1035,22 +1026,18 @@ class Variant {
   }
 
   template<typename T>
-  Variant refvalAtImpl(const T &key, int64 prehash = -1) {
+  Variant refvalAtImpl(const T &key) {
     if (m_type == KindOfVariant) {
-      return m_data.pvar->refvalAtImpl(key, prehash);
+      return m_data.pvar->refvalAtImpl(key);
     }
-    if (is(KindOfArray) || isNull() ||
-        (is(KindOfBoolean) && !toBoolean()) ||
-        (is(LiteralString) && !*getLiteralString()) ||
-        (is(KindOfString) && getStringData()->empty()) ||
-        (is(KindOfStaticString) && getStringData()->empty())) {
-      return ref(lvalAt(key, prehash));
+    if (is(KindOfArray) || isObjectConvertable()) {
+      return ref(lvalAt(key));
     } else {
-      return rvalAt(key, prehash);
+      return rvalAt(key);
     }
   }
 
-  Variant refvalAtImpl(CStrRef key, int64 prehash = -1, bool isString = false);
+  Variant refvalAtImpl(CStrRef key, bool isString = false);
 
 
  private:
@@ -1062,6 +1049,11 @@ class Variant {
     CT_ASSERT(offsetof(Variant,_count) == FAST_REFCOUNT_OFFSET);
 #endif
   }
+};
+
+template<int op> class AssignOp {
+public:
+  static Variant assign(Variant &var, CVarRef val);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1111,7 +1103,7 @@ inline Variant operator/(CVarRef v, double  n) { return Variant(v) /= n;}
 // breaking circular dependencies
 
 template<typename T>
-CVarRef Array::setImpl(const T &key, CVarRef v, int64 prehash) {
+CVarRef Array::setImpl(const T &key, CVarRef v) {
   if (!m_px) {
     ArrayData *data = ArrayData::Create(key, v);
     SmartPtr<ArrayData>::operator=(data);
@@ -1120,7 +1112,7 @@ CVarRef Array::setImpl(const T &key, CVarRef v, int64 prehash) {
       escalate();
     }
     ArrayData *escalated =
-      m_px->set(key, v, (m_px->getCount() > 1), prehash);
+      m_px->set(key, v, (m_px->getCount() > 1));
     if (escalated) {
       SmartPtr<ArrayData>::operator=(escalated);
     }
@@ -1129,8 +1121,23 @@ CVarRef Array::setImpl(const T &key, CVarRef v, int64 prehash) {
 }
 
 template<typename T>
-Variant Array::refvalAt(const T &key, int64 prehash /* = -1 */) {
-  return ref(lvalAt(key, prehash));
+CVarRef Array::addImpl(const T &key, CVarRef v) {
+  if (!m_px) {
+    ArrayData *data = ArrayData::Create(key, v);
+    SmartPtr<ArrayData>::operator=(data);
+  } else {
+    if (v.isContagious()) escalate();
+    ArrayData *escalated = m_px->add(key, v, (m_px->getCount() > 1));
+    if (escalated) {
+      SmartPtr<ArrayData>::operator=(escalated);
+    }
+  }
+  return v;
+}
+
+template<typename T>
+Variant Array::refvalAt(const T &key) {
+  return ref(lvalAt(key));
 }
 
 inline const Variant Array::operator[](bool    key) const {

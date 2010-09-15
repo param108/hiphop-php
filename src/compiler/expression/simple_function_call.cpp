@@ -343,8 +343,6 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
                 // set to be dynamic
                 constants->setDynamic(ar, symbol);
               }
-            } else {
-              constants->setDynamic(ar, symbol);
             }
             break;
           }
@@ -636,7 +634,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
         case DefinedFunction: {
           ConstantTablePtr constants = ar->getConstants();
           // system constant
-          if (constants->isPresent(symbol) && !constants->isDynamic(symbol)) {
+          if (constants->isPresent(symbol)) {
             return CONSTANT("true");
           }
           // user constant
@@ -1119,7 +1117,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       assert(cls);
       cg_printf("%s%s::", Option::ClassPrefix, cls->getId(cg).c_str());
       std::string name = m_name == "__construct" ?
-        cls->findConstructor(ar, true)->getId(cg) :
+        cls->findConstructor(ar, true)->getName() :
         cg.formatLabel(m_name);
 
       cg_printf("%s%s(", Option::MethodPrefix, name.c_str());
@@ -1143,19 +1141,19 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         } else {
           cg_printf("%s%s(",
                     m_builtinFunction ? Option::BuiltinFunctionPrefix :
-                    Option::FunctionPrefix, cg.formatLabel(m_name).c_str());
+                    Option::FunctionPrefix, m_funcScope->getId(cg).c_str());
         }
       }
     }
     FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
-                                      m_variableArgument, m_argArrayId);
+                                      m_variableArgument, m_argArrayId,
+                                      m_argArrayHash, m_argArrayIndex);
   } else {
     bool skipParams = false;
     needHash = true;
     if (!m_class && m_className.empty()) {
       if (!m_dynamicInvoke && m_redeclared) {
         if (canInvokeFewArgs()) {
-          // FMC unaddressed, need test case
           cg_printf("%s->%s%s_few_args(", cg.getGlobals(ar),
                     Option::InvokePrefix, cg.formatLabel(m_name).c_str());
           int left = Option::InvokeFewArgsCount;
@@ -1179,7 +1177,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
                  !m_funcScope->isSepExtension()) {
         if (m_funcScope->isUserFunction()) {
           cg_printf("%s%s(", Option::InvokePrefix,
-                    cg.formatLabel(m_name).c_str());
+                    m_funcScope->getId(cg).c_str());
           needHash = false;
         } else {
           extraArgs = m_safe ? ", false" : ", true";
@@ -1190,7 +1188,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         cg_printf("invoke(\"%s\", ", cg.escapeLabel(m_name).c_str());
       }
     } else {
-      // FMC: test fail case
+      // e.g. A::foo()
       const MethodSlot *ms = ar->getOrAddMethodSlot(m_name);
       bool inObj = m_parentClass && ar->getClassScope() &&
         !ar->getFunctionScope()->isStatic();
@@ -1234,7 +1232,6 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
           }
           cg_printf("), ");
         } else {
-          // FMC test this
           cg_printf("invoke_static_method%s(",
                   (ms->isError() ? "_mil" : ""));
         }
@@ -1255,12 +1252,6 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       }
       if (needHash) {
         if (!m_class && m_className.empty()) {
-      // FMC need to test m_redeclared, might not be valid here any more
-      // need to assert that eval style invoke was generated at least
-      // original clause had two checks, verify !m_className.empty() case.
-      // Merge lost my change, need to figure this out all over again.
-      // Maybe just this: needHash = !(m_redeclared && !dynamicInvoke);
-
           needHash = !(m_redeclared && !m_dynamicInvoke);
         } else {
           needHash = m_validClass || m_redeclaredClass;
@@ -1333,11 +1324,8 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
 
 void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
-  bool linemap = outputLineMap(cg, ar, true);
-
   if (!m_lambda.empty()) {
     cg_printf("\"%s\"", m_lambda.c_str());
-    if (linemap) cg_printf(")");
     return;
   }
 
@@ -1380,12 +1368,10 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
         cg_printf("throw_fatal(\"bad define\")");
         if (close) cg_printf(")");
       }
-      if (linemap) cg_printf(")");
       return;
     }
     if (m_name == "func_num_args") {
       cg_printf("num_args");
-      if (linemap) cg_printf(")");
       return;
     }
 
@@ -1402,7 +1388,6 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
             m_params->outputCPP(cg, ar);
           }
           cg_printf(")");
-          if (linemap) cg_printf(")");
           return;
         }
       }
@@ -1499,14 +1484,12 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
           default:
             break;
           }
-          if (linemap) cg_printf(")");
           return;
         }
       }
       break;
     case GetDefinedVarsFunction:
       cg_printf("get_defined_vars(variables)");
-      if (linemap) cg_printf(")");
       return;
     default:
       break;
@@ -1514,7 +1497,6 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
   }
 
   outputCPPParamOrderControlled(cg, ar);
-  if (linemap) cg_printf(")");
 }
 
 bool SimpleFunctionCall::canInvokeFewArgs() {
@@ -1594,7 +1576,8 @@ SimpleFunctionCallPtr SimpleFunctionCall::getFunctionCallForCallUserFunc(
         }
         if (cls->isRedeclaring()) {
           cls = ar->findExactClass(sclass);
-        } else if (!cls->isVolatile() && !ar->checkClassPresent(sclass)) {
+        } else if (!cls->isVolatile() && cls->isUserClass() &&
+                   !ar->checkClassPresent(sclass)) {
           cls->setVolatile();
         }
         if (!cls) {

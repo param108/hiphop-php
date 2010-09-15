@@ -54,7 +54,6 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
       m_data.dbl = source.toDouble();
       break;
     }
-  case LiteralString:
   case KindOfStaticString:
   case KindOfString:
     {
@@ -260,11 +259,6 @@ int ThreadSharedVariant::getIndex(CVarRef key) {
     StringData *sd = key.getStringData();
     return m_data.map->indexOf(sd);
   }
-  case LiteralString: {
-    if (getIsVector()) return -1;
-    StringData sd(key.getLiteralString(), AttachLiteral);
-    return m_data.map->indexOf(&sd);
-  }
   default:
     // No other types are legitimate keys
     break;
@@ -295,10 +289,10 @@ void ThreadSharedVariant::loadElems(ArrayData *&elems,
   ArrayInit ai(count, getIsVector(), keepRef);
   for (uint i = 0; i < count; i++) {
     if (getIsVector()) {
-      ai.set(i, (int64)i, sharedMap.getValue(i), -1, true);
+      ai.add((int64)i, sharedMap.getValue(i), true);
     } else {
-      ai.set(i, m_data.map->getKeyIndex(i)->toLocal(), sharedMap.getValue(i),
-             -1, true);
+      ai.add(m_data.map->getKeyIndex(i)->toLocal(), sharedMap.getValue(i),
+             true);
     }
   }
   elems = ai.create();
@@ -314,11 +308,6 @@ ThreadSharedVariant *ThreadSharedVariant::createAnother
     return (ThreadSharedVariant *)wrapped;
   }
   return new ThreadSharedVariant(source, serialized, inner);
-}
-
-ThreadSharedVariant *ThreadSharedVariantLockedRefs::createAnother
-(CVarRef source, bool serialized, bool inner /* = false */) {
-  return new ThreadSharedVariantLockedRefs(source, serialized, m_lock, inner);
 }
 
 void ThreadSharedVariant::getStats(SharedVariantStats *stats) {

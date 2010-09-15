@@ -18,7 +18,7 @@
 #include <runtime/base/string_util.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/runtime_error.h>
-#include <algorithm>
+#include <runtime/ext/ext_math.h>
 #include <runtime/ext/ext_json.h>
 
 using namespace std;
@@ -371,7 +371,6 @@ DataType ArrayUtil::Sum(CArrRef input, int64 *isum, double *dsum) {
       goto DOUBLE;
     }
     case KindOfStaticString:
-    case LiteralString:
     case KindOfString: {
       String s = entry.toString();
       int64 ti;
@@ -418,7 +417,6 @@ DataType ArrayUtil::Product(CArrRef input, int64 *iprod, double *dprod) {
       goto DOUBLE;
     }
     case KindOfStaticString:
-    case LiteralString:
     case KindOfString: {
       String s = entry.toString();
       int64 ti;
@@ -523,6 +521,21 @@ Variant ArrayUtil::Reverse(CArrRef input, bool preserve_keys /* = false */) {
   return ret;
 }
 
+static void php_array_data_shuffle(std::vector<ssize_t> &indices) {
+  int n_elems = indices.size();
+  if (n_elems > 1) {
+    int n_left = n_elems;
+    while (--n_left) {
+      int rnd_idx = f_rand(0, n_left);
+      if (rnd_idx != n_left) {
+        ssize_t temp = indices[n_left];
+        indices[n_left] = indices[rnd_idx];
+        indices[rnd_idx] = temp;
+      }
+    }
+  }
+}
+
 Variant ArrayUtil::Shuffle(CArrRef input) {
   int count = input.size();
   if (count == 0) {
@@ -535,7 +548,7 @@ Variant ArrayUtil::Shuffle(CArrRef input) {
        pos = input->iter_advance(pos)) {
     indices.push_back(pos);
   }
-  random_shuffle(indices.begin(), indices.end());
+  php_array_data_shuffle(indices);
 
   Array ret = Array::Create();
   for (int i = 0; i < count; i++) {
@@ -548,6 +561,8 @@ Variant ArrayUtil::Shuffle(CArrRef input) {
 Variant ArrayUtil::RandomKeys(CArrRef input, int num_req /* = 1 */) {
   int count = input.size();
   if (num_req <= 0 || num_req > count) {
+    raise_warning("Second argument has to be between 1 and the "
+                  "number of elements in the array");
     return null;
   }
 
@@ -557,7 +572,7 @@ Variant ArrayUtil::RandomKeys(CArrRef input, int num_req /* = 1 */) {
        pos = input->iter_advance(pos)) {
     indices.push_back(pos);
   }
-  random_shuffle(indices.begin(), indices.end());
+  php_array_data_shuffle(indices);
 
   if (num_req == 1) {
     return input->getKey(indices[0]);
@@ -583,7 +598,7 @@ Variant ArrayUtil::RandomValues(CArrRef input, int num_req /* = 1 */) {
        pos = input->iter_advance(pos)) {
     indices.push_back(pos);
   }
-  random_shuffle(indices.begin(), indices.end());
+  php_array_data_shuffle(indices);
 
   if (num_req == 1) {
     return input->getValue(indices[0]);
@@ -631,9 +646,11 @@ void ArrayUtil::Walk(Variant input, PFUNC_WALK walk_function,
                      PointerSet *seen /* = NULL */,
                      CVarRef userdata /* = null_variant */) {
   ASSERT(walk_function);
-  input.escalate(); // so we can safely take secondRef()
-  for (ArrayIter iter(input); iter; ++iter) {
-    CVarRef v = iter.secondRef();
+
+  Variant k;
+  Variant v;
+  input.escalate(true);
+  for (MutableArrayIterPtr iter = input.begin(&k, v); iter->advance(); ) {
     if (recursive && v.is(KindOfArray)) {
       ASSERT(seen);
       Array arr = v.toArray();
@@ -648,7 +665,7 @@ void ArrayUtil::Walk(Variant input, PFUNC_WALK walk_function,
 
       Walk(arr, walk_function, data, recursive, seen, userdata);
     } else {
-      walk_function(ref(v), iter.first(), userdata, data);
+      walk_function(ref(v), k, userdata, data);
     }
   }
 }

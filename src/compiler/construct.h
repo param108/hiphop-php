@@ -67,7 +67,9 @@ public:
     AccessorEffect = 0x100,      // could contain a getter/setter
     CreateEffect = 0x200,        // could cause the creation of an array
                                  // element or an object property
-    UnknownEffect = 0x3ff        // anything might happen
+    DiagnosticEffect = 0x400,    // can cause a diagnostic to be issued
+    OtherEffect = 0x800,         // something else
+    UnknownEffect = 0xfff        // any of the above
   };
 
   LocationPtr getLocation() { return m_loc;}
@@ -143,6 +145,12 @@ public:
   bool isErrorSuppressed(CodeError::ErrorType e) const;
 
   static void recomputeEffects() { s_effectsTag++; }
+
+  /**
+   * Write where this construct was in PHP files.
+   */
+  void printSource(CodeGenerator &cg);
+
 private:
   struct ExtraData {
     std::set<std::string> hphpNotes;
@@ -175,11 +183,6 @@ protected:
                        bool strong = true);
   void addUserClass(AnalysisResultPtr ar, const std::string &name,
                     bool strong = true);
-
-  /**
-   * Write where this construct was in PHP files.
-   */
-  void printSource(CodeGenerator &cg);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,8 @@
 <?php
 
-@require_once '../system/globals/constants.php';
+if (file_exists('../system/globals/constants.php')) {
+  @require_once '../system/globals/constants.php';
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // types
@@ -249,6 +251,7 @@ function DefineFunction($func) {
   if ($current_class && $classes[$current_class]['flags'] & HipHopSpecific) {
     $func['flags'] |= HipHopSpecific;
   }
+  if (!isset($func['return'])) $func['return'] = array();
   $func['ret_desc'] = idx($func['return'], 'desc');
   $func['return'] = idx($func['return'], 'type');
   if ($func['return'] & Reference) {
@@ -264,7 +267,7 @@ function DefineFunction($func) {
                               $func['name'].'(..'.$arg['name'].'..)');
         }
         if (preg_match('/^q_([A-Za-z]+)_(\w+)$/', $arg['value'], $m)) {
-          $class = strtolower($m[1]);
+          $class = $m[1];
           $constant = $m[2];
           $arg['default'] = "q_${class}_${constant}";
         } else {
@@ -313,7 +316,7 @@ function DefineFunction($func) {
 
 function typename($type, $prefix = true) {
   if (is_string($type)) {
-    if ($prefix) return 'p_' . strtolower($type);
+    if ($prefix) return 'p_' . $type;
     return $type;
   }
 
@@ -330,7 +333,7 @@ function typename($type, $prefix = true) {
 
 function param_typename($type, $ref) {
   if (is_string($type)) {
-    return 'p_' . strtolower($type);
+    return 'p_' . $type;
   }
 
   global $REFNAMES;
@@ -356,7 +359,7 @@ function typeenum($type) {
 
 function fprintType($f, $type) {
   if (is_string($type)) {
-    fprintf($f, 'S(999), "%s"', strtolower($type));
+    fprintf($f, 'S(999), "%s"', $type);
   } else {
     fprintf($f, 'T(%s)', typeenum($type));
   }
@@ -530,17 +533,22 @@ function generateFuncArgsCall($func, $f, $forceRef = false) {
 
 function generateFuncCPPHeader($func, $f, $method = false, $forceref = false,
                                $static = false, $class = false) {
-  fprintf($f, '%s%s %s_%s', $static ? 'static ' : '',
-          typename($func['return']), $method ? ($static ? "ti" : "t") : "f",
-          $func['name']);
+  if ($method) {
+    fprintf($f, '%s%s %s_%s', $static ? 'static ' : '',
+            typename($func['return']), $static ? "ti" : "t",
+            strtolower($func['name']));
+  } else {
+    fprintf($f, '%s f_%s', typename($func['return']), $func['name']);
+  }
   generateFuncArgsCPPHeader($func, $f, $forceref, $static);
   fprintf($f, ";\n");
 
   if ($static && $method) {
-    fprintf($f, '  public: static %s t_%s', typename($func['return']), $func['name']);
+    fprintf($f, '  public: static %s t_%s', typename($func['return']),
+            strtolower($func['name']));
     // for the actual static call there is no class name needed
     generateFuncArgsCPPHeader($func, $f, $forceref, false);
-    fprintf($f, " {\n    return ti_%s(\"%s\"", $func['name'],
+    fprintf($f, " {\n    return ti_%s(\"%s\"", strtolower($func['name']),
             strtolower($class['name']));
     generateFuncArgsCall($func, $f, $forceref);
     fprintf($f, ");\n  }\n");
@@ -588,13 +596,13 @@ function generateConstCPPHeader($const, $f) {
 }
 
 function generateClassCPPHeader($class, $f) {
-  $lowername = strtolower($class['name']);
+  $clsname = $class['name'];
   foreach ($class['consts'] as $k) {
     $name = typename($k['type']);
     if ($name == 'String') {
       $name = 'StaticString';
     }
-    fprintf($f, "extern const %s q_%s_%s;\n", $name, $lowername, $k['name']);
+    fprintf($f, "extern const %s q_%s_%s;\n", $name, $clsname, $k['name']);
   }
 
   fprintf($f,
@@ -607,35 +615,60 @@ function generateClassCPPHeader($class, $f) {
 EOT
           );
 
-  fprintf($f, "FORWARD_DECLARE_CLASS(%s);\n", $lowername);
+  fprintf($f, "FORWARD_DECLARE_CLASS(%s);\n", $clsname);
   foreach ($class['properties'] as $p) {
     generatePropertyCPPForwardDeclarations($p, $f);
   }
-  fprintf($f, "class c_%s", $lowername);
+
+  fprintf($f, "class c_%s", $clsname);
+  $magic_methods = array('__get' => 'ObjectData::UseGet',
+                         '__set' => 'ObjectData::UseSet',
+                         '__unset' => 'ObjectData::UseUnset');
+  $flags = array();
+  foreach ($class['methods'] as $m) {
+    $name = $m['name'];
+    if (isset($magic_methods[$name])) {
+      $flags[$name] = $magic_methods[$name];
+    }
+  }
+
   if ($class['parent']) {
-    fprintf($f, " : public c_" . strtolower($class['parent']));
+    global $classes;
+    $pclass = $class;
+    while ($flags && $pclass['parent'] && isset($classes[$class['parent']])) {
+      $pclass = $classes[$class['parent']];
+      foreach ($pclass['methods'] as $m) {
+        unset($flags[$m['name']]);
+      }
+    }
+    fprintf($f, " : public c_" . $class['parent']);
   } else {
     fprintf($f, " : public ExtObjectData");
+    if ($flags) {
+      echo "Using Flags!\n";
+      fprintf($f, "Flags<%s>", implode('|', $flags));
+      $flags = false;
+    }
   }
   foreach ($class['bases'] as $p) {
     fprintf($f, ", public $p");
   }
   $parents = array();
   fprintf($f, " {\n public:\n");
-  fprintf($f, "  BEGIN_CLASS_MAP(%s)\n", $lowername);
+  fprintf($f, "  BEGIN_CLASS_MAP(%s)\n", $clsname);
   if ($class['parent']) {
     $p = $class['parent'];
-    fprintf($f, "  RECURSIVE_PARENT_CLASS(%s)\n", strtolower($p));
+    fprintf($f, "  RECURSIVE_PARENT_CLASS(%s)\n", $p);
   }
   foreach ($class['ifaces'] as $p) {
-    fprintf($f, "  PARENT_CLASS(%s)\n", strtolower($p));
+    fprintf($f, "  PARENT_CLASS(%s)\n", $p);
   }
   foreach ($parents as $p) {
-    fprintf($f, "  RECURSIVE_PARENT_CLASS(%s)\n", strtolower($p));
+    fprintf($f, "  RECURSIVE_PARENT_CLASS(%s)\n", $p);
   }
-  fprintf($f, "  END_CLASS_MAP(%s)\n", $lowername);
-  fprintf($f, "  DECLARE_CLASS(%s, %s, %s)\n", $lowername, $class['name'],
-          $class['parent'] ? strtolower($class['parent']) : 'ObjectData');
+  fprintf($f, "  END_CLASS_MAP(%s)\n", $clsname);
+  fprintf($f, "  DECLARE_CLASS(%s, %s, %s)\n", $clsname, $clsname,
+          $class['parent'] ? $class['parent'] : 'ObjectData');
   fprintf($f, "  DECLARE_INVOKES_FROM_EVAL\n");
   fprintf($f, "  ObjectData* dynCreate(CArrRef params, bool init = true);\n");
 
@@ -650,8 +683,12 @@ EOT
   }
 
   fprintf($f, "  // need to implement\n");
-  fprintf($f, "  public: c_%s();\n", strtolower($class['name']));
-  fprintf($f, "  public: ~c_%s();\n", strtolower($class['name']));
+  if ($flags) {
+    fprintf($f, "  // constructor must call setAttributes(%s)\n",
+            implode('|', $flags));
+  }
+  fprintf($f, "  public: c_%s();\n", $class['name']);
+  fprintf($f, "  public: ~c_%s();\n", $class['name']);
   foreach ($class['methods'] as $m) {
     generateMethodCPPHeader($m, $class, $f);
   }
@@ -683,8 +720,6 @@ function generateMethodCPPHeader($method, $class, $f) {
   if ($method['name'] == "__call") {
     fprintf($f, "  public: Variant doCall(Variant v_name, ");
     fprintf($f, "Variant v_arguments, bool fatal);\n");
-  } else if ($method['name'] == "__get") {
-    fprintf($f, "  public: Variant doGet(Variant v_name, bool error);\n");
   }
 }
 
@@ -710,7 +745,7 @@ function generatePropertyCPPForwardDeclarations($property, $f) {
 
 function generatePreImplemented($method, $class, $f) {
   if ($method['name'] == '__construct') {
-    fprintf($f, "  public: c_%s *create", strtolower($class['name']));
+    fprintf($f, "  public: c_%s *create", $class['name']);
     generateFuncArgsCPPHeader($method, $f, true);
     fprintf($f, ";\n");
     fprintf($f, "  public: void dynConstruct(CArrRef Params);\n");
@@ -814,7 +849,8 @@ function replaceParams($filename, $header) {
     if ($var_arg) $replace .= 'int _argc, ';
     for ($i = 0; $i < count($args); $i++) {
       $arg = $args[$i];
-      $replace .= param_typename($arg['type'], idx($arg, 'ref')).' '.$arg['name'];
+      $replace .= param_typename($arg['type'],
+                                 idx($arg, 'ref')).' '.$arg['name'];
       if (isset($arg['default'])) {
         if ($header) {
           $replace .= ' = '.addcslashes($arg['default'], '\\');
@@ -989,6 +1025,7 @@ function get_class_doc_comments($class) {
 // phpnet
 
 function phpnet_clean($text) {
+  $text = preg_replace('#<!--UdmComment.*?/UdmComment-->#s', '', $text);
   $text = preg_replace('#<div class="example-contents">.*?</div>#s',
                        '<>', $text);
   $text = preg_replace('#<p class="para">#', '<>', $text);

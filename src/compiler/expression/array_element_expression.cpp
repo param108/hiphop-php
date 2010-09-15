@@ -203,6 +203,13 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
                                            TypePtr type, bool coerce) {
   ConstructPtr self = shared_from_this();
 
+  if (m_offset &&
+      !(m_context & (UnsetContext | ExistContext |
+                     InvokeArgument | LValue | RefValue))) {
+    setEffect(DiagnosticEffect);
+  }
+  if (hasContext(LValue) || hasContext(RefValue)) setEffect(CreateEffect);
+
   // handling $GLOBALS[...]
   if (m_variable->is(Expression::KindOfSimpleVariable)) {
     SimpleVariablePtr var =
@@ -249,7 +256,6 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
       } else {
         vars->setAttribute(VariableTable::ContainsDynamicVariable);
       }
-
 
       if (hasContext(LValue) || hasContext(RefValue)) {
         if (ar->isFirstPass()) {
@@ -300,8 +306,6 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
     clearEffect(AccessorEffect);
   }
 
-  if (hasContext(LValue) || hasContext(RefValue)) setEffect(CreateEffect);
-
   TypePtr ret = propagateTypes(ar, Type::Variant);
   m_implementedType = Type::Variant;
   return ret; // so not to lose values
@@ -342,13 +346,6 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
       cg_printf(")");
     }
   } else {
-    bool linemap = false;
-    if (m_offset &&
-        !(m_context & (UnsetContext | ExistContext | InvokeArgument | LValue |
-                       RefValue))) {
-      // rvalAt() with error = true
-      linemap = outputLineMap(cg, ar, true);
-    }
     TypePtr type = m_variable->getActualType();
     if (hasContext(UnsetContext)) {
       cg_printf("unsetLval(");
@@ -384,19 +381,6 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
       }
       m_offset->outputCPP(cg, ar);
       if (!type || !type->is(Type::KindOfString)) {
-        bool prehashed = false;
-        ScalarExpressionPtr sc =
-          dynamic_pointer_cast<ScalarExpression>(m_offset);
-        if (sc) {
-          int64 hash = sc->getHash();
-          if (hash >= 0) {
-            cg_printf(", 0x%016llXLL", hash);
-            prehashed = true;
-          }
-        }
-        if (!prehashed) {
-          cg_printf(", -1");
-        }
         if (rvalAt) {
           if (!hasContext(ExistContext)) {
             cg_printf(", true"); // raise undefined index error
@@ -411,6 +395,8 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
             cg_printf(", false");
           }
         }
+        ScalarExpressionPtr sc =
+          dynamic_pointer_cast<ScalarExpression>(m_offset);
         if (!hasContext(UnsetContext) && sc && sc->isLiteralString()) {
           String s(sc->getLiteralString());
           int64 n;
@@ -420,7 +406,6 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
         }
       }
       cg_printf(")");
-      if (linemap) cg_printf(")");
     } else {
       cg_printf(".lvalAt()");
     }
@@ -452,10 +437,6 @@ void ArrayElementExpression::outputCPPExistTest(CodeGenerator &cg,
     ScalarExpressionPtr sc =
       dynamic_pointer_cast<ScalarExpression>(m_offset);
     if (sc) {
-      int64 hash = sc->getHash();
-      if (hash >= 0) {
-        cg_printf(", 0x%016llXLL", hash);
-      }
       if (sc->isLiteralString()) {
         String s(sc->getLiteralString());
         int64 n;
@@ -494,12 +475,6 @@ void ArrayElementExpression::outputCPPUnset(CodeGenerator &cg,
     m_offset->outputCPP(cg, ar);
     ScalarExpressionPtr sc =
       dynamic_pointer_cast<ScalarExpression>(m_offset);
-    if (sc) {
-      int64 hash = sc->getHash();
-      if (hash >= 0) {
-        cg_printf(", 0x%016llXLL", hash);
-      }
-    }
     cg_printf(")");
   }
 }

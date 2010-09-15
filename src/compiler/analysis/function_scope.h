@@ -66,6 +66,8 @@ public:
   void setParamDefault(int index, const std::string &value,
                        const std::string &text);
   void setRefParam(int index);
+  bool hasRefParam(int max) const;
+
   void addModifier(int mod);
 
   /**
@@ -79,6 +81,7 @@ public:
   bool isStatic() const;
   bool isAbstract() const;
   bool isFinal() const;
+  bool isMagic() const;
   bool isRefParam(int index) const;
   bool isRefReturn() const { return m_refReturn;}
   bool isDynamicInvoke() const { return m_dynamicInvoke; }
@@ -119,7 +122,7 @@ public:
   /**
    * Get original name of the function, without case being lowered.
    */
-  std::string getOriginalName() const;
+  const std::string &getOriginalName() const;
 
   /**
    * If class method, returns class::name, otherwise just name.
@@ -280,7 +283,9 @@ public:
   static void outputCPPArguments(ExpressionListPtr params,
                                  CodeGenerator &cg, AnalysisResultPtr ar,
                                  int extraArg, bool variableArgument,
-                                 int extraArgArrayId = -1);
+                                 int extraArgArrayId = -1,
+                                 int extraArgArrayHash = -1,
+                                 int extraArgArrayIndex = -1);
 
   /**
    * Only generate arguments that have effects. This is for keeping those
@@ -315,9 +320,10 @@ public:
   void outputCPPCreateImpl(CodeGenerator &cg, AnalysisResultPtr ar);
 
   /**
-   * Output ClassInfo entry of this function.
+   * output functions
    */
   void outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar);
+  void outputMethodWrapper(CodeGenerator &cg, AnalysisResultPtr ar);
 
   FileScopePtr getFileScope() {
     FileScopePtr fs = m_file.lock();

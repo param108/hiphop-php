@@ -25,12 +25,20 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// 1. Static Strings 
+// 1. Static Strings
+extern StaticString s_sys_ss229c615f;
+extern StaticString s_sys_ss4140acbf;
+extern StaticString s_sys_ss0babeace;
+extern StaticString s_sys_ss5977ff8c;
+extern StaticString s_sys_ss1b610cff;
+extern StaticString s_sys_ss21d85096;
 
-// 2. Constants
+// 2. Static Arrays
 
-// 3. Classes
-FORWARD_DECLARE_CLASS(directory);
+// 3. Constants
+
+// 4. Classes
+FORWARD_DECLARE_CLASS(Directory);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

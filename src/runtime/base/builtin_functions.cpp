@@ -20,6 +20,8 @@
 #include <runtime/base/variable_unserializer.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/execution_context.h>
+#include <runtime/eval/debugger/debugger.h>
+#include <runtime/eval/runtime/code_coverage.h>
 #include <runtime/ext/ext_process.h>
 #include <util/logger.h>
 #include <util/util.h>
@@ -299,7 +301,6 @@ void throw_unexpected_argument_type(int argNum, const char *fnName,
   case KindOfInt32:
   case KindOfInt64:   otype = "int";         break;
   case KindOfDouble:  otype = "double";      break;
-  case LiteralString:
   case KindOfStaticString:
   case KindOfString:  otype = "string";      break;
   case KindOfArray:   otype = "array";       break;
@@ -323,20 +324,20 @@ String f_serialize(CVarRef value) {
   return vs.serialize(value, true);
 }
 
-Variant f_unserialize(CStrRef str) {
+Variant unserialize_ex(CStrRef str, VariableUnserializer::Type type) {
   if (str.empty()) {
     return false;
   }
 
   istringstream in(std::string(str.data(), str.size()));
-  VariableUnserializer vu(in);
+  VariableUnserializer vu(in, type);
   Variant v;
   try {
     v = vu.unserialize();
   } catch (Exception &e) {
     raise_notice("Unable to unserialize: [%s]. [%s] %s.", (const char *)str,
-                    e.getStackTrace().hexEncode().c_str(),
-                    e.getMessage().c_str());
+                 e.getStackTrace().hexEncode().c_str(),
+                 e.getMessage().c_str());
     return false;
   }
   return v;
@@ -349,7 +350,7 @@ String concat3(CStrRef s1, CStrRef s2, CStrRef s3) {
   int len = len1 + len2 + len3;
   char *buf = (char *)malloc(len + 1);
   if (buf == NULL) {
-    throw FatalErrorException("malloc failed: %d", len);
+    throw FatalErrorException(0, "malloc failed: %d", len);
   }
   memcpy(buf, s1.data(), len1);
   memcpy(buf + len1, s2.data(), len2);
@@ -372,7 +373,7 @@ String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4) {
   int len = len1 + len2 + len3 + len4;
   char *buf = (char *)malloc(len + 1);
   if (buf == NULL) {
-    throw FatalErrorException("malloc failed: %d", len);
+    throw FatalErrorException(0, "malloc failed: %d", len);
   }
   memcpy(buf, s1.data(), len1);
   memcpy(buf + len1, s2.data(), len2);
@@ -397,7 +398,7 @@ String concat5(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5) {
   int len = len1 + len2 + len3 + len4 + len5;
   char *buf = (char *)malloc(len + 1);
   if (buf == NULL) {
-    throw FatalErrorException("malloc failed: %d", len);
+    throw FatalErrorException(0, "malloc failed: %d", len);
   }
   memcpy(buf, s1.data(), len1);
   memcpy(buf + len1, s2.data(), len2);
@@ -425,7 +426,7 @@ String concat6(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5,
   int len = len1 + len2 + len3 + len4 + len5 + len6;
   char *buf = (char *)malloc(len + 1);
   if (buf == NULL) {
-    throw FatalErrorException("malloc failed: %d", len);
+    throw FatalErrorException(0, "malloc failed: %d", len);
   }
   memcpy(buf, s1.data(), len1);
   memcpy(buf + len1, s2.data(), len2);
@@ -443,59 +444,46 @@ String concat6(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5,
   #endif
 }
 
-String concat_assign(ObjectOffset v1, CStrRef s2) {
-  Variant &v = v1.lval();
-  String s1 = v.toString();
-  s1 += s2;
-  #ifdef TAINTED
-  propagate_tainting2(s1, s2, s1);
-  #endif
-  v1 = s1;
-  return s1;
+bool empty(CVarRef v, bool    offset) {
+  return empty(v, Variant(offset));
+}
+bool empty(CVarRef v, char    offset) {
+  return empty(v, Variant(offset));
+}
+bool empty(CVarRef v, short   offset) {
+  return empty(v, Variant(offset));
+}
+bool empty(CVarRef v, int     offset) {
+  return empty(v, Variant(offset));
+}
+bool empty(CVarRef v, int64   offset) {
+  return empty(v, Variant(offset));
+}
+bool empty(CVarRef v, double  offset) {
+  return empty(v, Variant(offset));
+}
+bool empty(CVarRef v, CArrRef offset) {
+  return empty(v, Variant(offset));
+}
+bool empty(CVarRef v, CObjRef offset) {
+  return empty(v, Variant(offset));
 }
 
-bool empty(CVarRef v, bool    offset, int64 prehash /* = -1 */) {
-  return empty(v, Variant(offset), prehash);
-}
-bool empty(CVarRef v, char    offset, int64 prehash /* = -1 */) {
-  return empty(v, Variant(offset), prehash);
-}
-bool empty(CVarRef v, short   offset, int64 prehash /* = -1 */) {
-  return empty(v, Variant(offset), prehash);
-}
-bool empty(CVarRef v, int     offset, int64 prehash /* = -1 */) {
-  return empty(v, Variant(offset), prehash);
-}
-bool empty(CVarRef v, int64   offset, int64 prehash /* = -1 */) {
-  return empty(v, Variant(offset), prehash);
-}
-bool empty(CVarRef v, double  offset, int64 prehash /* = -1 */) {
-  return empty(v, Variant(offset), prehash);
-}
-bool empty(CVarRef v, CArrRef offset, int64 prehash /* = -1 */) {
-  return empty(v, Variant(offset), prehash);
-}
-bool empty(CVarRef v, CObjRef offset, int64 prehash /* = -1 */) {
-  return empty(v, Variant(offset), prehash);
-}
-
-bool empty(CVarRef v, litstr offset, int64 prehash /* = -1 */,
-           bool isString /* = false */) {
+bool empty(CVarRef v, litstr offset, bool isString /* = false */) {
   if (!v.isArray()) {
-    return empty(v, Variant(offset), prehash);
+    return empty(v, Variant(offset));
   }
-  return !toBoolean(v.rvalAt(offset, prehash, false, isString));
+  return !toBoolean(v.rvalAt(offset, false, isString));
 }
 
-bool empty(CVarRef v, CStrRef offset, int64 prehash /* = -1 */,
-           bool isString /* = false */) {
+bool empty(CVarRef v, CStrRef offset, bool isString /* = false */) {
   if (!v.isArray()) {
-    return empty(v, Variant(offset), prehash);
+    return empty(v, Variant(offset));
   }
-  return !toBoolean(v.rvalAt(offset, prehash, false, isString));
+  return !toBoolean(v.rvalAt(offset, false, isString));
 }
 
-bool empty(CVarRef v, CVarRef offset, int64 prehash /* = -1 */) {
+bool empty(CVarRef v, CVarRef offset) {
   if (v.is(KindOfObject)) {
     if (!v.getArrayAccess()->o_invoke(s_offsetExists, Array::Create(offset))) {
       return true;
@@ -507,35 +495,35 @@ bool empty(CVarRef v, CVarRef offset, int64 prehash /* = -1 */) {
       return true;
     }
   }
-  return !toBoolean(v.rvalAt(offset, prehash));
+  return !toBoolean(v.rvalAt(offset));
 }
 
-bool isset(CVarRef v, bool    offset, int64 prehash /* = -1 */) {
-  return isset(v, Variant(offset), prehash);
+bool isset(CVarRef v, bool    offset) {
+  return isset(v, Variant(offset));
 }
-bool isset(CVarRef v, char    offset, int64 prehash /* = -1 */) {
-  return isset(v, Variant(offset), prehash);
+bool isset(CVarRef v, char    offset) {
+  return isset(v, Variant(offset));
 }
-bool isset(CVarRef v, short   offset, int64 prehash /* = -1 */) {
-  return isset(v, Variant(offset), prehash);
+bool isset(CVarRef v, short   offset) {
+  return isset(v, Variant(offset));
 }
-bool isset(CVarRef v, int     offset, int64 prehash /* = -1 */) {
-  return isset(v, Variant(offset), prehash);
+bool isset(CVarRef v, int     offset) {
+  return isset(v, Variant(offset));
 }
-bool isset(CVarRef v, int64   offset, int64 prehash /* = -1 */) {
-  return isset(v, Variant(offset), prehash);
+bool isset(CVarRef v, int64   offset) {
+  return isset(v, Variant(offset));
 }
-bool isset(CVarRef v, double  offset, int64 prehash /* = -1 */) {
-  return isset(v, Variant(offset), prehash);
+bool isset(CVarRef v, double  offset) {
+  return isset(v, Variant(offset));
 }
-bool isset(CVarRef v, CArrRef offset, int64 prehash /* = -1 */) {
-  return isset(v, Variant(offset), prehash);
+bool isset(CVarRef v, CArrRef offset) {
+  return isset(v, Variant(offset));
 }
-bool isset(CVarRef v, CObjRef offset, int64 prehash /* = -1 */) {
-  return isset(v, Variant(offset), prehash);
+bool isset(CVarRef v, CObjRef offset) {
+  return isset(v, Variant(offset));
 }
 
-bool isset(CVarRef v, CVarRef offset, int64 prehash /* = -1 */) {
+bool isset(CVarRef v, CVarRef offset) {
   if (v.is(KindOfObject)) {
     return v.getArrayAccess()->o_invoke(s_offsetExists,
                                         Array::Create(offset), -1);
@@ -544,23 +532,21 @@ bool isset(CVarRef v, CVarRef offset, int64 prehash /* = -1 */) {
     int pos = offset.toInt32();
     return pos >= 0 && pos < v.toString().size();
   }
-  return isset(v.rvalAt(offset, prehash));
+  return isset(v.rvalAt(offset));
 }
 
-bool isset(CVarRef v, litstr offset, int64 prehash /* = -1 */,
-           bool isString /* = false */) {
+bool isset(CVarRef v, litstr offset, bool isString /* = false */) {
   if (v.is(KindOfObject) || v.isString()) {
-    return isset(v, Variant(offset), prehash);
+    return isset(v, Variant(offset));
   }
-  return isset(v.rvalAt(offset, prehash, false, isString));
+  return isset(v.rvalAt(offset, false, isString));
 }
 
-bool isset(CVarRef v, CStrRef offset, int64 prehash /* = -1 */,
-           bool isString /* = false */) {
+bool isset(CVarRef v, CStrRef offset, bool isString /* = false */) {
   if (v.is(KindOfObject) || v.isString()) {
-    return isset(v, Variant(offset), prehash);
+    return isset(v, Variant(offset));
   }
-  return isset(v.rvalAt(offset, prehash, false, isString));
+  return isset(v.rvalAt(offset, false, isString));
 }
 
 String get_source_filename(litstr path) {
@@ -805,6 +791,34 @@ Variant invoke_static_method_bind_mil(CStrRef s,
   }
   return invoke_static_method_bind(s, methodIndex, method, params, fatal);
 
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// debugger and code coverage instrumentation
+
+void throw_exception(CObjRef e) {
+  if (!Eval::Debugger::InterruptException(e)) return;
+  throw e;
+}
+
+bool set_line(int line0, int char0 /* = 0 */, int line1 /* = 0 */,
+              int char1 /* = 0 */) {
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+  FrameInjection *frame = ti->m_top;
+  if (frame) {
+    frame->setLine(line0);
+    if (RuntimeOption::EnableDebugger && ti->m_reqInjectionData.debugger) {
+      Eval::InterruptSite site(frame, Object(), char0, line1, char1);
+      Eval::Debugger::InterruptFileLine(site);
+      if (site.isJumping()) {
+        return false;
+      }
+    }
+    if (RuntimeOption::RecordCodeCoverage) {
+      Eval::CodeCoverage::Record(frame->getFileName().data(), line0, line1);
+    }
+  }
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

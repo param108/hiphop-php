@@ -231,8 +231,6 @@ encodeStatic s_defaultEncoding[] = {
    to_zval_long, to_xml_long},
   {KindOfDouble, XSD_FLOAT_STRING, XSD_NAMESPACE,
    to_zval_double, to_xml_double},
-  {LiteralString, XSD_STRING_STRING, XSD_NAMESPACE,
-   to_zval_string, to_xml_string},
   {KindOfStaticString, XSD_STRING_STRING, XSD_NAMESPACE,
    to_zval_string, to_xml_string},
   {KindOfString, XSD_STRING_STRING, XSD_NAMESPACE,
@@ -541,7 +539,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, CVarRef data, int style,
   /* Special handling of class SoapVar */
   if (data.isObject() && data.toObject().instanceof("SoapVar")) {
     encodePtr enc;
-    c_soapvar *p = data.toObject().getTyped<c_soapvar>();
+    c_SoapVar *p = data.toObject().getTyped<c_SoapVar>();
     if (!p->m_ns.empty()) {
       enc = get_encoder(SOAP_GLOBAL(sdl), p->m_ns.data(), p->m_stype.data());
     } else {
@@ -637,7 +635,7 @@ static Variant master_to_zval_int(encodePtr encode, xmlNodePtr data) {
       if (type_attr) {
         string ns, cptype;
         parse_namespace(type_attr->children->content, cptype, ns);
-        xmlNsPtr nsptr = xmlSearchNs(data->doc, data, BAD_CAST(ns.data()));
+        xmlNsPtr nsptr = xmlSearchNs(data->doc, data, NS_STRING(ns));
         string nscat;
         if (nsptr) {
           nscat = (char*)nsptr->href;
@@ -1149,20 +1147,21 @@ static xmlNodePtr to_xml_null(encodeTypePtr type, CVarRef data, int style,
 
 static bool get_zval_property(Variant &object, const char* name,
                               Variant *ret = NULL) {
+  String sname(name);
   if (object.isObject()) {
     Object obj = object.toObject();
-    if (!obj->o_exists(name, -1)) {
-      return false;
+    if (Variant *t = obj->o_weakLval(sname)) {
+      if (ret) *ret = ref(*t);
+      return true;
     }
-    if (ret) *ret = ref(obj->o_lval(name, -1));
-    return true;
+    return false;
   }
   if (object.isArray()) {
     Array arr = object.toArray();
-    if (!arr.exists(name)) {
+    if (!arr.exists(sname)) {
       return false;
     }
-    if (ret) *ret = ref(object.lvalAt(name));
+    if (ret) *ret = ref(object.lvalAt(sname));
     return true;
   }
   return false;
@@ -1178,7 +1177,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
       if (!any.isNull() && !any.isArray()) {
         Array arr = Array::Create();
         if (name) {
-          arr.set(name, any);
+          arr.set(String(name, CopyString), any);
         } else {
           arr.append(any);
         }
@@ -1222,7 +1221,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
             }
             el.append(val);
           } else {
-            any.set(name, val);
+            any.set(String(name, CopyString), val);
           }
         } else {
           any.append(val);
@@ -1233,7 +1232,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
     node = node->next;
   }
   if (any) {
-    ret.toObject()->o_set(name ? name : "any", -1, any);
+    ret.toObject()->o_set(name ? String(name, CopyString) : "any", any);
   }
 }
 
@@ -1413,6 +1412,7 @@ static Variant to_zval_object_ex(encodeTypePtr type, xmlNodePtr data,
           return ret;
         }
         redo_any = get_zval_property(ret, "any");
+        ret.toObject()->set("any", null);
       } else {
         if (soap_check_xml_ref(ret, data)) {
           return ret;
@@ -1433,9 +1433,7 @@ static Variant to_zval_object_ex(encodeTypePtr type, xmlNodePtr data,
       }
       model_to_zval_object(ret, sdlType->model, data, sdl);
       if (redo_any) {
-        if (!get_zval_property(ret, "any")) {
-          model_to_zval_any(ret, data->children);
-        }
+        model_to_zval_any(ret, data->children);
       }
     }
     if (!sdlType->attributes.empty()) {
@@ -2301,7 +2299,7 @@ static Variant to_zval_array(encodeTypePtr type, xmlNodePtr data) {
     xmlNsPtr nsptr;
     string type, ns;
     parse_namespace(attr->children->content, type, ns);
-    nsptr = xmlSearchNs(attr->doc, attr->parent, BAD_CAST(ns.data()));
+    nsptr = xmlSearchNs(attr->doc, attr->parent, NS_STRING(ns));
 
     String stype(type);
     char *end = const_cast<char*>(strrchr(stype.data(), '['));
@@ -2320,7 +2318,7 @@ static Variant to_zval_array(encodeTypePtr type, xmlNodePtr data) {
     string type, ns;
     parse_namespace(attr->children->content, type, ns);
     xmlNsPtr nsptr;
-    nsptr = xmlSearchNs(attr->doc, attr->parent, BAD_CAST(ns.data()));
+    nsptr = xmlSearchNs(attr->doc, attr->parent, NS_STRING(ns));
     if (nsptr != NULL) {
       enc = get_encoder(SOAP_GLOBAL(sdl), (char*)nsptr->href, type.data());
     }
@@ -2617,14 +2615,14 @@ static Variant guess_zval_convert(encodeTypePtr type, xmlNodePtr data) {
   }
   ret = master_to_zval_int(enc, data);
   if (SOAP_GLOBAL(sdl) && type_name && enc->details.sdl_type) {
-    c_soapvar *soapvar = NEW(c_soapvar)();
+    c_SoapVar *soapvar = NEW(c_SoapVar)();
     soapvar->m_type = enc->details.type;
     soapvar->m_value = ret;
 
     string ns, cptype;
     parse_namespace(type_name, cptype, ns);
 
-    xmlNsPtr nsptr = xmlSearchNs(data->doc, data, BAD_CAST(ns.data()));
+    xmlNsPtr nsptr = xmlSearchNs(data->doc, data, NS_STRING(ns));
     soapvar->m_stype = cptype;
     if (nsptr) {
       soapvar->m_ns = String((char*)nsptr->href, CopyString);
@@ -3220,7 +3218,7 @@ static encodePtr get_array_type(xmlNodePtr node, CVarRef array,
     Variant tmp = iter.second();
 
     if (tmp.isObject() && tmp.toObject().instanceof("SoapVar")) {
-      c_soapvar *var = tmp.toObject().getTyped<c_soapvar>();
+      c_SoapVar *var = tmp.toObject().getTyped<c_SoapVar>();
       cur_type = var->m_type;
       if (!var->m_stype.empty()) {
         cur_stype = var->m_stype.c_str();
@@ -3238,8 +3236,7 @@ static encodePtr get_array_type(xmlNodePtr node, CVarRef array,
       cur_ns = NULL;
     } else {
       cur_type = tmp.getType();
-      if (cur_type == LiteralString ||
-          cur_type == KindOfStaticString) {
+      if (cur_type == KindOfStaticString) {
         cur_type = KindOfString;
       }
       cur_stype = NULL;

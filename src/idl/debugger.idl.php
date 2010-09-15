@@ -12,7 +12,8 @@
 // Preamble: C++ code inserted at beginning of ext_{name}.h
 
 DefinePreamble(<<<CPP
-#include <runtime/eval/debugger/debugger_client.h>#include <runtime/eval/debugger/debugger_proxy.h>
+#include <runtime/eval/debugger/debugger_client.h>
+#include <runtime/eval/debugger/debugger_proxy.h>
 CPP
 );
 
@@ -80,6 +81,24 @@ DefineFunction(
     'return' => array(
       'type'   => StringMap,
       'desc'   => "A map of commands and their PHP classes.",
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "hphpd_break",
+    'desc'   => "Sets a hard breakpoint. When a debugger is running, this line of code will break into debugger, if condition is met. If there is no debugger that's attached, it will not do anything.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => null,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "condition",
+        'type'   => Boolean,
+        'value'  => "true",
+        'desc'   => "If true, break, otherwise, continue.",
+      ),
     ),
   ));
 
@@ -381,10 +400,22 @@ DefineFunction(
         'desc'   => "PHP source code to print.",
       ),
       array(
+        'name'   => "highlight_line",
+        'type'   => Int32,
+        'value'  => "0",
+        'desc'   => "Which line to focus or highlight.",
+      ),
+      array(
         'name'   => "start_line_no",
         'type'   => Int32,
         'value'  => "0",
         'desc'   => "Starting line number. 0 for no line no.",
+      ),
+      array(
+        'name'   => "end_line_no",
+        'type'   => Int32,
+        'value'  => "0",
+        'desc'   => "End line number. 0 for no end line no.",
       ),
     ),
   ));

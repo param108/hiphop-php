@@ -20,6 +20,7 @@
 #include <runtime/eval/debugger/debugger_thrift_buffer.h>
 #include <runtime/base/preg.h>
 #include <runtime/base/execution_context.h>
+#include <runtime/base/class_info.h>
 
 using namespace std;
 using namespace boost;
@@ -55,7 +56,45 @@ int InterruptSite::getFileLen() const {
   return m_file_strlen;
 }
 
+std::string InterruptSite::desc() const {
+  string ret;
+  if (m_exception.isNull()) {
+    ret = "Break";
+  } else if (m_exception.isObject()) {
+    ret = "Exception thrown";
+  } else {
+    ret = "Error occurred";
+  }
+
+  const char *cls = getClass();
+  const char *func = getFunction();
+  if (func && *func) {
+    ret += " at ";
+    if (cls && *cls) {
+      ret += cls;
+      ret += "::";
+    }
+    ret += func;
+    ret += "()";
+  }
+
+  string file = getFile();
+  int line0 = getLine0();
+  if (line0) {
+    ret += " on line " + lexical_cast<string>(line0);
+    if (!file.empty()) {
+      ret += " of " + file;
+    }
+  } else if (!file.empty()) {
+    ret += " in " + file;
+  }
+
+  return ret;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
+
+const char *BreakPointInfo::ErrorClassName = "@";
 
 const char *BreakPointInfo::GetInterruptName(InterruptType interrupt) {
   switch (interrupt) {
@@ -71,24 +110,27 @@ const char *BreakPointInfo::GetInterruptName(InterruptType interrupt) {
 
 BreakPointInfo::BreakPointInfo(bool regex, State state,
                                const std::string &file, int line)
-    : m_state(state), m_valid(true), m_interrupt(BreakPointReached),
+    : m_index(0), m_state(state), m_valid(true),
+      m_interrupt(BreakPointReached),
       m_file(file), m_line1(line), m_line2(line),
       m_regex(regex), m_check(false) {
+  createIndex();
 }
 
 BreakPointInfo::BreakPointInfo(bool regex, State state,
                                InterruptType interrupt,
                                const std::string &url)
-    : m_state(state), m_valid(true), m_interrupt(interrupt),
+    : m_index(0), m_state(state), m_valid(true), m_interrupt(interrupt),
       m_line1(0), m_line2(0), m_url(url),
       m_regex(regex), m_check(false) {
+  createIndex();
 }
 
 BreakPointInfo::BreakPointInfo(bool regex, State state,
                                InterruptType interrupt,
                                const std::string &exp,
                                const std::string &file)
-    : m_state(state), m_valid(true), m_interrupt(interrupt),
+    : m_index(0), m_state(state), m_valid(true), m_interrupt(interrupt),
       m_line1(0), m_line2(0),
       m_regex(regex), m_check(false) {
   if (m_interrupt == ExceptionThrown) {
@@ -99,9 +141,22 @@ BreakPointInfo::BreakPointInfo(bool regex, State state,
   } else {
     parseBreakPointReached(exp, file);
   }
+  createIndex();
+}
+
+static int s_max_breakpoint_index = 0;
+void BreakPointInfo::createIndex() {
+  m_index = ++s_max_breakpoint_index;
+}
+
+BreakPointInfo::~BreakPointInfo() {
+  if (m_index && m_index == s_max_breakpoint_index) {
+    --s_max_breakpoint_index;
+  }
 }
 
 void BreakPointInfo::sendImpl(DebuggerThriftBuffer &thrift) {
+  thrift.write(m_index);
   thrift.write(m_state);
   thrift.write(m_interrupt);
   thrift.write(m_file);
@@ -120,6 +175,7 @@ void BreakPointInfo::sendImpl(DebuggerThriftBuffer &thrift) {
 }
 
 void BreakPointInfo::recvImpl(DebuggerThriftBuffer &thrift) {
+  thrift.read(m_index);
   thrift.read(m_state);
   thrift.read(m_interrupt);
   thrift.read(m_file);
@@ -154,9 +210,19 @@ void BreakPointInfo::toggle() {
 }
 
 bool BreakPointInfo::valid() {
-  return m_valid &&
-    ((m_line1 && m_line2) || !m_file.empty() || !m_funcs.empty() ||
-     (m_interrupt != BreakPointReached && m_interrupt != ExceptionThrown));
+  if (m_valid) {
+    switch (m_interrupt) {
+      case BreakPointReached:
+        return (m_line1 && m_line2) || !m_file.empty() || !m_funcs.empty();
+      case ExceptionThrown:
+        return !m_class.empty();
+      case RequestStarted:
+      case RequestEnded:
+      case PSPEnded:
+        return true;
+    }
+  }
+  return false;
 }
 
 bool BreakPointInfo::same(BreakPointInfoPtr bpi) {
@@ -178,7 +244,7 @@ bool BreakPointInfo::match(InterruptType interrupt, InterruptSite &site) {
       case BreakPointReached:
         return
           Match(site.getFile(), site.getFileLen(), m_file, m_regex, false) &&
-          checkLines(site.getLine()) && checkStack(site) &&
+          checkLines(site.getLine0()) && checkStack(site) &&
           checkUrl(site.url()) && checkFrame(site.getFrame()) && checkClause();
       default:
         break;
@@ -294,14 +360,18 @@ std::string BreakPointInfo::descBreakPointReached() const {
 std::string BreakPointInfo::descExceptionThrown() const {
   string ret;
   if (!m_namespace.empty() || !m_class.empty()) {
-    ret = "right before throwing ";
-    if (!m_class.empty()) {
-      if (!m_namespace.empty()) {
-        ret += regex(m_namespace) + "::";
-      }
-      ret += regex(m_class);
+    if (m_class == ErrorClassName) {
+      ret = "right after an error";
     } else {
-      ret += "any exceptions in namespace " + regex(m_namespace);
+      ret = "right before throwing ";
+      if (!m_class.empty()) {
+        if (!m_namespace.empty()) {
+          ret += regex(m_namespace) + "::";
+        }
+        ret += regex(m_class);
+      } else {
+        ret += "any exceptions in namespace " + regex(m_namespace);
+      }
     }
   }
   return ret;
@@ -337,6 +407,8 @@ std::string BreakPointInfo::desc() const {
 }
 
 bool BreakPointInfo::parseLines(const std::string &token) {
+  if (token.empty()) return false;
+
   for (unsigned int i = 0; i < token.size(); i++) {
     char ch = token[i];
     if ((ch < '0' || ch > '9') && ch != '-') {
@@ -397,6 +469,7 @@ void BreakPointInfo::parseBreakPointReached(const std::string &exp,
   size_t pos = input.find('@');
   if (pos != string::npos) {
     m_url = input.substr(pos + 1);
+    if (pos == 0) return;
     input = input.substr(0, pos);
   }
 
@@ -488,10 +561,15 @@ void BreakPointInfo::parseExceptionThrown(const std::string &exp) {
 
   pos = input.find("::");
   if (pos != string::npos) {
-    m_namespace = input.substr(0, pos);
+    if (pos) {
+      m_namespace = input.substr(0, pos);
+    }
     m_class = input.substr(pos + 2);
   } else {
     m_class = input;
+  }
+  if (strncasecmp(m_class.c_str(), "error", m_class.size()) == 0) {
+    m_class = ErrorClassName;
   }
 }
 
@@ -500,6 +578,28 @@ bool BreakPointInfo::MatchFile(const char *haystack, int haystack_len,
   int pos = haystack_len - needle.size();
   return (pos == 0 || haystack[pos - 1] == '/') &&
     strcasecmp(haystack + pos, needle.c_str()) == 0;
+}
+
+bool BreakPointInfo::MatchClass(const char *fcls, const std::string &bcls,
+                                bool regex, const char *func) {
+  if (bcls.empty()) return true;
+  if (!fcls || !*fcls) return false;
+  if (regex || !func || !*func) {
+    return Match(fcls, 0, bcls, true, true);
+  }
+  if (strcasecmp(fcls, bcls.c_str()) == 0) {
+    return true;
+  }
+
+  const ClassInfo *clsInfo = ClassInfo::FindClass(fcls);
+  if (clsInfo) {
+    ClassInfo *foundClass;
+    if (clsInfo->hasMethod(func, foundClass) && foundClass) {
+      const char *name = foundClass->getName();
+      return strcasecmp(fcls, name) == 0;
+    }
+  }
+  return false;
 }
 
 bool BreakPointInfo::Match(const char *haystack, int haystack_len,
@@ -526,13 +626,17 @@ bool BreakPointInfo::Match(const char *haystack, int haystack_len,
   return r.same(1);
 }
 
-bool BreakPointInfo::checkException(CObjRef e) {
+bool BreakPointInfo::checkException(CVarRef e) {
   ASSERT(!e.isNull());
-  if (m_regex) {
-    return Match(m_class.c_str(), m_class.size(), e->o_getClassName().data(),
-                 true, false);
+  if (e.isObject()) {
+    if (m_regex) {
+      return Match(m_class.c_str(), m_class.size(),
+                   e.toObject()->o_getClassName().data(), true, false);
+    }
+    return e.instanceof(m_class.c_str());
   }
-  return e.instanceof(m_class.c_str());
+  return Match(m_class.c_str(), m_class.size(), ErrorClassName, m_regex,
+               false);
 }
 
 bool BreakPointInfo::checkUrl(std::string &url) {
@@ -561,8 +665,9 @@ bool BreakPointInfo::checkStack(InterruptSite &site) {
   if (m_funcs.empty()) return true;
 
   if (!Match(site.getNamespace(), 0, m_funcs[0]->m_namespace, m_regex, true) ||
-      !Match(site.getClass(),     0, m_funcs[0]->m_class,     m_regex, true) ||
-      !Match(site.getFunction(),  0, m_funcs[0]->m_function,  m_regex, true)) {
+      !Match(site.getFunction(),  0, m_funcs[0]->m_function,  m_regex, true) ||
+      !MatchClass(site.getClass(), m_funcs[0]->m_class, m_regex,
+                  site.getFunction())) {
     return false;
   }
 
@@ -572,10 +677,10 @@ bool BreakPointInfo::checkStack(InterruptSite &site) {
       InterruptSite prevSite(f);
       if (Match(prevSite.getNamespace(), 0,
                 m_funcs[i]->m_namespace, m_regex, true) &&
-          Match(prevSite.getClass(), 0,
-                m_funcs[i]->m_class, m_regex, true) &&
           Match(prevSite.getFunction(), 0,
-                m_funcs[i]->m_function, m_regex, true)) {
+                m_funcs[i]->m_function, m_regex, true) &&
+          MatchClass(prevSite.getClass(), m_funcs[i]->m_class, m_regex,
+                     site.getFunction())) {
         break;
       }
     }
@@ -605,7 +710,7 @@ bool BreakPointInfo::checkClause() {
       }
     }
     String output;
-    Variant ret = DebuggerProxy::ExecutePHP(m_php, output);
+    Variant ret = DebuggerProxy::ExecutePHP(m_php, output, false, 0);
     if (m_check) {
       return ret.toBoolean();
     }

@@ -140,10 +140,14 @@ endif
 STATIC_LIB = $(LIB_DIR)/lib$(PROJECT_NAME).a
 SHARED_LIB = $(LIB_DIR)/lib$(PROJECT_NAME).so
 APP_TARGET = $(OUT_TOP)$(PROJECT_NAME)
+
 MONO_TARGETS = $(filter-out $(PROJECT_NAME), $(patsubst %.cpp, %, $(wildcard *.cpp)))
 
 # external shared libraries
 EXTERNAL =
+
+# additional objects that are linked into the static library
+ADDITIONAL_OBJS =
 
 ###############################################################################
 # Compilation
@@ -168,13 +172,11 @@ endif
 endif
 
 PREFIX := $(TIMECMD)$(if $(USE_CCACHE), ccache,$(if $(NO_DISTCC),, distcc))
+ICC_ARGS := -no-ipo -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593
 
-ifndef CXX
-CXX = g++
-endif
-ifndef CC
-CC = gcc
-endif
+CXX := $(if $(USE_ICC),$(ICC)/bin/intel64/icpc $(ICC_ARGS),g++)
+CC = $(if $(USE_ICC),$(ICC)/bin/intel64/icc $(ICC_ARGS),gcc)
+
 P_CXX = $(PREFIX) $(CXX)
 P_CC = $(PREFIX) $(CC)
 # override make default for icpcp case
@@ -227,11 +229,13 @@ CPPFLAGS += \
   -isystem $(EXT_DIR)/libfbi/include \
   -isystem $(EXT_DIR)/readline/include \
   -isystem $(EXT_DIR)/libmemcached/include \
+  -isystem $(EXT_DIR)/jemalloc/include \
+  -isystem $(EXT_DIR)/google-perftools/include \
   -I $(PROJECT_ROOT)/src \
   -I $(PROJECT_ROOT)/src/system/gen \
 
-ifdef USE_JEMALLOC
-CPPFLAGS += -isystem $(EXT_DIR)/jemalloc/include
+ifdef HPHP_DEV
+CPPFLAGS += -isystem $(EXT_DIR)/libpng/include
 endif
 
 ifdef GOOGLE_CPU_PROFILER
@@ -243,9 +247,6 @@ endif
 ifdef GOOGLE_TCMALLOC
 GOOGLE_TOOLS = 1
 endif
-ifdef GOOGLE_TOOLS
-CPPFLAGS += -isystem $(EXT_DIR)/google-perftools/include
-endif
 
 CPPFLAGS += -D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1 -pthread
 CXXFLAGS += -ftemplate-depth-60
@@ -253,10 +254,8 @@ CXXFLAGS += -ftemplate-depth-60
 endif
 
 ifndef NO_WALL
-CXXFLAGS += -Wall -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof
-ifeq ($(findstring g++, $(CXX)), g++)
-CXXFLAGS += -Wno-parentheses
-endif
+CXXFLAGS += -Wall -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof \
+	$(if $(USE_ICC),-w1,-Wno-parentheses)
 endif
 
 ifndef NO_WERROR
@@ -330,6 +329,9 @@ CPPFLAGS += -DSTACK_FRAME_INJECTION
 endif
 ifdef ENABLE_LATE_STATIC_BINDING
 CPPFLAGS += -DENABLE_LATE_STATIC_BINDING
+endif
+ifdef ENABLE_FULL_SETLINE
+CPPFLAGS += -DENABLE_FULL_SETLINE
 endif
 
 ifdef GOOGLE_CPU_PROFILER
@@ -481,7 +483,12 @@ MCC_LIBS = $(EXT_DIR)/libmcc/lib/libmcc.a $(EXT_DIR)/libch/lib/libch.a \
 
 LIBMEMCACHED_LIBS = $(EXT_DIR)/libmemcached/lib/libmemcached.a
 
+ifdef HPHP_DEV 
+GD_LIBS = $(EXT_DIR)/gd/lib/libgd.a $(EXT_DIR)/libpng/lib/libpng.a \
+	-ljpeg -lfreetype -lfontconfig
+else
 GD_LIBS = $(EXT_DIR)/gd/lib/libgd.a -lpng -ljpeg -lfreetype -lfontconfig
+endif
 
 MOZILLA_LIBS = $(EXT_DIR)/mozilla/libmozutil_s.a \
                $(EXT_DIR)/mozilla/libexpat_s.a \
@@ -563,7 +570,7 @@ ALL_LIBS = $(CURL_LIBS) $(PCRE_LIBS) $(BOOST_LIBS) \
 	$(GD_LIBS) $(LIBXML_LIBS) $(FBML_LIBS) $(MBFL_LIBS) \
 	$(MCRYPT_LIBS) $(JEMALLOC_LIBS) $(GOOGLE_LIBS) $(ICU_LIBS) \
 	$(HTTP_LIBS) $(XHP_LIBS) $(TIME_LIBS) $(TBB_LIBS) $(FBI_LIBS) \
-	$(LDAP_LIBS) $(READLINE_LIBS) $(LIBMEMCACHED_LIBS) $(ORACLE_LIBS)
+	$(LDAP_LIBS) $(READLINE_LIBS) $(LIBMEMCACHED_LIBS) $(ORACLE_LIBS) \
 
 LIB_PATHS = $(HPHP_LIB) \
   $(HPHP_TEST_LIB_PATH) \
@@ -595,15 +602,28 @@ LIB_PATHS = $(HPHP_LIB) \
   $(EXT_DIR)/ldap/lib \
   $(EXT_DIR)/libxml2/lib \
 
+ifdef HPHP_DEV 
+LIB_PATHS += $(EXT_DIR)/libpng/lib
+endif
+
 ###############################################################################
 # Dependencies
 
 # This is to make sure "make" without any target will actually "make all".
 overall: all
 
+# Add quiet as a dependent to prevent "nothing to do for... warnings from make"
+.PHONY: quiet
+quiet:
+	@true
+
 # Suppressing no rule errors
 %.d:
-	@true
+	@
+
+# Suppressing errors for missing headers caused by old deps in .d files
+%.h:
+	@
 
 DEPEND_FILES := $(OBJECTS:.o=.d)
 
@@ -718,6 +738,9 @@ SUB_INTERMEDIATE_FILES = $(INTERMEDIATE_FILES)
 
 $(OBJECTS): $(GENERATED_SOURCES)
 
+.PHONY: objects
+objects: $(OBJECTS) quiet
+
 ifdef SHOW_LINK
 
 $(SHARED_LIB): $(OBJECTS)
@@ -725,7 +748,7 @@ $(SHARED_LIB): $(OBJECTS)
 			$(SO_LDFLAGS) -o $@ $(OBJECTS) $(EXTERNAL)
 
 $(STATIC_LIB): $(OBJECTS)
-	$(AR_CMD) $@ $(OBJECTS)
+	$(AR_CMD) $@ $(OBJECTS) $(ADDITIONAL_OBJS)
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 	$(LD_CMD) -o $@ $(LDFLAGS) $< $(LIBS)
@@ -739,7 +762,7 @@ $(SHARED_LIB): $(OBJECTS)
 
 $(STATIC_LIB): $(OBJECTS)
 	@echo 'Linking $@ ...'
-	$(V)$(AR_CMD) $@ $(OBJECTS)
+	$(V)$(AR_CMD) $@ $(OBJECTS) $(ADDITIONAL_OBJS)
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 	@echo 'Linking $@ ...'
@@ -747,17 +770,30 @@ $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 
 endif
 
-.PHONY:out-of-date
+.PHONY:out-of-date do-setup
+
+do-setup: quiet
+
 $(APP_TARGET): $(OBJECTS) $(DEP_LIBS) $(FORCE_RELINK)
 	$(LINK_OBJECTS) $(LINK_LIBS)
 
-.PHONY: $(LIB_TARGETS)
-$(LIB_TARGETS): $(CODEGEN_TARGETS)
+.PHONY: $(LIB_TARGETS) \
+	$(addsuffix -obj, $(LIB_TARGETS) $(PROGRAMS)) \
+	$(addsuffix -setup, $(LIB_TARGETS) $(PROGRAMS))
+
+$(addsuffix -setup, $(PROGRAMS) $(LIB_TARGETS)):
+	$(V)$(MAKE) $(NO_PRINT) -C $(@:-setup=) do-setup
+
+$(addsuffix -obj, $(LIB_TARGETS) $(PROGRAMS)): %-obj : %-setup
+
+$(LIB_TARGETS): % : %-obj $(CODEGEN_TARGETS)
 	$(V)$(MAKE) $(NO_PRINT) -C $@
 
-.PHONY: $(PROGRAMS)
-$(PROGRAMS): $(LIB_TARGETS)
+$(PROGRAMS): % : %-obj $(LIB_TARGETS)
 	$(V)$(MAKE) $(NO_PRINT) -C $@
+
+$(addsuffix -obj, $(PROGRAMS) $(LIB_TARGETS)):
+	$(V)$(MAKE) $(NO_PRINT) -C $(@:-obj=) objects
 
 .PHONY: report
 report:

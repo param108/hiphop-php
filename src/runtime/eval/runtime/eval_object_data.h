@@ -44,19 +44,12 @@ public:
   virtual Array o_toArray() const;
   virtual void o_getArray(Array &props) const;
   virtual void o_setArray(CArrRef props);
-  virtual bool o_exists(CStrRef prop, int64 phash,
-      const char *context, int64 hash) const;
-  virtual Variant o_get(CStrRef prop, int64 phash, bool error,
-      const char *context, int64 hash);
-  virtual Variant o_getUnchecked(CStrRef prop, int64 phash,
-      const char *context, int64 hash);
-  virtual Variant &o_lval(CStrRef prop, int64 phash,
-      const char *context, int64 hash);
-  virtual Variant o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit,
-      const char *context, int64 hash);
+  virtual Variant *o_realProp(CStrRef prop, int flags,
+                              CStrRef context = null_string) const;
   void o_setPrivate(const char *cls, const char *s, int64 hash, CVarRef v);
 
-  DECLARE_INSTANCE_PROP_WRAPPER_OPS
+  virtual Variant o_getError(CStrRef prop, CStrRef context);
+  virtual Variant o_setError(CStrRef prop, CStrRef context);
 
    // methods
   virtual CStrRef o_getClassName() const;
@@ -81,7 +74,6 @@ public:
 
 
   virtual Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
-  virtual Variant doGet(Variant v_name, bool error);
 
   // magic methods
   // __construct is handled in a special way
@@ -95,7 +87,6 @@ public:
   virtual Variant t___set_state(Variant v_properties);
   virtual String t___tostring();
   virtual Variant t___clone();
-  virtual Variant &___lval(Variant v_name);
   virtual Variant &___offsetget_lval(Variant v_name);
 
 protected:

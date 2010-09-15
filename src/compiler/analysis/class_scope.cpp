@@ -70,7 +70,8 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     if (f->getName() == "__construct") setAttribute(HasConstructor);
     else if (f->getName() == "__destruct") setAttribute(HasDestructor);
     else if (f->getName() == "__call") setAttribute(HasUnknownMethodHandler);
-    else if (f->getName() == "__get") setAttribute(HasUnknownPropHandler);
+    else if (f->getName() == "__get") setAttribute(HasUnknownPropGetter);
+    else if (f->getName() == "__set") setAttribute(HasUnknownPropSetter);
     addFunction(ar, f);
   }
   setAttribute(Extension);
@@ -79,7 +80,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
   ASSERT(m_parent.empty() || (!m_bases.empty() && m_bases[0] == m_parent));
 }
 
-std::string ClassScope::getOriginalName() const {
+const std::string &ClassScope::getOriginalName() const {
   if (m_stmt) {
     return dynamic_pointer_cast<InterfaceStatement>(m_stmt)->
       getOriginalName();
@@ -88,7 +89,7 @@ std::string ClassScope::getOriginalName() const {
 }
 
 std::string ClassScope::getId(CodeGenerator &cg) const {
-  string name = cg.formatLabel(getName());
+  string name = cg.formatLabel(getOriginalName());
   if (m_redeclaring < 0) {
     return name;
   }
@@ -503,9 +504,14 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (isInterface()) attribute |= ClassInfo::IsInterface|ClassInfo::IsAbstract;
   if (m_kindOf == KindOfAbstractClass) attribute |= ClassInfo::IsAbstract;
   if (m_kindOf == KindOfFinalClass) attribute |= ClassInfo::IsFinal;
-  if (!m_docComment.empty()) attribute |= ClassInfo::HasDocComment;
   if (needLazyStaticInitializer()) attribute |= ClassInfo::IsLazyInit;
+
   attribute |= m_attributeClassInfo;
+  if (!m_docComment.empty() && Option::GenerateDocComments) {
+    attribute |= ClassInfo::HasDocComment;
+  } else {
+    attribute &= ~ClassInfo::HasDocComment;
+  }
 
   string parent;
   if (!m_parent.empty()) {
@@ -516,10 +522,14 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
       parent = m_parent;
     }
   }
-  cg_printf("(const char *)0x%04X, \"%s\", \"%s\",\n", attribute,
-            getOriginalName().c_str(), parent.c_str());
+  cg_printf("(const char *)0x%04X, \"%s\", \"%s\", \"%s\", (const char *)%d, "
+            "(const char *)%d,\n", attribute,
+            getOriginalName().c_str(), parent.c_str(),
+            m_stmt ? m_stmt->getLocation()->file : "",
+            m_stmt ? m_stmt->getLocation()->line0 : 0,
+            m_stmt ? m_stmt->getLocation()->line1 : 0);
 
-  if (!m_docComment.empty()) {
+  if (!m_docComment.empty() && Option::GenerateDocComments) {
     char *dc = string_cplus_escape(m_docComment.c_str(), m_docComment.size());
     cg_printf("\"%s\",\n", dc);
     free(dc);
@@ -664,13 +674,16 @@ void ClassScope::outputCPPClassJumpTable
   for (JumpTable jt(cg, classes, true, false, false); jt.ready(); jt.next()) {
     const char *clsName = jt.key();
     StringToClassScopePtrVecMap::const_iterator iterClasses =
-      classScopes.find(clsName);
+      classScopes.find(Util::toLower(clsName));
+    bool redeclaring = iterClasses->second[0]->isRedeclaring();
     if (iterClasses != classScopes.end()) {
       cg_printf("%s%s", macro,
-                (iterClasses->second[0]->isRedeclaring()) ? "_REDECLARED" :
+                redeclaring ? "_REDECLARED" :
                 (iterClasses->second[0]->isVolatile()) ? "_VOLATILE" : "");
       cg_printf("(0x%016llXLL, %s%s);\n",
-                hash_string_i(clsName), cg.formatLabel(clsName).c_str(),
+                hash_string_i(clsName),
+                redeclaring ? iterClasses->second[0]->getName().c_str() :
+                cg.formatLabel(clsName).c_str(),
                 methodIndex ? ", methodIndex" : "");
     }
   }
@@ -745,7 +758,8 @@ void ClassScope::outputCPPInvokeStaticMethodImpl
     cg_printf("Variant r;\n");
 
     cg_printf(FMC);
-    cg_printf("method = methodIndexLookupReverse(methodIndex);\n");
+    cg_printf("method = g_bypassMILR ? method : "
+              "methodIndexLookupReverse(methodIndex);\n");
     cg_printf("#endif\n");
     cg_printf("if (eval_invoke_static_method_hook(r, s, method, params, "
         "foundClass)) return r;\n");
@@ -768,7 +782,8 @@ void ClassScope::outputCPPInvokeStaticMethodImpl
     cg_indentEnd("");
     cg_indentBegin("} else {\n");
     cg_printf(FMC);
-    cg_printf("method = methodIndexLookupReverse(methodIndex);\n");
+    cg_printf("method = g_bypassMILR ? method : "
+              "methodIndexLookupReverse(methodIndex);\n");
     cg_printf("#endif\n");
     cg_printf("raise_warning(\"call_user_func to non-existent class's method"
         " %%s::%%s\", s, method);\n");
@@ -836,7 +851,7 @@ void ClassScope::outputCPPGetStaticPropertyImpl
   cg.printf("const ObjectStaticCallbacks * cwo = "
             "get%s_object_static_callbacks(s);\n",
             system ? "_builtin" : "");
-  cg.printf("if (cwo) return cwo->os_get(prop, -1);\n");
+  cg.printf("if (cwo) return cwo->os_get(prop);\n");
   cg.indentEnd("}\n");
 
   if (!system) {
@@ -862,7 +877,7 @@ void ClassScope::outputCPPGetStaticPropertyImpl
   cg.printf("const ObjectStaticCallbacks * cwo = "
             "get%s_object_static_callbacks(s);\n",
             system ? "_builtin" : "");
-  cg.printf("if (cwo) return &cwo->os_lval(prop, -1);\n");
+  cg.printf("if (cwo) return &cwo->os_lval(prop);\n");
   cg.indentEnd("}\n");
 
   if (!system) {
@@ -1004,12 +1019,22 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
   string clsNameStr = getId(cg);
   const char *clsName = clsNameStr.c_str();
   bool dynamicObject = derivesFromRedeclaring() == DirectFromRedeclared;
-  const char *parent = "ObjectData";
-  if (!getParent().empty()) parent = getParent().c_str();
+  string parent = "ObjectData";
+  string parentName = "ObjectData";
+  if (!getParent().empty()) {
+    parentName = getParent();
+    ClassScopePtr cls = ar->findClass(parentName);
+    if (cls) {
+      parent = cls->getId(cg);
+    } else {
+      parent = parentName;
+    }
+  }
 
   if (Option::GenerateCPPMacros) {
     // Constant Lookup Table
-    getVariables()->outputCPPPropertyTable(cg, ar, parent,
+    getVariables()->outputCPPPropertyTable(cg, ar, parent.c_str(),
+                                           parentName.c_str(),
                                            derivesFromRedeclaring());
 
     // If parent is redeclared, you have to go to their class statics object.
@@ -1019,7 +1044,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
       cg.printDeclareGlobals();
       getConstants()->outputCPPJumpTable(cg, ar, !dynamicObject, false);
       cg_printf("return %s->%s%s->%sconstant(s);\n", cg.getGlobals(ar),
-                Option::ClassStaticsObjectPrefix, parent,
+                Option::ClassStaticsObjectPrefix, parentName.c_str(),
                 Option::ObjectStaticPrefix);
       cg_indentEnd("}\n");
     } else {
@@ -1027,8 +1052,8 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
       cg_indentBegin("Variant %s%s::%sconstant(const char *s) {\n",
                      Option::ClassPrefix, clsName, Option::ObjectStaticPrefix);
       getConstants()->outputCPPJumpTable(cg, ar, !dynamicObject, false);
-      cg_printf("return %s%s::%sconstant(s);\n", Option::ClassPrefix, parent,
-                Option::ObjectStaticPrefix);
+      cg_printf("return %s%s::%sconstant(s);\n", Option::ClassPrefix,
+                parent.c_str(), Option::ObjectStaticPrefix);
       cg_indentEnd("}\n");
       cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_CONSTANT_%s", clsName);
     }
@@ -1075,7 +1100,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
   if (derivesFromRedeclaring()) {
     cg_printf("clone->setParent(parent->clone());\n");
   } else if(!getParent().empty()) {
-    cg_printf("%s%s::cloneSet(clone);\n", Option::ClassPrefix, parent);
+    cg_printf("%s%s::cloneSet(clone);\n", Option::ClassPrefix, parent.c_str());
   } else {
     cg_printf("ObjectData::cloneSet(clone);\n");
   }
@@ -1088,14 +1113,6 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
                    Option::ClassPrefix, clsName);
     cg_printf("return t___call(v_name, !v_arguments.isNull() ? "
               "v_arguments : Variant(Array::Create()));\n");
-    cg_indentEnd("}\n");
-  }
-
-  // doGet
-  if (getAttribute(ClassScope::HasUnknownPropHandler)) {
-    cg_indentBegin("Variant %s%s::doGet(Variant v_name, bool error) {\n",
-                   Option::ClassPrefix, clsName);
-    cg_printf("return t___get(v_name);\n");
     cg_indentEnd("}\n");
   }
 
@@ -1282,20 +1299,31 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
   scope += Option::ClassPrefix;
   scope += id;
   scope += "::";
-  string parent;
-  string parentName = m_parent.empty() ? string("ObjectData") : m_parent;
+  string parentExpr, parent, parentName;
+  if (m_parent.empty()) {
+    parentName = "ObjectData";
+    parent = "ObjectData";
+  } else {
+    parentName = m_parent;
+    ClassScopePtr cls = ar->findClass(m_parent);
+    if (cls) {
+      parent = cls->getId(cg);
+    } else {
+      parent = parentName;
+    }
+  }
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
   bool needGlobals = false;
   if (dynamicObject) {
     if (staticOnly) {
       needGlobals = true;
-      parent = string("g->") + Option::ClassStaticsObjectPrefix +
+      parentExpr = string("g->") + Option::ClassStaticsObjectPrefix +
         parentName + "->";
     } else {
-      parent = string("parent->");
+      parentExpr = string("parent->");
     }
   } else {
-    parent = string(Option::ClassPrefix) + parentName + "::";
+    parentExpr = string(Option::ClassPrefix) + parent + "::";
   }
   string invokeName;
   invokeName += staticOnly ? Option::ObjectStaticPrefix : Option::ObjectPrefix;
@@ -1305,7 +1333,7 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
     invokeName += "_from_eval";
   }
 
-  parent += invokeName;
+  parentExpr += invokeName;
   StringToFunctionScopePtrVecMap funcScopes;
   if (Option::FlattenInvoke) {
     StringToFunctionScopePtrMap fss;
@@ -1382,7 +1410,7 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
       forEval, false /* hash */);
   cg_printf("#endif\n");
   if (needGlobals) cg.printDeclareGlobals();
-  string base = parent;
+  string base = parentExpr;
   if (Option::FlattenInvoke && !needsInvokeParent(ar, false)) {
     base = m_derivesFromRedeclaring ? "c_DynamicObjectData" : "c_ObjectData";
     base += "::" + invokeName;
@@ -1391,9 +1419,10 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
   if (forEval) {
     if (staticOnly) {
       cg_printf("return %s(c, s, env, caller, hash, fatal);\n",
-                parent.c_str());
+                parentExpr.c_str());
     } else {
-      cg_printf("return %s(s, env, caller, hash, fatal);\n", parent.c_str());
+      cg_printf("return %s(s, env, caller, hash, fatal);\n",
+                parentExpr.c_str());
     }
     cg_indentEnd("}\n");
   } else {
@@ -1467,4 +1496,18 @@ void ClassScope::OutputVolatileCheckBegin(CodeGenerator &cg,
 
 void ClassScope::OutputVolatileCheckEnd(CodeGenerator &cg) {
   cg_printf("))");
+}
+
+void ClassScope::outputMethodWrappers(CodeGenerator &cg,
+                                      AnalysisResultPtr ar) {
+  if (!isInterface()) {
+    ClassScopePtr self = static_pointer_cast<ClassScope>(shared_from_this());
+    for (unsigned int i = 0; i < m_functionsVec.size(); i++) {
+      FunctionScopePtr func = m_functionsVec[i];
+      if (func->isPublic() && !func->isConstructor(self) &&
+          !func->isMagic() && !func->isAbstract()) {
+        func->outputMethodWrapper(cg, ar);
+      }
+    }
+  }
 }

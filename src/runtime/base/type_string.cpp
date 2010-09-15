@@ -56,7 +56,7 @@ String::String(int n) {
 
   buf = (char*)malloc(len + 1);
   memcpy(buf, p, len + 1); // including the null terminator.
-  SmartPtr<StringData>::operator=(NEW(StringData)(buf, AttachString));
+  SmartPtr<StringData>::operator=(NEW(StringData)(buf, len, AttachString));
 }
 
 String::String(int64 n) {
@@ -71,7 +71,7 @@ String::String(int64 n) {
 
   buf = (char*)malloc(len + 1);
   memcpy(buf, p, len + 1); // including the null terminator.
-  m_px = NEW(StringData)(buf, AttachString);
+  m_px = NEW(StringData)(buf, len, AttachString);
   m_px->incRefCount();
 }
 
@@ -82,9 +82,6 @@ String::String(double n) {
   m_px = NEW(StringData)(buf, AttachString);
   m_px->incRefCount();
 }
-
-String::String(litstr s)
-  : SmartPtr<StringData>(NEW(StringData)(s, AttachLiteral)) { }
 
 void String::assign(const char *data, StringDataMode mode) {
   if (data) {
@@ -409,7 +406,7 @@ bool String::same(litstr v2) const {
 
 bool String::same(CStrRef v2) const {
   if (m_px == NULL && v2.get() == NULL) return true;
-  if (m_px && v2.get()) return equal(v2);
+  if (m_px && v2.get()) return m_px->same(v2.get());
   return false;
 }
 
@@ -426,7 +423,6 @@ bool String::equal(litstr v2) const {
 }
 
 bool String::equal(CStrRef v2) const {
-  if (size() != v2.size()) return false;
   if (m_px == NULL && v2.get() == NULL) return true;
   if (m_px == NULL) return v2.empty();
   if (v2.get() == NULL) return empty();
@@ -655,7 +651,7 @@ String String::fiberCopy() const {
 ///////////////////////////////////////////////////////////////////////////////
 // debugging
 
-void String::dump() {
+void String::dump() const {
   if (m_px) {
     m_px->dump();
   } else {

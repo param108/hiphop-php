@@ -24,17 +24,41 @@
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+// startup options for debugger client
+
+struct DebuggerClientOptions {
+  std::string host;
+  int port;
+  std::string extension;
+  StringVec cmds;
+  std::string sandbox;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 // exceptions
 
-class DebuggerClientExitException  : public Exception {};
-class DebuggerConsoleExitException : public Exception {};
-class DebuggerProtocolException    : public Exception {};
+// client side exception
+class DebuggerClientException      : public Exception {};
+class DebuggerConsoleExitException : public DebuggerClientException {};
+class DebuggerProtocolException    : public DebuggerClientException {};
 
-class DebuggerRestartException : public Exception {
+// both client and server side exception
+class DebuggerException            : public Exception {};
+class DebuggerClientExitException  : public DebuggerException {
+  virtual const char *what() const throw() {
+    return "Debugger client has just quit.";
+  }
+};
+class DebuggerRestartException     : public DebuggerException {
 public:
   DebuggerRestartException(StringVecPtr args) : m_args(args) {}
-  StringVecPtr m_args;
   ~DebuggerRestartException() throw() {}
+
+  virtual const char *what() const throw() {
+    return "Debugger restarting program or aborting web request.";
+  }
+
+  StringVecPtr m_args;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,7 +77,17 @@ enum CodeColor {
   CodeColorLineNo
 };
 
-String highlight_php(CStrRef source, int line);
+/**
+ * "line", starting line number, or 0 for no line number display.
+ * "lineFocus", the line to highlight, with gray background.
+ * highlight_code() doesn't need <?php and will treat source entirely PHP.
+ */
+String highlight_php(CStrRef source, int line = 0, int lineFocus0 = 0,
+                     int charFocus0 = 0, int lineFocus1 = 0,
+                     int charFocus1 = 0);
+String highlight_code(CStrRef source, int line = 0, int lineFocus0 = 0,
+                      int charFocus0 = 0, int lineFocus1 = 0,
+                      int charFocus1 = 0);
 
 extern const char *PHP_KEYWORDS[];
 
@@ -62,8 +96,18 @@ extern const char *PHP_KEYWORDS[];
 DECLARE_BOOST_TYPES(DMachineInfo);
 class DMachineInfo {
 public:
+  DMachineInfo()
+      : m_interrupting(false), m_sandboxAttached(false), m_initialized(false),
+        m_rpcPort(0) {}
+
   std::string m_name;
   DebuggerThriftBuffer m_thrift;
+
+  bool m_interrupting;
+  bool m_sandboxAttached;
+  bool m_initialized;
+  std::string m_rpcHost;
+  int m_rpcPort;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -79,7 +123,13 @@ public:
   std::string m_path;
 
   const std::string &id() const;
+  const std::string desc() const;
+
   void set(const std::string &id);
+  void update(const DSandboxInfo &src);
+
+  void sendImpl(ThriftBuffer &thrift);
+  void recvImpl(ThriftBuffer &thrift);
 
 private:
   mutable std::string m_cached_id;

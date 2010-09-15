@@ -28,6 +28,14 @@
 #include <runtime/ext/hash/hash_crc32.h>
 #include <runtime/ext/hash/hash_haval.h>
 
+#include <runtime/ext/hash/hash_furc.h>
+
+#if defined(HPHP_OSS)
+#define furc_hash furc_hash_internal
+#else
+#include <ch/hash.h>
+#endif
+
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(hash);
 ///////////////////////////////////////////////////////////////////////////////
@@ -363,6 +371,18 @@ String f_hash_final(CObjRef context, bool raw_output /* = false */) {
     return raw;
   }
   return StringUtil::HexEncode(raw);
+}
+
+int f_furchash_hphp_ext(CStrRef key, int len, int npart) {
+  if (len > key.size()) {
+    len = key.size();
+  }
+
+  return furc_hash(key, len, npart);
+}
+
+bool f_furchash_hphp_ext_supported() {
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

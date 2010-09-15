@@ -87,8 +87,6 @@ using namespace boost;
   cls##Ptr(new cls(getLocation(), Statement::KindOf##cls))
 #define NEW_STMT(cls, e...)                                     \
   cls##Ptr(new cls(getLocation(), Statement::KindOf##cls, ##e))
-#define NEW_STMT_POP_LOC(cls, e...)                             \
-  cls##Ptr(new cls(popLocation(), Statement::KindOf##cls, ##e))
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics
@@ -116,7 +114,6 @@ StatementListPtr Parser::ParseString(const char *input, AnalysisResultPtr ar,
 Parser::Parser(Scanner &s, const char *fileName, int fileSize,
                AnalysisResultPtr ar)
   : m_scanner(s), m_ar(ar) {
-  _location = &m_location;
   m_messenger.error_stream(m_err);
   m_messenger.message_stream(m_msg);
   messenger(m_messenger);
@@ -159,34 +156,24 @@ std::string Parser::popComment() {
   return ret;
 }
 
-void Parser::pushLocation() {
-  m_locs.push_back(getLocation());
-}
-
-LocationPtr Parser::popLocation() {
-  LocationPtr ret = m_locs.back();
-  m_locs.pop_back();
-  return ret;
-}
-
 const char *Parser::file() {
   return m_fileName;
 }
 
 int Parser::line0() {
-  return m_location.first_line();
+  return _rule_location.first_line();
 }
 
 int Parser::char0() {
-  return m_location.first_column();
+  return _rule_location.first_column();
 }
 
 int Parser::line1() {
-  return m_location.last_line();
+  return _rule_location.last_line();
 }
 
 int Parser::char1() {
-  return m_location.last_column();
+  return _rule_location.last_column();
 }
 
 int Parser::scan(void *arg /* = NULL */) {
@@ -537,7 +524,6 @@ void Parser::onClassConst(Token *out, Token *cls, Token *name) {
 
 void Parser::onFunctionStart() {
   m_ar->getFileScope()->pushAttribute();
-  pushLocation();
   pushComment();
 }
 
@@ -546,7 +532,7 @@ void Parser::onFunction(Token *out, Token *ref, Token *name, Token *params,
   if (!stmt->stmt) {
     stmt->stmt = NEW_STMT0(StatementList);
   }
-  FunctionStatementPtr func = NEW_STMT_POP_LOC
+  FunctionStatementPtr func = NEW_STMT
     (FunctionStatement, ref->num, name->text(),
      dynamic_pointer_cast<ExpressionList>(params->exp),
      dynamic_pointer_cast<StatementList>(stmt->stmt),
@@ -574,7 +560,6 @@ void Parser::onParam(Token *out, Token *params, Token *type, Token *var,
 }
 
 void Parser::onClassStart() {
-  pushLocation();
   pushComment();
 }
 
@@ -585,7 +570,7 @@ void Parser::onClass(Token *out, Token *type, Token *name, Token *base,
     stmtList = dynamic_pointer_cast<StatementList>(stmt->stmt);
   }
 
-  ClassStatementPtr cls = NEW_STMT_POP_LOC
+  ClassStatementPtr cls = NEW_STMT
     (ClassStatement, type->num, name->text(), base->text(),
      dynamic_pointer_cast<ExpressionList>(baseInterface->exp),
      popComment(), stmtList);
@@ -602,7 +587,7 @@ void Parser::onInterface(Token *out, Token *name, Token *base, Token *stmt) {
     stmtList = dynamic_pointer_cast<StatementList>(stmt->stmt);
   }
 
-  InterfaceStatementPtr intf = NEW_STMT_POP_LOC
+  InterfaceStatementPtr intf = NEW_STMT
     (InterfaceStatement, name->text(),
      dynamic_pointer_cast<ExpressionList>(base->exp), popComment(), stmtList);
   out->stmt = intf;
@@ -636,7 +621,7 @@ void Parser::onClassVariable(Token *out, Token *modifiers, Token *decl) {
 
 void Parser::onMethod(Token *out, Token *modifiers, Token *ref, Token *name,
                       Token *params, Token *stmt) {
-  ModifierExpressionPtr exp = modifiers->exp ?
+  ModifierExpressionPtr exp = (modifiers && modifiers->exp) ?
     dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
     : NEW_EXP0(ModifierExpression);
 
@@ -647,7 +632,7 @@ void Parser::onMethod(Token *out, Token *modifiers, Token *ref, Token *name,
     stmts = dynamic_pointer_cast<StatementList>(stmt->stmt);
   }
 
-  out->stmt = NEW_STMT_POP_LOC
+  out->stmt = NEW_STMT
     (MethodStatement, exp, ref->num, name->text(),
      dynamic_pointer_cast<ExpressionList>(params->exp), stmts,
      m_ar->getFileScope()->popAttribute(),

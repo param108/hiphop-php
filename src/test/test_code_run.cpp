@@ -391,6 +391,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestLocale);
   RUN_TEST(TestArray);
   RUN_TEST(TestArrayInit);
+  RUN_TEST(TestArrayCopy);
   RUN_TEST(TestArrayEscalation);
   RUN_TEST(TestArrayOffset);
   RUN_TEST(TestArrayAccess);
@@ -1189,11 +1190,32 @@ bool TestCodeRun::TestString() {
        "}"
        "var_dump(test6());");
 
-  MVCR("<?php ;"
+  MVCR("<?php "
        "class X {"
        " static function g() {}"
        "};"
        "echo 'abc' . X::g() . 'efg';");
+
+  MVCR("<?php "
+       "$s = 'x';"
+       "var_dump(strrpos($s.'0', $s));"
+       "for ($i = -7; $i < 7; $i++) {"
+       "  echo $i,':';var_dump(strrpos('xabcay', 'a',$i));"
+       "}");
+
+  MVCR("<?php\n"
+       "$a = 'zz';\n"
+       "$a++;\n"
+       "$b = 'zz';\n" // $b should remain 'zz'
+       "var_dump($a, $b);\n");
+
+  MVCR("<?php\n"
+       "function test($s) {\n"
+       "  $a = array('abc' => 1, 'abcd' => 2);\n"
+       "  $s .= 'c'; var_dump($a[$s]);\n"
+       "  $s .= 'd'; var_dump($a[$s]);\n" // should find 'abcd' in $a
+       "}\n"
+       "test('ab');\n");
 
   return true;
 }
@@ -1428,9 +1450,189 @@ bool TestCodeRun::TestArrayInit() {
        "  var_dump($a);\n"
        "}\n"
        "try { test(); } catch (Exception $e) { }\n");
+  MVCR("<?php\n"
+       "function test($x, $y) {"
+       "$a = array($x, $y);"
+       "$a[] = 3;"
+       "return $a;"
+       "}"
+       "var_dump(test(1,2));");
+  MVCR("<?php\n"
+       "function foo($p) {"
+       "  $a = array('a', 'b', $p);"
+       "  $a[] = 'd';"
+       "  var_dump($a);"
+       "  $a = array(0 => 'a', 1 => 'b', 2 => $p);"
+       "  $a[] = 'd';"
+       "  var_dump($a);"
+       "  $a = array(2 => 'a', 4 => 'b', 6 => $p);"
+       "  $a[] = 'd';"
+       "  var_dump($a);"
+       "  $a = array(-2 => 'a', -4 => 'b', -6 => $p);"
+       "  $a[] = 'd';"
+       "  var_dump($a);"
+       "  $a = array(0 => 'a');"
+       "  $a[] = 'b';"
+       "  var_dump($a);"
+       "}"
+       "foo('c');");
+  MVCR("<?php\n"
+      "$v = 1;"
+      "function foo($a) {"
+      "  $arr = array($a, $a++, $a);"
+      "  var_dump($arr);"
+      "}"
+      "foo($v);");
+  return true;
+}
+
+bool TestCodeRun::TestArrayCopy() {
+  MVCR("<?php function h1() {\n"
+       "  $x = array(1,2,3,4);\n"
+       "  next($x);\n"
+       "  $y = $x;\n"
+       "  unset($y[2]);\n"
+       "  var_dump(current($x));\n"
+       "  var_dump(current($y));\n"
+       "}\n"
+       "h1();\n");
+
+  MVCR("<?php function h2() {\n"
+       "  $x = array(1,2,3,4);\n"
+       "  next($x);\n"
+       "  $y = $x;\n"
+       "  $y[] = 4;\n"
+       "  var_dump(current($x));\n"
+       "  var_dump(current($y));\n"
+       "}\n"
+       "h2();\n");
+
+  MVCR("<?php function h3() {\n"
+       "  $x = array(1,2,3,4);\n"
+       "  next($x);\n"
+       "  $y = $x;\n"
+       "  array_pop($y);\n"
+       "  var_dump(current($x));\n"
+       "  var_dump(current($y));\n"
+       "}\n"
+       "h3();\n");
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   bool(false)
+   *   int(1)
+   *
+   * The difference in behavior is intentional. Under Zend PHP, the first call
+   * to current triggers an array copy, and because the original array's
+   * internal iterator points past the end, the copy's internal iterator is
+   * reset. This behavior exposes information to user code about when array
+   * copies are triggered.
+   *
+   * Under HPHP, we always leave the internal iterator intact when making an
+   * array copy. The advantage here is that we do not expose information about
+   * when array copies are triggered to user code.
+   */
+  MVCRO("<?php function h4() {\n"
+       "  $x = array(1,2,3,4);\n"
+       "  end($x);\n"
+       "  next($x);\n"
+       "  $y = $x;\n"
+       "  unset($y[2]);\n"
+       "  var_dump(current($x));\n"
+       "  var_dump(current($y));\n"
+       "}\n"
+       "h4();\n"
+       ,
+       "bool(false)\n"
+       "bool(false)\n"
+       );
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   bool(false)
+   *   int(1)
+   *
+   * The difference in behavior is intentional. Under Zend PHP, when 4 is
+   * appended to $y, it triggers an array copy which resets $y's internal
+   * iterator. This is why current($y) returns 1.
+   *
+   * Under HPHP, when 4 is appended to $y, it triggers an array copy. However,
+   * $y's internal iterator is not reset; it continues to point past the last
+   * element. Then when the append operation actually executes, it updates the
+   * internal iterator to point to the newly appended element. For more info
+   * see the h4 testcase.
+   */
+  MVCRO("<?php function h5() {\n"
+       "  $x = array(1,2,3,4);\n"
+       "  end($x);\n"
+       "  next($x);\n"
+       "  $y = $x;\n"
+       "  $y[] = 4;\n"
+       "  var_dump(current($x));\n"
+       "  var_dump(current($y));\n"
+       "}\n"
+       "h5();\n"
+       ,
+       "bool(false)\n"
+       "int(4)\n"
+       );
+
+  MVCR("<?php function h6() {\n"
+       "  $x = array(1,2,3,4);\n"
+       "  end($x);\n"
+       "  next($x);\n"
+       "  $y = $x;\n"
+       "  array_pop($y);\n"
+       "  var_dump(current($x));\n"
+       "  var_dump(current($y));\n"
+       "}\n"
+       "h6();\n");
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   int(0)
+   *   bool(false)
+   *
+   * The difference in behavior is intentional. For more info see testcase h4.
+   */
+  MVCRO("<?php function h7() {\n"
+       "  $arr = array(0,1,2,3,4);\n"
+       "  end($arr);\n"
+       "  next($arr);\n"
+       "  $arr2 = $arr;\n"
+       "  var_dump(current($arr));\n"
+       "  var_dump(current($arr2));\n"
+       "}\n"
+       "h7();\n"
+       ,
+       "bool(false)\n"
+       "bool(false)\n"
+       );
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   int(0)
+   *   bool(false)
+   *
+   * The difference in behavior is intentional. For more info see testcase h4.
+   */
+  MVCRO("<?php function h8() {\n"
+       "  $arr = array(0,1,2,3,4);\n"
+       "  end($arr);\n"
+       "  next($arr);\n"
+       "  $arr2 = $arr;\n"
+       "  var_dump(current($arr2));\n"
+       "  var_dump(current($arr));\n"
+       "}\n"
+       "h8();\n"
+       ,
+       "bool(false)\n"
+       "bool(false)\n"
+       );
 
   return true;
 }
+
 
 bool TestCodeRun::TestScalarArray() {
   MVCR("<?php "
@@ -1489,6 +1691,13 @@ bool TestCodeRun::TestScalarArray() {
       "function test1() { $a = array(__FUNCTION__, __LINE__); return $a; }\n"
       "function test2() { $a = array(__FUNCTION__, __LINE__); return $a; }\n"
       "var_dump(test1()); var_dump(test2());");
+
+  MVCR("<?php ;"
+       "define('VALUE', 1);"
+       "function func($params) {"
+       " var_dump($params);"
+       "}"
+       "func(array('key' => @VALUE));");
 
   return true;
 }
@@ -1919,7 +2128,38 @@ bool TestCodeRun::TestArrayForEach() {
        "}\n"
        "f2();\n");
 
-  MVCR("<?php\n"
+  /**
+   * Zend PHP 5.2 outputs:
+   *   key=a val=1
+   *   key=b val=2
+   *   key=c val=333
+   *   array(6) {
+   *     ["a"]=>
+   *     int(1)
+   *     ["b"]=>
+   *     int(2)
+   *     ["d"]=>
+   *     int(4)
+   *     ["e"]=>
+   *     int(5)
+   *     ["f"]=>
+   *     int(6)
+   *     ["c"]=>
+   *     &int(333)
+   *   }
+   *
+   * The difference in behavior is intentional. Under PHP, when the next
+   * element is unset inside a foreach by reference loop, a heuristic is used
+   * to figure out which element should be visited next. In this specific
+   * example, the loop resumes at key 'c', skipping over keys 'd', 'e', and
+   * 'f'.
+   *
+   * Under HPHP, when the next element is unset inside a foreach by loop, the
+   * loop's iterator is appropriately updated. HPHP successfully upholds the
+   * invariant that a foreach by refererence loop that exhausts the array will
+   * visit every element that has not been deleted exactly once.
+   */
+  MVCRO("<?php\n"
        "function f3() {\n"
        "  $i = 0;\n"
        "  $foo = array('a'=>1, 'b'=>2, 'c'=>3, 'd'=>4, 'e'=>5, 'f'=>6);\n"
@@ -1938,9 +2178,30 @@ bool TestCodeRun::TestArrayForEach() {
        "  }\n"
        "  var_dump($foo);\n"
        "}\n"
-       "f3();\n");
+       "f3();\n"
+       ,
+       "key=a val=1\n"
+       "key=b val=2\n"
+       "key=d val=4\n"
+       "key=e val=5\n"
+       "key=f val=6\n"
+       "key=c val=333\n"
+       "array(6) {\n"
+       "  [\"a\"]=>\n"
+       "  int(1)\n"
+       "  [\"b\"]=>\n"
+       "  int(2)\n"
+       "  [\"d\"]=>\n"
+       "  int(4)\n"
+       "  [\"e\"]=>\n"
+       "  int(5)\n"
+       "  [\"f\"]=>\n"
+       "  int(6)\n"
+       "  [\"c\"]=>\n"
+       "  &int(333)\n"
+       "}\n"
+       );
 
-/* dangling pointers in iterator
   MVCR("<?php\n"
        "function f4() {\n"
        "  $i = 0;\n"
@@ -1962,30 +2223,70 @@ bool TestCodeRun::TestArrayForEach() {
        "  var_dump($foo);\n"
        "}\n"
        "f4();\n");
-*/
 
-  MVCR("<?php\n"
+  /**
+   * Zend PHP 5.2 outputs:
+   *   key=f val=3
+   *   key()=e current()=1
+   *   key=e val=1
+   *   key()=d current()=5
+   *   key=d val=9
+   *   key()=0s0 current()=0
+   *   key=0s0 val=0
+   *   key()=1s1 current()=1
+   *   key=1s1 val=1
+   *   key()=2s2 current()=2
+   *   key=2s2 val=2
+   *   key()=3s3 current()=3
+   *   key=3s3 val=3
+   *   key()=4s4 current()=4
+   *   ...
+   *
+   * The difference in behavior is intentional. For more info, see testcase h3.
+   */
+  MVCRO("<?php\n"
        "function f5() {\n"
        "  $i = 0;\n"
        "  $foo = array('f'=>3, 'e'=>1, 'd'=>5, 'a'=>6, 'b'=>2, 'c'=>4);\n"
        "  $a = 0;\n"
        "  foreach ($foo as $key => &$val) {\n"
-       "    if ($val <= 10)\n"
-       "      echo \"key=$key val=$val\\n\";\n"
+       "    echo \"key=$key val=$val\\n\";\n"
        "    if ($key == 'e' && $a == 0) {\n"
        "      $a = 1;\n"
        "      unset($foo['e']);\n"
        "      unset($foo['d']);\n"
        "      $foo['d'] = 9;\n"
-       "      for ($i = 0; $i < 10000; ++$i)\n"
-       "        $foo[$i . 's' . $i] = $i;\n"
+       "      for ($j = 0; $j < 10000; ++$j)\n"
+       "        $foo[$j . 's' . $j] = $j;\n"
        "    }\n"
        "    ++$i;\n"
        "    if ($i >= 20)\n"
        "      break;\n"
        "  }\n"
        "}\n"
-       "f5();\n");
+       "f5();\n"
+       ,
+       "key=f val=3\n"
+       "key=e val=1\n"
+       "key=a val=6\n"
+       "key=b val=2\n"
+       "key=c val=4\n"
+       "key=d val=9\n"
+       "key=0s0 val=0\n"
+       "key=1s1 val=1\n"
+       "key=2s2 val=2\n"
+       "key=3s3 val=3\n"
+       "key=4s4 val=4\n"
+       "key=5s5 val=5\n"
+       "key=6s6 val=6\n"
+       "key=7s7 val=7\n"
+       "key=8s8 val=8\n"
+       "key=9s9 val=9\n"
+       "key=10s10 val=10\n"
+       "key=11s11 val=11\n"
+       "key=12s12 val=12\n"
+       "key=13s13 val=13\n"
+       );
 
   MVCR("<?php\n"
        "function f6() {\n"
@@ -1993,16 +2294,14 @@ bool TestCodeRun::TestArrayForEach() {
        "  $foo = array('f'=>3, 'e'=>1, 'd'=>5, 'a'=>6, 'b'=>2, 'c'=>4);\n"
        "  $a = 0;\n"
        "  foreach ($foo as $key => &$val) {\n"
-       "    if ($val <= 10)\n"
-       "      echo \"key=$key val=$val\\n\";\n"
        "    if ($key == 'e' && $a == 0) {\n"
        "      $a = 1;\n"
        "      unset($foo['e']);\n"
        "      unset($foo['d']);\n"
        "      $bar['e'] = 8;\n"
        "      $foo['d'] = 9;\n"
-       "      for ($i = 0; $i < 10000; ++$i)\n"
-       "        $foo[$i . 's' . $i] = $i;\n"
+       "      for ($j = 0; $j < 10000; ++$j)\n"
+       "        $foo[$j . 's' . $j] = $j;\n"
        "    }\n"
        "    ++$i;\n"
        "    if ($i >= 20)\n"
@@ -2011,7 +2310,22 @@ bool TestCodeRun::TestArrayForEach() {
        "}\n"
        "f6();\n");
 
-  MVCR("<?php\n"
+  /**
+   * Zend PHP 5.2 outputs:
+   *   key=0 value=0
+   *   key=1 value=1
+   *   key=2 value=0
+   *   key=3 value=1
+   *
+   * The difference in behavior is intentional. Under PHP, a foreach by
+   * reference loop will not visit an element that is appended to the array
+   * during the iteration for the last element in the array.
+   *
+   * Under HPHP, a foreach by reference loop will always visit an element that
+   * is appended to the array during any iteration, provided that the element
+   * is not deleted and the loop does not exit early.
+   */
+  MVCRO("<?php\n"
        "function f7() {\n"
        "  $i = 0;\n"
        "  $bar = array();\n"
@@ -2028,9 +2342,30 @@ bool TestCodeRun::TestArrayForEach() {
        "      break;\n"
        "  }\n"
        "}\n"
-       "f7();\n");
+       "f7();\n"
+       ,
+       "key=0 value=0\n"
+       "key=1 value=1\n"
+       "key=2 value=0\n"
+       "key=3 value=1\n"
+       "key=4 value=0\n"
+       "key=5 value=1\n"
+       "key=6 value=0\n"
+       "key=7 value=1\n"
+       "key=8 value=0\n"
+       "key=9 value=1\n"
+       "key=10 value=0\n"
+       "key=11 value=1\n"
+       "key=12 value=0\n"
+       "key=13 value=1\n"
+       "key=14 value=0\n"
+       "key=15 value=1\n"
+       "key=16 value=0\n"
+       "key=17 value=1\n"
+       "key=18 value=0\n"
+       "key=19 value=1\n"
+       );
 
-/* dangling pointers in iterator
   MVCR("<?php\n"
        "function f8() {\n"
        "  $i = 0;\n"
@@ -2051,7 +2386,6 @@ bool TestCodeRun::TestArrayForEach() {
        "  }\n"
        "}\n"
        "f8();\n");
-*/
 
   MVCR("<?php\n"
        "function f9() {\n"
@@ -2076,6 +2410,315 @@ bool TestCodeRun::TestArrayForEach() {
        "  }\n"
        "}\n"
        "f9();\n");
+
+  /**
+   * XXX Note that this test clobbers the array inside the foreach by reference
+   * loop. When UseSmallArray=true, this causes a fatal error to be thrown
+   * saying "SmallArray should have been escalated". We may need to change
+   * MutableArrayIter to check if the array needs to be escalated at the
+   * beginning of each iteration.
+   */
+  MVCR("<?php function g1() {\n"
+       "  $arr = array(0,1,2,3);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as &$v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      $arr = array(4,5,6,7);\n"
+       "     }\n"
+       "  }\n"
+       "}\n"
+       "g1();\n");
+
+  MVCR("<?php function g2() {\n"
+       "  $arr = array(0,1,2,3);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as &$v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      $old = $arr;\n"
+       "      $arr = array(4,5,6,7);\n"
+       "    } else if ($v == 6) {\n"
+       "      $arr = $old;\n"
+       "      unset($old);\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g2();\n");
+
+  MVCR("<?php function g3() {\n"
+       "  $arr2 = array(0,1,2,3);\n"
+       "  $arr = $arr2;\n"
+       "  $b = true;\n"
+       "  $b2 = true;\n"
+       "  foreach ($arr as &$v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      $arr = array(4,5,6,7);\n"
+       "    } else if ($b2 && $v == 6) {\n"
+       "      $b2 = false;\n"
+       "      $arr = $arr2;\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g3();\n");
+
+  MVCR("<?php function g4() {\n"
+       "  $arr = array(0,1,2,3);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as &$v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      array_push($arr, 4);\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g4();\n");
+
+  MVCR("<?php function g5() {\n"
+       "  $arr = array(0,1,2,3);\n"
+       "  $arr2 = $arr;\n"
+       "  $b = true;\n"
+       "  foreach ($arr as &$v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      array_push($arr, 4);\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g5();\n");
+
+  MVCR("<?php function g6() {\n"
+       "  $arr = array(0,'a'=>1,2,'b'=>3,4);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as $k => &$v) {\n"
+       "    echo \"key=$k val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      array_pop($arr);\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g6();\n");
+
+  MVCR("<?php function g7() {\n"
+       "  $arr = array(0,'a'=>1,2,'b'=>3,4);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as $k => &$v) {\n"
+       "    echo \"key=$k val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      unset($arr[1]); \n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g7();\n");
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   key=0 val=0
+   *   key=a val=1
+   *   key=0 val=0
+   *   key=a val=1
+   *   key=b val=3
+   *
+   * The difference in behavior is intentional. Under PHP, after the next
+   * element is unset inside the foreach by reference loop and the array_pop
+   * operation is performed, a heuristic is used to determine which element
+   * should be visited next. If this specific example, the loop chooses to
+   * resume at key '0'.
+   *
+   * Under HPHP, when the next element is unset inside a foreach by loop, the
+   * loop's iterator is appropriately updated. Likewise, the loop's iterator
+   * remains intact after the array_pop operation. Thus, after the unset and
+   * the pop operation, HPHP resumes the loop at key 'b'.
+   */
+  MVCRO("<?php function g8() {\n"
+       "  $arr = array(0,'a'=>1,2,'b'=>3,4);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as $k => &$v) {\n"
+       "    echo \"key=$k val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      unset($arr[1]); \n"
+       "      array_pop($arr);\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g8();\n"
+       ,
+       "key=0 val=0\n"
+       "key=a val=1\n"
+       "key=b val=3\n"
+       );
+
+  MVCR("<?php function g9() {\n"
+       "  $arr = array(0,1,2,3,4);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as &$v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      array_shift($arr);\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g9();\n");
+
+  MVCR("<?php function g10() {\n"
+       "  $arr = array(0,1,2,3);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as &$v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      array_unshift($arr, 4);\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g10();\n");
+
+  MVCR("<?php function g11() {\n"
+       "  $arr = array(0,1,2,3);\n"
+       "  reset($arr);\n"
+       "  var_dump(current($arr));\n"
+       "  foreach ($arr as &$v) {\n"
+       "    var_dump(current($arr));\n"
+       "  }\n"
+       "  var_dump(current($arr));\n"
+       "}\n"
+       "g11();\n");
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   val=0
+   *   val=1
+   *   val=2
+   *   val=3
+   *   val=4
+   *   bool(false)
+   *
+   * The difference in behavior is intentional. Under PHP, foreach by value can
+   * in some cases modify the array's internal iterator without triggering an
+   * array copy. This can potentially expose information to user code about
+   * when array copies are triggered.
+   *
+   * Under HPHP, foreach by value will never modify the array's internal
+   * iterator. The advantage here is that we do not expose information about
+   * when array copies are triggered to user code.
+   *
+   * The PHP manual states the following:
+   *   foreach has some side effects on the array pointer. Don't rely on the
+   *   array pointer during or after the foreach without resetting it.
+   */
+  MVCRO("<?php function k1() {\n"
+       "  $arr = array(0,1,2,3,4);\n"
+       "  reset($arr);\n"
+       "  foreach ($arr as $v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "  }\n"
+       "  var_dump(current($arr));\n"
+       "}\n"
+       "k1();\n"
+       ,
+       "val=0\n"
+       "val=1\n"
+       "val=2\n"
+       "val=3\n"
+       "val=4\n"
+       "int(0)\n"
+       );
+
+  MVCR("<?php function k2() {\n"
+       "  $arr = array(0,1,2,3,4);\n"
+       "  reset($arr);\n"
+       "  $arr2 = $arr;\n"
+       "  foreach ($arr as $v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "  }\n"
+       "  var_dump(current($arr));\n"
+       "  var_dump(current($arr2));\n"
+       "}\n"
+       "k2();\n");
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   val=0
+   *   val=1
+   *   val=2
+   *   val=3
+   *   val=4
+   *   int(0)
+   *   bool(false)
+   *
+   * The difference in behavior is intentional. For more info see testcase k1.
+   */
+  MVCRO("<?php function k3() {\n"
+       "  $arr = array(0,1,2,3,4);\n"
+       "  reset($arr);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as $v) {\n"
+       "    if ($b) {\n"
+       "      $b = false;\n"
+       "      $arr2 = $arr;\n"
+       "    }\n"
+       "    echo \"val=$v\\n\";\n"
+       "  }\n"
+       "  var_dump(current($arr));\n"
+       "  var_dump(current($arr2));\n"
+       "}\n"
+       "k3();\n"
+       ,
+       "val=0\n"
+       "val=1\n"
+       "val=2\n"
+       "val=3\n"
+       "val=4\n"
+       "int(0)\n"
+       "int(0)\n"
+       );
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   val=0
+   *   val=1
+   *   val=2
+   *   val=3
+   *   val=4
+   *   int(0)
+   *   bool(false)
+   *
+   * This behavior is intentional. For more info see testcase k1.
+   */
+  MVCRO("<?php function k4() {\n"
+       "  $arr = array(0,1,2,3,4);\n"
+       "  reset($arr);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as $v) {\n"
+       "    if ($b) {\n"
+       "      $b = false;\n"
+       "      $arr2 = $arr;\n"
+       "    }\n"
+       "    echo \"val=$v\\n\";\n"
+       "  }\n"
+       "  var_dump(current($arr2));\n"
+       "  var_dump(current($arr));\n"
+       "}\n"
+       "k4();\n"
+       ,
+       "val=0\n"
+       "val=1\n"
+       "val=2\n"
+       "val=3\n"
+       "val=4\n"
+       "int(0)\n"
+       "int(0)\n"
+       );
 
   return true;
 }
@@ -2916,7 +3559,10 @@ bool TestCodeRun::TestObjectProperty() {
        "var_dump(empty($x->buz));"
        "var_dump(empty($x->pub_var));"
        "var_dump(empty($x->pub_set));"
-       "var_dump(empty($x->priv_var));");
+       "var_dump(empty($x->priv_var));"
+       "unset($x->pub_var);"
+       "var_dump(isset($x->pub_var));"
+       "var_dump(empty($x->pub_var));");
 
   return true;
 }
@@ -3409,16 +4055,202 @@ bool TestCodeRun::TestObjectMethod() {
        "  $y->$z($y);"
        "}"
        "test(new Y, 'bar');");
-
+  MVCR("<?php\n"
+      "/*\n"
+      "   some random tests used for debugging fast method call and various "
+      " invoke paths\n"
+      "   // php53 means this feature cannot be tested under php 5.2\n"
+      "*/\n"
+      "\n"
+      "$fix249639=0; // when this task is fixed or o_id on static calls\n"
+      "\n"
+      "global $trace;\n"
+      "function f2 ($a) { return $a+200; }\n"
+      "function f4 ($a) { return $a+400; }\n"
+      "class B {\n"
+      "  public $id;\n"
+      "  public $x;\n"
+      "  function __call($name, $arguments) {\n"
+      "    // keep f4bogus from fatalling\n"
+      "    echo \"Calling B object method '$name' \" . implode(', ', "
+      "$arguments). \"\\n\";\n"
+      "  }\n"
+      "\n"
+      "  function f1($a) { return $x=$a+11; }\n"
+      "  function f2($a) { return $x=$a+12; }\n"
+      "  function f4($a) { return $x=$a+12; }\n"
+      "  function trace($s) { global $trace; $trace = \"<$s(\"."
+      "$this->id.\")>\"; }\n"
+      "  private function f4helper($a) { return $x=$a+12; }\n"
+      "}\n"
+      "class G  extends B {\n"
+      "  public $pointless;\n"
+      "  function __call($name, $arguments) {\n"
+      "    // keep f4bogus from fatalling\n"
+      "    echo \"Calling G object method '$name' \" . "
+      "implode(', ', $arguments). \"\\n\";\n"
+      "  }\n"
+      "  function __construct($i) { $this->id=$i; }\n"
+      "  function f($a) { $this->trace(\"G::f\"); return $a; }\n"
+      "  function f1($a) { return $a; } // override\n"
+      "  function flongerthan8($a,$b,$c) { return $a+$b+$c+1; }\n"
+      "  function f4($a) { return B::f4($a); } \n"
+      "  // check SimpleFunctionCall::outputCPPParamOrderControlled\n"
+      "  /// !m_valid, !m_className.empty() case\n"
+      "  // called method must not exist anywhere even though it\n"
+      "  // looks like it might\n"
+      "  function f4missing($a) { \n"
+      "    // check SimpleFunctionCall::outputCPPParamOrderControlled\n"
+      "    // !m_valid, !m_className.empty() cases\n"
+      "\n"
+      "    // m_validClass \n"
+      "    echo \"Calling G object 'f4missing' 3 == \"; \n"
+      "    //php53 echo parent::f4missing(3),\"\\n\";  // fatals in PHP\n"
+      "\n"
+      "    // !m_validClass, m_class\n"
+      "    $b=\"B\"; // $b::f4(4);   // task 217171\n"
+      "    echo \"static parent method B::f4, 16 == \", B::f4(4),\"\\n\"; "
+      "  // should work\n"
+      "  \n"
+      "    // call an non-existant method on the one object via dynamic "
+      "class name\n"
+      "    //php53 if($fix249639) echo \"Calling G object method 'f4bogus' "
+      "5 == \", $b::f4bogus(5); __call, \n"
+      "    // call existing method on the one object via dynamic class name\n"
+      "    //php53 if($fix249639) echo \"Calling G object method 'f4missing' "
+      "5 == \", $b::f4missing(5); \n"
+      "    // $b=\"Bbogus\"; $b::f4bogus(6); // report error\n"
+      "    // !m_validClass, !m_class // DDD need this test yet \n"
+      "    //echo \"missing 3 \", Bbogus::f4bogus(6),\"\\n\"; "
+      "// fatals in PHP\n"
+      "\n"
+      "  } \n"
+      "  function f5($a) { return H::f4($a); } // static call\n"
+      "}\n"
+      "class H {\n"
+      "  function f($a) { global $trace; $trace=\"H::f,\"; return \"\"; }\n"
+      "  function f3($a) { return \"\"; }\n"
+      "  function f4($a) { return $a+12; }\n"
+      "  function f7($a) { return \"\"; }\n"
+      "}\n"
+      "\n"
+      "class J {\n"
+      "  function __call($name, $arguments) {\n"
+      "    echo \"Calling object method '$name' \" . implode(', ', "
+      "$arguments). \"\\n\";\n"
+      "  }\n"
+      "  function f6($a) { return \"\"; }\n"
+      "}\n"
+      "\n"
+      "function error_handler ($errnor, $errstr, $errfile, $errline) {\n"
+      "  // Should catch these undefined methods here, but task 333319\n"
+      "  // is blocking their being caught.  For now, suppress the PHP error\n"
+      "  // so as to match the missing HPHP one.\n"
+      "  //echo \"error handler<<<\\n\";\n"
+      "  //var_dump($errnor, $errstr, $errfile, $errline) ;\n"
+      "  //echo \">>>\\n\";\n"
+      "  return true;\n"
+      "}\n"
+      "// test invoke_builtin_static_method\n"
+      "//echo \"bar == \", \n"
+      " //    call_user_func_array(array('Normalizer','normalize'),"
+      "array(\"bar\")), \"\\n\";\n"
+      "\n"
+      "$g = new G(5);\n"
+      "// test simple function case\n"
+      "echo \"600 == \",\n"
+      "  call_user_func_array('f2',array(call_user_func_array('f4',array(0))))"
+      ", "
+      "\"\\n\";\n"
+      "\n"
+      "// test C::o_invoke, C::o_invoke_few_args, lookup in call_user_func\n"
+      "// static method call (in G::f4).\n"
+      "echo \"1 1 13 34 12 == \",$g->f(1),\" \", $g->f1(1),\"  \", \n"
+      "    $g->f2(1),\" \",$g->flongerthan8(10,11,12,13,14,15,16),\n"
+      "    \" \",$g->f4(0),\"\\n\";\n"
+      "// check case insensitive\n"
+      "echo \"1 1 13 34 12 == \",$g->F(1),\" \", $g->F1(1),\"  \", \n"
+      "    $g->F2(1),\" \",$g->Flongerthan8(10,11,12,13,14,15,16),\n"
+      "    \" \",$g->F4(0),\"\\n\";\n"
+      "\n"
+      "// check SimpleFunctionCall::outputCPPParamOrderControlled\n"
+      "$prev_handler=set_error_handler(\"error_handler\");\n"
+      "$g->f4missing(3);\n"
+      "// $b=\"G\"; $b::f4(4); \n"
+      "\n"
+      "// For those dynamic cases, check:\n"
+      "// 1) A call to an existing method\n"
+      "// 2) A call to a method which exists, but not in this class (exists "
+      "in methodMap)\n"
+      "// 3) A call to a method which does not exist anywhere\n"
+      "\n"
+      "// $func=\"f3\"; echo \"{G::f3}(3) = \",$g->$func(3),\"\\n\";\n"
+      "// $func=\"missing\"; echo \"{G::missing}(3) = \",$g->$func(3),\"\\n\";"
+      "\n"
+      "// tests direct dynamic call \n"
+      "$f='f'; $f1='f1';\n"
+      "echo \"1 1 == \",$g->{$f}(1),\" \", $g->{$f1}(1),\"\\n\"; \n"
+      "echo \"1 1 == \",$g->{'F'}(1),\" \", $g->{$f1}(1),\"\\n\"; \n"
+      "\n"
+      "$res = call_user_func_array(\"H::f\",array(2)); // ok\n"
+      "\n"
+      "// tests methodIndexLookup and this variety of dynamic calls\n"
+      "// trying to exhause f_call_user_func_array cases\n"
+      "$res = call_user_func_array(array($g,'f'),array(20)); // ok\n"
+      "echo \"dynamic call \\$g->'f' $trace, 20 == $res\\n\"; \n"
+      "$res= call_user_func_array(array($g,'G::f'),array(21)); // G::G::f a "
+      "bit wierd\n"
+      "echo \"dynamic call \\$g->'G::f' $trace, 21 == $res\\n\";\n"
+      "//echo \"dynamic call \\$g->'H::f' $trace, FAIL = \",\n"
+      "//      call_user_func_array(array($g,'H::f'),array(22)),\"\\n\"; "
+      "// G::H::f better break\n"
+      "\n"
+      "// Test on static class, dynamic method name, static call\n"
+      "$f = 'f1';\n"
+      "echo \"31 == \",G::$f(31),\"\\n\"; // G::f exists\n"
+      "$f = 'f3';\n"
+      "if ($fix249639) echo \"<method not found>(32) == \",G::$f(32),\"\\n\"; "
+      "// H::f3 exists, but not G::f3\n"
+      "$f = 'missing';\n"
+      "if ($fix249639) echo \"<method not found>(33) == \",G::$f(33),\"\\n\"; "
+      "// missing does not exist \n"
+      "\n"
+      "// Test dynamic class, dynamic method name, static call\n"
+      "$cls='G';\n"
+      "$f = 'f1';\n"
+      "\n"
+      "//php53 echo \"31 == \",$cls::$f(31),\"\\n\"; // G::f1 exists\n"
+      "$f = 'f3';\n"
+      "//php53 if ($fix249639) echo \"<method not found>(32) == \","
+      "$cls::$f(32),\"\\n\"; // H::f3 exists, but not G::f3\n"
+      "$f = 'missing';\n"
+      "//php53 if ($fix249639) echo \"<method not found>(33) == \","
+      "$cls::$f(33),\"\\n\"; // missing does not exist \n"
+      "\n"
+      "\n"
+      "// test methodIndexLookupReverse\n"
+      "echo \"dynamic call \\$g->'missing' $trace, Calling G object method "
+      "'missing' 2 = \", call_user_func_array(array($g,'missing'),"
+      "array(2)),\"\\n\";\n"
+      "echo \"dynamic call 'missing(2)' $trace, FAIL =\", "
+      "call_user_func_array('missing',array(2)),\"\\n\";\n"
+      "\n"
+      "// more __call testing\n"
+      "$j = new J();\n"
+      "echo \"Calling object method 'missing' 3 = \";\n"
+      "call_user_func_array(array($j,'missing'),array(3)); \n"
+      "\n"
+      "// test mapping for system function names\n"
+      "$ourFileName = \"testFile.txt\";\n"
+      "$ourFileHandle = fopen($ourFileName, 'w') or die(\"can't open file\");\n"
+      "fclose($ourFileHandle);\n"
+      "unlink($ourFileName);\n"
+      "\n"
+      "echo \"done\\n\";");
  return true;
 }
 
 bool TestCodeRun::TestClassMethod() {
-  // circular derivation
-  MVCR("<?php class A extends B { function foo() {}} "
-       "class B extends A { function foo() {}} "
-       "$obj = new A(); $obj->foo();");
-
   MVCR(
     "<?php\n"
     "class Foo {\n"
@@ -3654,7 +4486,6 @@ bool TestCodeRun::TestObjectMagicMethod() {
       "isset($a['57']);"
       "isset($a['6.5']);");
 
-#if 0
   MVCR("<?php "
        "class foo"
        "{"
@@ -3663,7 +4494,6 @@ bool TestCodeRun::TestObjectMagicMethod() {
        "}"
        "$foo = new foo; $a = $foo->x = 'baz'; $b = $foo->x .= 'bar';"
        "var_dump($a,$b);");
-#endif
 
   MVCR("<?php\n"
        "class A {\n"
@@ -3678,6 +4508,20 @@ bool TestCodeRun::TestObjectMagicMethod() {
        "  var_dump($a);\n"
        "}\n"
        "test();\n");
+
+  MVCR("<?php ;"
+       "class X {"
+       "  public $real = 1;"
+       "  function __get($name) { echo 'get:'; var_dump($name); return 'abc'; }"
+       "  function __set($name, $val) { echo 'set:'; var_dump($name,$val); }"
+       "}"
+       "function test($x) {"
+       "  ++$x->foo;"
+       "  var_dump($x->bar++);"
+       "  $x->real++;"
+       "  var_dump($x);"
+       "}"
+       "test(new X);");
 
   return true;
 }
@@ -4172,6 +5016,33 @@ bool TestCodeRun::TestObjectPropertyExpression() {
       "  $c1->a->b->c = 10;"
       "}"
       "var_dump($c1->a->b->c);");
+  MVCR("<?php "
+       "class Y {}"
+       "class X {"
+       "  public $a;"
+       "  function __construct() {"
+       "    $this->a = array('x' => new Y);"
+       "  }"
+       "  function bar() {"
+       "    var_dump('bar');"
+       "    $this->qq = new Y;"
+       "    $this->qq->x = $this->qq->y = 1;"
+       "    return $this->qq;"
+       "  }"
+       "}"
+       "function foo() { var_dump('foo'); return 'foo'; }"
+       "function test($x, $a, $s) {"
+       "  $t = &$s->t;"
+       "  unset($x->bar()->x);"
+       "  unset($x->q->r->s->${foo()});"
+       "  unset($x->y->a->b->c);"
+       "  unset($x->a['x']->y->a->b->c);"
+       "  unset($a['a']['y'][foo()]);"
+       "  unset($a['b']->y->z);"
+       "  unset($a->c->d);"
+       "  var_dump($x, $a, $s);"
+       "}"
+       "test(new X, array(), false);");
 
   return true;
 }
@@ -4248,6 +5119,27 @@ bool TestCodeRun::TestComparisons() {
 
   MVCR("<?php $a = '05/17'; $b = '05/18'; var_dump($a == $b);");
   MVCR("<?php var_dump('05/17' == '05/18');");
+  MVCR("<?php var_dump('1.0' == '1');"
+       "var_dump('1.0E2' == '10E1');"
+       "var_dump('1' === '1');"
+       "var_dump('1.0' === '1.0');"
+       "var_dump('1' === '1.0');"
+       "var_dump('1.0' === '1.00');"
+       "var_dump(1.0 === 1.00);"
+       "var_dump('1' == '1');"
+       "var_dump('1.0' == '1.0');"
+       "var_dump('1' == '1.0');"
+       "var_dump('1.0' == '1.00');"
+       "var_dump(1.0 == 1.00);"
+       "function foo($a, $b) {"
+       "  $s = (string)$a;"
+       "  $t = (string)$b;"
+       "  var_dump($s === $t);"
+       "}"
+       "foo('1.00', '1.0');"
+       "foo('1.0', '1.0');"
+       "foo('1.', '1.0');"
+       "foo('1', '1.0');");
 
   COMPARE_OP(==);
   COMPARE_OP(===);
@@ -5575,6 +6467,18 @@ bool TestCodeRun::TestProgramFunctions() {
 }
 
 bool TestCodeRun::TestCompilation() {
+  // testing re-declared classes with missing parents
+  MVCR("<?php $a = bar(); if ($a) { class fOO extends Unknown {} } else "
+       "{ class Foo extends unknOwn {} } function bar() { return 123;}");
+
+  // testing re-declared classes with different cases
+  MVCR("<?php $a = bar(); if ($a) { class fOO {} } else "
+       "{ class Foo {} } function bar() { return 123;} $obj = new foo();");
+
+  // testing re-declared functions with different cases
+  MVCR("<?php $a = bar(); if ($a) { function fOO() {} } else "
+       "{ function Foo() {} } function bar() { return 123;} foo();");
+
   // overlapped interface
   MVCR("<?php interface A {} class B implements A {} "
       "class C extends B implements A {} $obj = new C();");
@@ -5819,6 +6723,44 @@ bool TestCodeRun::TestCompilation() {
        "return $x->newInstance()->loadAll(); }");
 
   MVCR("<?php var_dump(array(1,2,3)+array(4,5,6));");
+
+  MVCR("<?php "
+       "function foo($a) {"
+       "  $r = '';"
+       "  if ($a) {"
+       "    $r ->error = '';"
+       "  }"
+       "  return $r;"
+       "}"
+       "var_dump(foo(true));"
+       "var_dump(foo(false));");
+  MVCR("<?php "
+       "function foo($a) {"
+       "  $r = '';"
+       "  if ($a) {"
+       "    $r ->error->line = 1;"
+       "  }"
+       "  return $r;"
+       "}"
+       "var_dump(foo(true));"
+       "var_dump(foo(false));");
+
+  MVCR("<?php "
+       "call_user_func_array(array('Normalizer','normalize'),array('bar'));");
+
+  MVCR("<?php "
+       "function bar($g) { return $g; }"
+       "class X {"
+       "  static function foo() {"
+       "    echo $this->baz(bar(1), bar(''));"
+       "  }"
+       "}");
+
+  MVCR("<?php "
+       "function foo() {}"
+       "function test() {"
+       "  foo()->bar();"
+       "}");
 
   return true;
 }
@@ -6409,6 +7351,22 @@ bool TestCodeRun::TestSuperGlobals() {
        "test();"
        "var_dump($_POST);");
 
+  MVCR("<?php ;"
+       "class X {"
+       "  static function test() {"
+       "    var_dump(__FUNCTION__);"
+       "    var_dump(__CLASS__);"
+       "    var_dump(__METHOD__);"
+       "    return array($GLOBALS[__FUNCTION__],"
+       "                 $GLOBALS[__CLASS__],"
+       "                 $GLOBALS[__METHOD__]);"
+       "  }"
+       "}"
+       "$test = 'this_is_function_test';"
+       "$X = 'this_is_class_x';"
+       "$GLOBALS['X::test'] = 'this_is_method_test::x';"
+       "var_dump(X::test());");
+
   return true;
 }
 
@@ -6801,6 +7759,26 @@ bool TestCodeRun::TestStaticStatement() {
       "d::sf();"
       "d::sf();"
       "d::sf();");
+
+  MVCR("<?php "
+       "class A {"
+       "  private function foo() {"
+       "    static $x = null;"
+       "    var_dump(get_class($this), $x);"
+       "    $x = 1;"
+       "  }"
+       "  public function run() {"
+       "    $this->foo();"
+       "  }"
+       "}"
+       "class B extends A {}"
+       "class C extends A {}"
+       "$a = new A;"
+       "$b = new B;"
+       "$c = new C;"
+       "$a->run();"
+       "$b->run();"
+       "$c->run();");
 
   return true;
 }
@@ -8969,7 +9947,17 @@ bool TestCodeRun::TestEvalOrder() {
        "  var_dump('end');"
        "}"
        "g();");
-
+  MVCR("<?php ;"
+       "function foo($v) {"
+       "  $a = array('key' => &$v);"
+       "  return $a;"
+       "}"
+       "function goo($v) {"
+       "  return $v . 1;"
+       "}"
+       "var_dump(foo('1.0'));"
+       "var_dump(foo(foo('1.0')));"
+       "var_dump(foo(goo('1.0')));");
  return true;
 }
 
@@ -10283,7 +11271,40 @@ bool TestCodeRun::TestClassConstant() {
       "var_dump(B::CONSTANT);"
       "var_dump(C::$A_CONSTANT);"
       "var_dump(C::$B_CONSTANT);");
-
+  MVCR("<?php "
+      "abstract class TB {"
+      "  const PARAM_A = 'aaa';"
+      "  const PARAM_B = 'bbb';"
+      "  const PARAM_C = 'ccc';"
+      "  const PARAM_D = 'ddd';"
+      "}"
+      "abstract class ATB extends TB {"
+      "}"
+      "class ABCD extends ATB {"
+      "  static public function foo() {"
+      "    return array("
+      "      'a_ids'   => array("
+      "        ATB::PARAM_A => true,"
+      "        ATB::PARAM_C   => array("
+      "          array('tcks', 'none'),"
+      "          array('tcks', 'ids'),"
+      "          ),"
+      "        ATB::PARAM_B     =>"
+      "          'aaaa',"
+      "      ),"
+      "      'user_id'   => array("
+      "        ATB::PARAM_A => true,"
+      "        ATB::PARAM_C   => array("
+      "          array('tcks', 'none'),"
+      "          array('tcks', 'id'),"
+      "          ),"
+      "        ATB::PARAM_B     =>"
+      "          'bbbb',"
+      "      ),"
+      "    );"
+      "  }"
+      "}"
+      "var_dump(ABCD::foo());");
   return true;
 }
 
@@ -10516,6 +11537,41 @@ bool TestCodeRun::TestAssignment() {
 }
 
 bool TestCodeRun::TestSimpleXML() {
+  MVCR("<?php\n"
+       "function addChildNode(SimpleXMLElement $parent, "
+       "SimpleXMLElement $node) {\n"
+       "  $newchild = $parent->addChild($node->getName(), (string)$node);\n"
+       "  foreach ($node->attributes() as $name => $value) {\n"
+       "    $newchild->addAttribute($name, $value);\n"
+       "  }\n"
+       "  foreach ($node->children() as $child) {\n"
+       "    addChildNode($newchild, $child);\n"
+       "  }\n"
+       "}\n"
+       "\n"
+       "$xmlreq = '<a><item><node><sub>1st</sub>"
+       "<sub>2nd</sub></node></item></a>';\n"
+       "$quote = simplexml_load_string($xmlreq);\n"
+       "$req = new SimpleXMLElement('<node/>');\n"
+       "foreach ($quote->attributes() as $name => $value) {\n"
+       "  $req->addAttribute($name, $value);\n"
+       "}\n"
+       "foreach ($quote->children() as $child) {\n"
+       "  addChildNode($req, $child);\n"
+       "}\n"
+       "\n"
+       "$vertex = new SimpleXMLElement('<root/>');\n"
+       "addChildNode($vertex, $req);\n"
+       "var_dump($vertex->asXML());\n"
+      );
+
+  MVCR("<?php $x = new SimpleXMLElement('<foo><bar>345.234</bar></foo>');"
+       "var_dump((double)$x->bar);");
+  MVCR("<?php $x = new SimpleXMLElement('<foo><bar></bar></foo>');"
+       "var_dump((bool)$x->bar);");
+  MVCR("<?php $x = new SimpleXMLElement('<foo><bar>0</bar></foo>');"
+       "var_dump((bool)$x->bar);");
+
   MVCR("<?php "
        "$x = new SimpleXMLElement('<foo/>'); "
        "$x->addAttribute('attr', 'one'); "
@@ -11679,6 +12735,31 @@ bool TestCodeRun::TestExtArray() {
       "var_dump(array_chunk(array()));"
       "$a = array(1, 2);"
       "var_dump(asort($a, 100000));");
+  MVCR("<?php\n"
+      "function f(&$val,$key) {\n"
+      "  echo \"k=$key v=$val\\n\";\n"
+      "  $val = $val + 1;\n"
+      "}\n"
+      "$arr = array(0,1,2);\n"
+      "array_walk($arr,'f');\n"
+      "var_dump($arr);\n");
+  MVCR("<?php\n"
+      "function f($val,$key) {\n"
+      "  echo \"k=$key v=$val\\n\";\n"
+      "}\n"
+      "$arr = array(0,1,2);\n"
+      "array_walk($arr,'f');\n");
+  MVCR("<?php\n"
+      "$arr = array(0,1,2);\n"
+      "function f($val,$key) {\n"
+      "  global $arr;\n"
+      "  echo \"k=$key v=$val\\n\";\n"
+      "  if ($key == 0) {\n"
+      "    unset($arr[1]);\n"
+      "  }\n"
+      "}\n"
+      "array_walk($arr,'f');\n"
+      "var_dump($arr);\n");
 
   return true;
 }

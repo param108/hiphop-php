@@ -25,109 +25,64 @@ namespace HPHP {
 /* preface starts */
 /* preface finishes */
 /* SRC: classes/exception.php line 259 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_unexpectedvalueexception
-Variant c_unexpectedvalueexception::os_getInit(const char *s, int64 hash) {
-  return c_runtimeexception::os_getInit(s, hash);
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_UnexpectedValueException
+Variant c_UnexpectedValueException::os_getInit(CStrRef s) {
+  return c_RuntimeException::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_unexpectedvalueexception
-Variant c_unexpectedvalueexception::os_get(const char *s, int64 hash) {
-  return c_runtimeexception::os_get(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_UnexpectedValueException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_UnexpectedValueException
+Variant c_UnexpectedValueException::os_get(CStrRef s) {
+  return c_RuntimeException::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_unexpectedvalueexception
-Variant &c_unexpectedvalueexception::os_lval(const char *s, int64 hash) {
-  return c_runtimeexception::os_lval(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_UnexpectedValueException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_UnexpectedValueException
+Variant &c_UnexpectedValueException::os_lval(CStrRef s) {
+  return c_RuntimeException::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_unexpectedvalueexception
-void c_unexpectedvalueexception::o_getArray(Array &props) const {
-  c_runtimeexception::o_getArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_UnexpectedValueException
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_UnexpectedValueException
+void c_UnexpectedValueException::o_getArray(Array &props) const {
+  c_RuntimeException::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_unexpectedvalueexception
-void c_unexpectedvalueexception::o_setArray(CArrRef props) {
-  c_runtimeexception::o_setArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_UnexpectedValueException
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_UnexpectedValueException
+void c_UnexpectedValueException::o_setArray(CArrRef props) {
+  c_RuntimeException::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_unexpectedvalueexception
-Variant c_unexpectedvalueexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_UnexpectedValueException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_UnexpectedValueException
+Variant * c_UnexpectedValueException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_unexpectedvalueexception
-Variant c_unexpectedvalueexception::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_runtimeexception::o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_UnexpectedValueException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_UnexpectedValueException
+Variant * c_UnexpectedValueException::o_realPropPublic(CStrRef s, int flags) const {
+  return c_RuntimeException::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_unexpectedvalueexception
-Variant c_unexpectedvalueexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_UnexpectedValueException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_UnexpectedValueException
+Variant * c_UnexpectedValueException::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_unexpectedvalueexception
-bool c_unexpectedvalueexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_UnexpectedValueException
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_UnexpectedValueException
+Variant c_UnexpectedValueException::os_constant(const char *s) {
+  return c_RuntimeException::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_unexpectedvalueexception
-bool c_unexpectedvalueexception::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_runtimeexception::o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_unexpectedvalueexception
-bool c_unexpectedvalueexception::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_unexpectedvalueexception
-Variant c_unexpectedvalueexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_unexpectedvalueexception
-Variant c_unexpectedvalueexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_runtimeexception::o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_unexpectedvalueexception
-Variant c_unexpectedvalueexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_unexpectedvalueexception
-Variant& c_unexpectedvalueexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_unexpectedvalueexception
-Variant& c_unexpectedvalueexception::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_runtimeexception::o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_unexpectedvalueexception
-Variant& c_unexpectedvalueexception::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_unexpectedvalueexception
-Variant c_unexpectedvalueexception::os_constant(const char *s) {
-  return c_runtimeexception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_unexpectedvalueexception
-IMPLEMENT_CLASS(unexpectedvalueexception)
-ObjectData *c_unexpectedvalueexception::cloneImpl() {
-  c_unexpectedvalueexception *obj = NEW(c_unexpectedvalueexception)();
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_UnexpectedValueException
+IMPLEMENT_CLASS(UnexpectedValueException)
+ObjectData *c_UnexpectedValueException::cloneImpl() {
+  c_UnexpectedValueException *obj = NEW(c_UnexpectedValueException)();
   cloneSet(obj);
   return obj;
 }
-void c_unexpectedvalueexception::cloneSet(c_unexpectedvalueexception *clone) {
-  c_runtimeexception::cloneSet(clone);
+void c_UnexpectedValueException::cloneSet(c_UnexpectedValueException *clone) {
+  c_RuntimeException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_unexpectedvalueexception
-Variant c_unexpectedvalueexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_UnexpectedValueException
+Variant c_UnexpectedValueException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -150,7 +105,7 @@ Variant c_unexpectedvalueexception::o_invoke(MethodIndex methodIndex, const char
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -194,59 +149,59 @@ Variant c_unexpectedvalueexception::o_invoke(MethodIndex methodIndex, const char
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         {
           ArrayData *ad(params.get());
@@ -254,7 +209,7 @@ Variant c_unexpectedvalueexception::o_invoke(MethodIndex methodIndex, const char
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -262,13 +217,13 @@ Variant c_unexpectedvalueexception::o_invoke(MethodIndex methodIndex, const char
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_unexpectedvalueexception
-Variant c_unexpectedvalueexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_UnexpectedValueException
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_UnexpectedValueException
+Variant c_UnexpectedValueException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -329,59 +284,59 @@ Variant c_unexpectedvalueexception::o_invoke_few_args(MethodIndex methodIndex, c
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -391,21 +346,21 @@ Variant c_unexpectedvalueexception::o_invoke_few_args(MethodIndex methodIndex, c
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_unexpectedvalueexception
-Variant c_unexpectedvalueexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_UnexpectedValueException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_UnexpectedValueException
+Variant c_UnexpectedValueException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_unexpectedvalueexception
-Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_UnexpectedValueException
+Variant c_UnexpectedValueException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -547,11 +502,11 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -565,7 +520,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -579,7 +534,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -593,7 +548,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -607,7 +562,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -621,7 +576,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -635,7 +590,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -649,7 +604,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -663,7 +618,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -689,130 +644,85 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
     default:
       break;
   }
-#endif
-  return c_runtimeexception::o_invoke_from_eval(s, env, caller, hash, fatal);
+  #endif
+  return c_RuntimeException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_unexpectedvalueexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+Variant c_UnexpectedValueException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
-  return c_runtimeexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+  #else
+  #endif
+  return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_unexpectedvalueexception = {
-  c_unexpectedvalueexception::os_getInit,
-  c_unexpectedvalueexception::os_get,
-  c_unexpectedvalueexception::os_lval,
-  c_unexpectedvalueexception::os_invoke,
-  c_unexpectedvalueexception::os_constant,
+struct ObjectStaticCallbacks cw_UnexpectedValueException = {
+  c_UnexpectedValueException::os_getInit,
+  c_UnexpectedValueException::os_get,
+  c_UnexpectedValueException::os_lval,
+  c_UnexpectedValueException::os_invoke,
+  c_UnexpectedValueException::os_constant,
 };
-void c_unexpectedvalueexception::init() {
-  c_runtimeexception::init();
+void c_UnexpectedValueException::init() {
+  c_RuntimeException::init();
 }
 /* SRC: classes/exception.php line 233 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_overflowexception
-Variant c_overflowexception::os_getInit(const char *s, int64 hash) {
-  return c_runtimeexception::os_getInit(s, hash);
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OverflowException
+Variant c_OverflowException::os_getInit(CStrRef s) {
+  return c_RuntimeException::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_overflowexception
-Variant c_overflowexception::os_get(const char *s, int64 hash) {
-  return c_runtimeexception::os_get(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OverflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_OverflowException
+Variant c_OverflowException::os_get(CStrRef s) {
+  return c_RuntimeException::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_overflowexception
-Variant &c_overflowexception::os_lval(const char *s, int64 hash) {
-  return c_runtimeexception::os_lval(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_OverflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_OverflowException
+Variant &c_OverflowException::os_lval(CStrRef s) {
+  return c_RuntimeException::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_overflowexception
-void c_overflowexception::o_getArray(Array &props) const {
-  c_runtimeexception::o_getArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_OverflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_OverflowException
+void c_OverflowException::o_getArray(Array &props) const {
+  c_RuntimeException::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_overflowexception
-void c_overflowexception::o_setArray(CArrRef props) {
-  c_runtimeexception::o_setArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_OverflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_OverflowException
+void c_OverflowException::o_setArray(CArrRef props) {
+  c_RuntimeException::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_overflowexception
-Variant c_overflowexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_OverflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_OverflowException
+Variant * c_OverflowException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_overflowexception
-Variant c_overflowexception::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_runtimeexception::o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_OverflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_OverflowException
+Variant * c_OverflowException::o_realPropPublic(CStrRef s, int flags) const {
+  return c_RuntimeException::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_overflowexception
-Variant c_overflowexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_OverflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OverflowException
+Variant * c_OverflowException::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_overflowexception
-bool c_overflowexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OverflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_OverflowException
+Variant c_OverflowException::os_constant(const char *s) {
+  return c_RuntimeException::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_overflowexception
-bool c_overflowexception::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_runtimeexception::o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_overflowexception
-bool c_overflowexception::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_overflowexception
-Variant c_overflowexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_overflowexception
-Variant c_overflowexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_runtimeexception::o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_overflowexception
-Variant c_overflowexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_overflowexception
-Variant& c_overflowexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_overflowexception
-Variant& c_overflowexception::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_runtimeexception::o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_overflowexception
-Variant& c_overflowexception::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_overflowexception
-Variant c_overflowexception::os_constant(const char *s) {
-  return c_runtimeexception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_overflowexception
-IMPLEMENT_CLASS(overflowexception)
-ObjectData *c_overflowexception::cloneImpl() {
-  c_overflowexception *obj = NEW(c_overflowexception)();
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_OverflowException
+IMPLEMENT_CLASS(OverflowException)
+ObjectData *c_OverflowException::cloneImpl() {
+  c_OverflowException *obj = NEW(c_OverflowException)();
   cloneSet(obj);
   return obj;
 }
-void c_overflowexception::cloneSet(c_overflowexception *clone) {
-  c_runtimeexception::cloneSet(clone);
+void c_OverflowException::cloneSet(c_OverflowException *clone) {
+  c_RuntimeException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_overflowexception
-Variant c_overflowexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_OverflowException
+Variant c_OverflowException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -835,7 +745,7 @@ Variant c_overflowexception::o_invoke(MethodIndex methodIndex, const char *s, CA
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -879,59 +789,59 @@ Variant c_overflowexception::o_invoke(MethodIndex methodIndex, const char *s, CA
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         {
           ArrayData *ad(params.get());
@@ -939,7 +849,7 @@ Variant c_overflowexception::o_invoke(MethodIndex methodIndex, const char *s, CA
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -947,13 +857,13 @@ Variant c_overflowexception::o_invoke(MethodIndex methodIndex, const char *s, CA
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_overflowexception
-Variant c_overflowexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_OverflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_OverflowException
+Variant c_OverflowException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -1014,59 +924,59 @@ Variant c_overflowexception::o_invoke_few_args(MethodIndex methodIndex, const ch
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -1076,21 +986,21 @@ Variant c_overflowexception::o_invoke_few_args(MethodIndex methodIndex, const ch
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_overflowexception
-Variant c_overflowexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_OverflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_OverflowException
+Variant c_OverflowException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_overflowexception
-Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_OverflowException
+Variant c_OverflowException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -1232,11 +1142,11 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -1250,7 +1160,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -1264,7 +1174,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -1278,7 +1188,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -1292,7 +1202,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -1306,7 +1216,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -1320,7 +1230,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -1334,7 +1244,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -1348,7 +1258,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -1374,130 +1284,85 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
     default:
       break;
   }
-#endif
-  return c_runtimeexception::o_invoke_from_eval(s, env, caller, hash, fatal);
+  #endif
+  return c_RuntimeException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_overflowexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+Variant c_OverflowException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
-  return c_runtimeexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+  #else
+  #endif
+  return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_overflowexception = {
-  c_overflowexception::os_getInit,
-  c_overflowexception::os_get,
-  c_overflowexception::os_lval,
-  c_overflowexception::os_invoke,
-  c_overflowexception::os_constant,
+struct ObjectStaticCallbacks cw_OverflowException = {
+  c_OverflowException::os_getInit,
+  c_OverflowException::os_get,
+  c_OverflowException::os_lval,
+  c_OverflowException::os_invoke,
+  c_OverflowException::os_constant,
 };
-void c_overflowexception::init() {
-  c_runtimeexception::init();
+void c_OverflowException::init() {
+  c_RuntimeException::init();
 }
 /* SRC: classes/exception.php line 225 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_outofboundsexception
-Variant c_outofboundsexception::os_getInit(const char *s, int64 hash) {
-  return c_runtimeexception::os_getInit(s, hash);
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfBoundsException
+Variant c_OutOfBoundsException::os_getInit(CStrRef s) {
+  return c_RuntimeException::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_outofboundsexception
-Variant c_outofboundsexception::os_get(const char *s, int64 hash) {
-  return c_runtimeexception::os_get(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfBoundsException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_OutOfBoundsException
+Variant c_OutOfBoundsException::os_get(CStrRef s) {
+  return c_RuntimeException::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_outofboundsexception
-Variant &c_outofboundsexception::os_lval(const char *s, int64 hash) {
-  return c_runtimeexception::os_lval(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_OutOfBoundsException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_OutOfBoundsException
+Variant &c_OutOfBoundsException::os_lval(CStrRef s) {
+  return c_RuntimeException::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_outofboundsexception
-void c_outofboundsexception::o_getArray(Array &props) const {
-  c_runtimeexception::o_getArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_OutOfBoundsException
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_OutOfBoundsException
+void c_OutOfBoundsException::o_getArray(Array &props) const {
+  c_RuntimeException::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_outofboundsexception
-void c_outofboundsexception::o_setArray(CArrRef props) {
-  c_runtimeexception::o_setArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_OutOfBoundsException
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_OutOfBoundsException
+void c_OutOfBoundsException::o_setArray(CArrRef props) {
+  c_RuntimeException::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_outofboundsexception
-Variant c_outofboundsexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_OutOfBoundsException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_OutOfBoundsException
+Variant * c_OutOfBoundsException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_outofboundsexception
-Variant c_outofboundsexception::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_runtimeexception::o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_OutOfBoundsException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_OutOfBoundsException
+Variant * c_OutOfBoundsException::o_realPropPublic(CStrRef s, int flags) const {
+  return c_RuntimeException::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_outofboundsexception
-Variant c_outofboundsexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_OutOfBoundsException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OutOfBoundsException
+Variant * c_OutOfBoundsException::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_outofboundsexception
-bool c_outofboundsexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OutOfBoundsException
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_OutOfBoundsException
+Variant c_OutOfBoundsException::os_constant(const char *s) {
+  return c_RuntimeException::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_outofboundsexception
-bool c_outofboundsexception::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_runtimeexception::o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_outofboundsexception
-bool c_outofboundsexception::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_outofboundsexception
-Variant c_outofboundsexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_outofboundsexception
-Variant c_outofboundsexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_runtimeexception::o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_outofboundsexception
-Variant c_outofboundsexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_outofboundsexception
-Variant& c_outofboundsexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_outofboundsexception
-Variant& c_outofboundsexception::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_runtimeexception::o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_outofboundsexception
-Variant& c_outofboundsexception::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_outofboundsexception
-Variant c_outofboundsexception::os_constant(const char *s) {
-  return c_runtimeexception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_outofboundsexception
-IMPLEMENT_CLASS(outofboundsexception)
-ObjectData *c_outofboundsexception::cloneImpl() {
-  c_outofboundsexception *obj = NEW(c_outofboundsexception)();
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_OutOfBoundsException
+IMPLEMENT_CLASS(OutOfBoundsException)
+ObjectData *c_OutOfBoundsException::cloneImpl() {
+  c_OutOfBoundsException *obj = NEW(c_OutOfBoundsException)();
   cloneSet(obj);
   return obj;
 }
-void c_outofboundsexception::cloneSet(c_outofboundsexception *clone) {
-  c_runtimeexception::cloneSet(clone);
+void c_OutOfBoundsException::cloneSet(c_OutOfBoundsException *clone) {
+  c_RuntimeException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_outofboundsexception
-Variant c_outofboundsexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_OutOfBoundsException
+Variant c_OutOfBoundsException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -1520,7 +1385,7 @@ Variant c_outofboundsexception::o_invoke(MethodIndex methodIndex, const char *s,
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -1564,59 +1429,59 @@ Variant c_outofboundsexception::o_invoke(MethodIndex methodIndex, const char *s,
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         {
           ArrayData *ad(params.get());
@@ -1624,7 +1489,7 @@ Variant c_outofboundsexception::o_invoke(MethodIndex methodIndex, const char *s,
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -1632,13 +1497,13 @@ Variant c_outofboundsexception::o_invoke(MethodIndex methodIndex, const char *s,
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_outofboundsexception
-Variant c_outofboundsexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_OutOfBoundsException
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_OutOfBoundsException
+Variant c_OutOfBoundsException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -1699,59 +1564,59 @@ Variant c_outofboundsexception::o_invoke_few_args(MethodIndex methodIndex, const
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -1761,21 +1626,21 @@ Variant c_outofboundsexception::o_invoke_few_args(MethodIndex methodIndex, const
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_outofboundsexception
-Variant c_outofboundsexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_OutOfBoundsException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_OutOfBoundsException
+Variant c_OutOfBoundsException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_outofboundsexception
-Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_OutOfBoundsException
+Variant c_OutOfBoundsException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -1917,11 +1782,11 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -1935,7 +1800,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -1949,7 +1814,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -1963,7 +1828,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -1977,7 +1842,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -1991,7 +1856,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -2005,7 +1870,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -2019,7 +1884,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -2033,7 +1898,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -2059,130 +1924,85 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
     default:
       break;
   }
-#endif
-  return c_runtimeexception::o_invoke_from_eval(s, env, caller, hash, fatal);
+  #endif
+  return c_RuntimeException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_outofboundsexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+Variant c_OutOfBoundsException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
-  return c_runtimeexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+  #else
+  #endif
+  return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_outofboundsexception = {
-  c_outofboundsexception::os_getInit,
-  c_outofboundsexception::os_get,
-  c_outofboundsexception::os_lval,
-  c_outofboundsexception::os_invoke,
-  c_outofboundsexception::os_constant,
+struct ObjectStaticCallbacks cw_OutOfBoundsException = {
+  c_OutOfBoundsException::os_getInit,
+  c_OutOfBoundsException::os_get,
+  c_OutOfBoundsException::os_lval,
+  c_OutOfBoundsException::os_invoke,
+  c_OutOfBoundsException::os_constant,
 };
-void c_outofboundsexception::init() {
-  c_runtimeexception::init();
+void c_OutOfBoundsException::init() {
+  c_RuntimeException::init();
 }
 /* SRC: classes/exception.php line 155 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_logicexception
-Variant c_logicexception::os_getInit(const char *s, int64 hash) {
-  return c_exception::os_getInit(s, hash);
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LogicException
+Variant c_LogicException::os_getInit(CStrRef s) {
+  return c_Exception::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_logicexception
-Variant c_logicexception::os_get(const char *s, int64 hash) {
-  return c_exception::os_get(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LogicException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_LogicException
+Variant c_LogicException::os_get(CStrRef s) {
+  return c_Exception::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_logicexception
-Variant &c_logicexception::os_lval(const char *s, int64 hash) {
-  return c_exception::os_lval(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_LogicException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_LogicException
+Variant &c_LogicException::os_lval(CStrRef s) {
+  return c_Exception::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_logicexception
-void c_logicexception::o_getArray(Array &props) const {
-  c_exception::o_getArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_LogicException
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_LogicException
+void c_LogicException::o_getArray(Array &props) const {
+  c_Exception::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_logicexception
-void c_logicexception::o_setArray(CArrRef props) {
-  c_exception::o_setArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_LogicException
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_LogicException
+void c_LogicException::o_setArray(CArrRef props) {
+  c_Exception::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_logicexception
-Variant c_logicexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_LogicException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_LogicException
+Variant * c_LogicException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_logicexception
-Variant c_logicexception::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_exception::o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_LogicException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_LogicException
+Variant * c_LogicException::o_realPropPublic(CStrRef s, int flags) const {
+  return c_Exception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_logicexception
-Variant c_logicexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_LogicException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LogicException
+Variant * c_LogicException::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_logicexception
-bool c_logicexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LogicException
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_LogicException
+Variant c_LogicException::os_constant(const char *s) {
+  return c_Exception::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_logicexception
-bool c_logicexception::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_exception::o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_logicexception
-bool c_logicexception::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_logicexception
-Variant c_logicexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_logicexception
-Variant c_logicexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_exception::o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_logicexception
-Variant c_logicexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_logicexception
-Variant& c_logicexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_logicexception
-Variant& c_logicexception::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_exception::o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_logicexception
-Variant& c_logicexception::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_logicexception
-Variant c_logicexception::os_constant(const char *s) {
-  return c_exception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_logicexception
-IMPLEMENT_CLASS(logicexception)
-ObjectData *c_logicexception::cloneImpl() {
-  c_logicexception *obj = NEW(c_logicexception)();
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_LogicException
+IMPLEMENT_CLASS(LogicException)
+ObjectData *c_LogicException::cloneImpl() {
+  c_LogicException *obj = NEW(c_LogicException)();
   cloneSet(obj);
   return obj;
 }
-void c_logicexception::cloneSet(c_logicexception *clone) {
-  c_exception::cloneSet(clone);
+void c_LogicException::cloneSet(c_LogicException *clone) {
+  c_Exception::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_logicexception
-Variant c_logicexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_LogicException
+Variant c_LogicException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -2205,7 +2025,7 @@ Variant c_logicexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -2249,59 +2069,59 @@ Variant c_logicexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         {
           ArrayData *ad(params.get());
@@ -2309,7 +2129,7 @@ Variant c_logicexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -2317,13 +2137,13 @@ Variant c_logicexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_logicexception
-Variant c_logicexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_LogicException
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_LogicException
+Variant c_LogicException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -2384,59 +2204,59 @@ Variant c_logicexception::o_invoke_few_args(MethodIndex methodIndex, const char 
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -2446,21 +2266,21 @@ Variant c_logicexception::o_invoke_few_args(MethodIndex methodIndex, const char 
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_logicexception
-Variant c_logicexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_LogicException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_LogicException
+Variant c_LogicException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_logicexception
-Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_LogicException
+Variant c_LogicException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -2602,11 +2422,11 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -2620,7 +2440,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -2634,7 +2454,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -2648,7 +2468,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -2662,7 +2482,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -2676,7 +2496,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -2690,7 +2510,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -2704,7 +2524,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -2718,7 +2538,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -2744,130 +2564,85 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     default:
       break;
   }
-#endif
-  return c_exception::o_invoke_from_eval(s, env, caller, hash, fatal);
+  #endif
+  return c_Exception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_logicexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+Variant c_LogicException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
-  return c_exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+  #else
+  #endif
+  return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_logicexception = {
-  c_logicexception::os_getInit,
-  c_logicexception::os_get,
-  c_logicexception::os_lval,
-  c_logicexception::os_invoke,
-  c_logicexception::os_constant,
+struct ObjectStaticCallbacks cw_LogicException = {
+  c_LogicException::os_getInit,
+  c_LogicException::os_get,
+  c_LogicException::os_lval,
+  c_LogicException::os_invoke,
+  c_LogicException::os_constant,
 };
-void c_logicexception::init() {
-  c_exception::init();
+void c_LogicException::init() {
+  c_Exception::init();
 }
 /* SRC: classes/exception.php line 241 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_rangeexception
-Variant c_rangeexception::os_getInit(const char *s, int64 hash) {
-  return c_runtimeexception::os_getInit(s, hash);
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RangeException
+Variant c_RangeException::os_getInit(CStrRef s) {
+  return c_RuntimeException::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_rangeexception
-Variant c_rangeexception::os_get(const char *s, int64 hash) {
-  return c_runtimeexception::os_get(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_RangeException
+Variant c_RangeException::os_get(CStrRef s) {
+  return c_RuntimeException::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_rangeexception
-Variant &c_rangeexception::os_lval(const char *s, int64 hash) {
-  return c_runtimeexception::os_lval(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_RangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RangeException
+Variant &c_RangeException::os_lval(CStrRef s) {
+  return c_RuntimeException::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_rangeexception
-void c_rangeexception::o_getArray(Array &props) const {
-  c_runtimeexception::o_getArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_RangeException
+void c_RangeException::o_getArray(Array &props) const {
+  c_RuntimeException::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_rangeexception
-void c_rangeexception::o_setArray(CArrRef props) {
-  c_runtimeexception::o_setArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_RangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_RangeException
+void c_RangeException::o_setArray(CArrRef props) {
+  c_RuntimeException::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_rangeexception
-Variant c_rangeexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_RangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_RangeException
+Variant * c_RangeException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_rangeexception
-Variant c_rangeexception::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_runtimeexception::o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_RangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RangeException
+Variant * c_RangeException::o_realPropPublic(CStrRef s, int flags) const {
+  return c_RuntimeException::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_rangeexception
-Variant c_rangeexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RangeException
+Variant * c_RangeException::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_rangeexception
-bool c_rangeexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_RangeException
+Variant c_RangeException::os_constant(const char *s) {
+  return c_RuntimeException::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_rangeexception
-bool c_rangeexception::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_runtimeexception::o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_rangeexception
-bool c_rangeexception::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_rangeexception
-Variant c_rangeexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_rangeexception
-Variant c_rangeexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_runtimeexception::o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_rangeexception
-Variant c_rangeexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_rangeexception
-Variant& c_rangeexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_rangeexception
-Variant& c_rangeexception::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_runtimeexception::o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_rangeexception
-Variant& c_rangeexception::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_rangeexception
-Variant c_rangeexception::os_constant(const char *s) {
-  return c_runtimeexception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_rangeexception
-IMPLEMENT_CLASS(rangeexception)
-ObjectData *c_rangeexception::cloneImpl() {
-  c_rangeexception *obj = NEW(c_rangeexception)();
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_RangeException
+IMPLEMENT_CLASS(RangeException)
+ObjectData *c_RangeException::cloneImpl() {
+  c_RangeException *obj = NEW(c_RangeException)();
   cloneSet(obj);
   return obj;
 }
-void c_rangeexception::cloneSet(c_rangeexception *clone) {
-  c_runtimeexception::cloneSet(clone);
+void c_RangeException::cloneSet(c_RangeException *clone) {
+  c_RuntimeException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_rangeexception
-Variant c_rangeexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_RangeException
+Variant c_RangeException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -2890,7 +2665,7 @@ Variant c_rangeexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -2934,59 +2709,59 @@ Variant c_rangeexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         {
           ArrayData *ad(params.get());
@@ -2994,7 +2769,7 @@ Variant c_rangeexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -3002,13 +2777,13 @@ Variant c_rangeexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_rangeexception
-Variant c_rangeexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_RangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_RangeException
+Variant c_RangeException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -3069,59 +2844,59 @@ Variant c_rangeexception::o_invoke_few_args(MethodIndex methodIndex, const char 
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -3131,21 +2906,21 @@ Variant c_rangeexception::o_invoke_few_args(MethodIndex methodIndex, const char 
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_rangeexception
-Variant c_rangeexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_RangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RangeException
+Variant c_RangeException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_rangeexception
-Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RangeException
+Variant c_RangeException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -3287,11 +3062,11 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -3305,7 +3080,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -3319,7 +3094,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -3333,7 +3108,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -3347,7 +3122,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -3361,7 +3136,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -3375,7 +3150,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -3389,7 +3164,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -3403,7 +3178,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -3429,130 +3204,85 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     default:
       break;
   }
-#endif
-  return c_runtimeexception::o_invoke_from_eval(s, env, caller, hash, fatal);
+  #endif
+  return c_RuntimeException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_rangeexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+Variant c_RangeException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
-  return c_runtimeexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+  #else
+  #endif
+  return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_rangeexception = {
-  c_rangeexception::os_getInit,
-  c_rangeexception::os_get,
-  c_rangeexception::os_lval,
-  c_rangeexception::os_invoke,
-  c_rangeexception::os_constant,
+struct ObjectStaticCallbacks cw_RangeException = {
+  c_RangeException::os_getInit,
+  c_RangeException::os_get,
+  c_RangeException::os_lval,
+  c_RangeException::os_invoke,
+  c_RangeException::os_constant,
 };
-void c_rangeexception::init() {
-  c_runtimeexception::init();
+void c_RangeException::init() {
+  c_RuntimeException::init();
 }
 /* SRC: classes/exception.php line 193 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_invalidargumentexception
-Variant c_invalidargumentexception::os_getInit(const char *s, int64 hash) {
-  return c_logicexception::os_getInit(s, hash);
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_InvalidArgumentException
+Variant c_InvalidArgumentException::os_getInit(CStrRef s) {
+  return c_LogicException::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_invalidargumentexception
-Variant c_invalidargumentexception::os_get(const char *s, int64 hash) {
-  return c_logicexception::os_get(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_InvalidArgumentException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_InvalidArgumentException
+Variant c_InvalidArgumentException::os_get(CStrRef s) {
+  return c_LogicException::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_invalidargumentexception
-Variant &c_invalidargumentexception::os_lval(const char *s, int64 hash) {
-  return c_logicexception::os_lval(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_InvalidArgumentException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_InvalidArgumentException
+Variant &c_InvalidArgumentException::os_lval(CStrRef s) {
+  return c_LogicException::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_invalidargumentexception
-void c_invalidargumentexception::o_getArray(Array &props) const {
-  c_logicexception::o_getArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_InvalidArgumentException
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_InvalidArgumentException
+void c_InvalidArgumentException::o_getArray(Array &props) const {
+  c_LogicException::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_invalidargumentexception
-void c_invalidargumentexception::o_setArray(CArrRef props) {
-  c_logicexception::o_setArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_InvalidArgumentException
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_InvalidArgumentException
+void c_InvalidArgumentException::o_setArray(CArrRef props) {
+  c_LogicException::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_invalidargumentexception
-Variant c_invalidargumentexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_InvalidArgumentException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_InvalidArgumentException
+Variant * c_InvalidArgumentException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_invalidargumentexception
-Variant c_invalidargumentexception::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_logicexception::o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_InvalidArgumentException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_InvalidArgumentException
+Variant * c_InvalidArgumentException::o_realPropPublic(CStrRef s, int flags) const {
+  return c_LogicException::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_invalidargumentexception
-Variant c_invalidargumentexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_InvalidArgumentException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_InvalidArgumentException
+Variant * c_InvalidArgumentException::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_invalidargumentexception
-bool c_invalidargumentexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_InvalidArgumentException
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_InvalidArgumentException
+Variant c_InvalidArgumentException::os_constant(const char *s) {
+  return c_LogicException::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_invalidargumentexception
-bool c_invalidargumentexception::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_logicexception::o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_invalidargumentexception
-bool c_invalidargumentexception::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_invalidargumentexception
-Variant c_invalidargumentexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_invalidargumentexception
-Variant c_invalidargumentexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_logicexception::o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_invalidargumentexception
-Variant c_invalidargumentexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_invalidargumentexception
-Variant& c_invalidargumentexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_invalidargumentexception
-Variant& c_invalidargumentexception::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_logicexception::o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_invalidargumentexception
-Variant& c_invalidargumentexception::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_invalidargumentexception
-Variant c_invalidargumentexception::os_constant(const char *s) {
-  return c_logicexception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_invalidargumentexception
-IMPLEMENT_CLASS(invalidargumentexception)
-ObjectData *c_invalidargumentexception::cloneImpl() {
-  c_invalidargumentexception *obj = NEW(c_invalidargumentexception)();
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_InvalidArgumentException
+IMPLEMENT_CLASS(InvalidArgumentException)
+ObjectData *c_InvalidArgumentException::cloneImpl() {
+  c_InvalidArgumentException *obj = NEW(c_InvalidArgumentException)();
   cloneSet(obj);
   return obj;
 }
-void c_invalidargumentexception::cloneSet(c_invalidargumentexception *clone) {
-  c_logicexception::cloneSet(clone);
+void c_InvalidArgumentException::cloneSet(c_InvalidArgumentException *clone) {
+  c_LogicException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_invalidargumentexception
-Variant c_invalidargumentexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_InvalidArgumentException
+Variant c_InvalidArgumentException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -3575,7 +3305,7 @@ Variant c_invalidargumentexception::o_invoke(MethodIndex methodIndex, const char
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -3619,59 +3349,59 @@ Variant c_invalidargumentexception::o_invoke(MethodIndex methodIndex, const char
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         {
           ArrayData *ad(params.get());
@@ -3679,7 +3409,7 @@ Variant c_invalidargumentexception::o_invoke(MethodIndex methodIndex, const char
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -3687,13 +3417,13 @@ Variant c_invalidargumentexception::o_invoke(MethodIndex methodIndex, const char
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_invalidargumentexception
-Variant c_invalidargumentexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_InvalidArgumentException
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_InvalidArgumentException
+Variant c_InvalidArgumentException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -3754,59 +3484,59 @@ Variant c_invalidargumentexception::o_invoke_few_args(MethodIndex methodIndex, c
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -3816,21 +3546,21 @@ Variant c_invalidargumentexception::o_invoke_few_args(MethodIndex methodIndex, c
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_invalidargumentexception
-Variant c_invalidargumentexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_InvalidArgumentException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_InvalidArgumentException
+Variant c_InvalidArgumentException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_invalidargumentexception
-Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_InvalidArgumentException
+Variant c_InvalidArgumentException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -3972,11 +3702,11 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -3990,7 +3720,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -4004,7 +3734,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -4018,7 +3748,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -4032,7 +3762,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -4046,7 +3776,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -4060,7 +3790,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -4074,7 +3804,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -4088,7 +3818,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -4114,130 +3844,85 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
     default:
       break;
   }
-#endif
-  return c_logicexception::o_invoke_from_eval(s, env, caller, hash, fatal);
+  #endif
+  return c_LogicException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_invalidargumentexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+Variant c_InvalidArgumentException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
-  return c_logicexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+  #else
+  #endif
+  return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_invalidargumentexception = {
-  c_invalidargumentexception::os_getInit,
-  c_invalidargumentexception::os_get,
-  c_invalidargumentexception::os_lval,
-  c_invalidargumentexception::os_invoke,
-  c_invalidargumentexception::os_constant,
+struct ObjectStaticCallbacks cw_InvalidArgumentException = {
+  c_InvalidArgumentException::os_getInit,
+  c_InvalidArgumentException::os_get,
+  c_InvalidArgumentException::os_lval,
+  c_InvalidArgumentException::os_invoke,
+  c_InvalidArgumentException::os_constant,
 };
-void c_invalidargumentexception::init() {
-  c_logicexception::init();
+void c_InvalidArgumentException::init() {
+  c_LogicException::init();
 }
 /* SRC: classes/exception.php line 250 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_underflowexception
-Variant c_underflowexception::os_getInit(const char *s, int64 hash) {
-  return c_runtimeexception::os_getInit(s, hash);
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_UnderflowException
+Variant c_UnderflowException::os_getInit(CStrRef s) {
+  return c_RuntimeException::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_underflowexception
-Variant c_underflowexception::os_get(const char *s, int64 hash) {
-  return c_runtimeexception::os_get(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_UnderflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_UnderflowException
+Variant c_UnderflowException::os_get(CStrRef s) {
+  return c_RuntimeException::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_underflowexception
-Variant &c_underflowexception::os_lval(const char *s, int64 hash) {
-  return c_runtimeexception::os_lval(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_UnderflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_UnderflowException
+Variant &c_UnderflowException::os_lval(CStrRef s) {
+  return c_RuntimeException::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_underflowexception
-void c_underflowexception::o_getArray(Array &props) const {
-  c_runtimeexception::o_getArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_UnderflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_UnderflowException
+void c_UnderflowException::o_getArray(Array &props) const {
+  c_RuntimeException::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_underflowexception
-void c_underflowexception::o_setArray(CArrRef props) {
-  c_runtimeexception::o_setArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_UnderflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_UnderflowException
+void c_UnderflowException::o_setArray(CArrRef props) {
+  c_RuntimeException::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_underflowexception
-Variant c_underflowexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_UnderflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_UnderflowException
+Variant * c_UnderflowException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_underflowexception
-Variant c_underflowexception::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_runtimeexception::o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_UnderflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_UnderflowException
+Variant * c_UnderflowException::o_realPropPublic(CStrRef s, int flags) const {
+  return c_RuntimeException::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_underflowexception
-Variant c_underflowexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_UnderflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_UnderflowException
+Variant * c_UnderflowException::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_underflowexception
-bool c_underflowexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_UnderflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_UnderflowException
+Variant c_UnderflowException::os_constant(const char *s) {
+  return c_RuntimeException::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_underflowexception
-bool c_underflowexception::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_runtimeexception::o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_underflowexception
-bool c_underflowexception::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_underflowexception
-Variant c_underflowexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_underflowexception
-Variant c_underflowexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_runtimeexception::o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_underflowexception
-Variant c_underflowexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_underflowexception
-Variant& c_underflowexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_underflowexception
-Variant& c_underflowexception::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_runtimeexception::o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_underflowexception
-Variant& c_underflowexception::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_underflowexception
-Variant c_underflowexception::os_constant(const char *s) {
-  return c_runtimeexception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_underflowexception
-IMPLEMENT_CLASS(underflowexception)
-ObjectData *c_underflowexception::cloneImpl() {
-  c_underflowexception *obj = NEW(c_underflowexception)();
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_UnderflowException
+IMPLEMENT_CLASS(UnderflowException)
+ObjectData *c_UnderflowException::cloneImpl() {
+  c_UnderflowException *obj = NEW(c_UnderflowException)();
   cloneSet(obj);
   return obj;
 }
-void c_underflowexception::cloneSet(c_underflowexception *clone) {
-  c_runtimeexception::cloneSet(clone);
+void c_UnderflowException::cloneSet(c_UnderflowException *clone) {
+  c_RuntimeException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_underflowexception
-Variant c_underflowexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_UnderflowException
+Variant c_UnderflowException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -4260,7 +3945,7 @@ Variant c_underflowexception::o_invoke(MethodIndex methodIndex, const char *s, C
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -4304,59 +3989,59 @@ Variant c_underflowexception::o_invoke(MethodIndex methodIndex, const char *s, C
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         {
           ArrayData *ad(params.get());
@@ -4364,7 +4049,7 @@ Variant c_underflowexception::o_invoke(MethodIndex methodIndex, const char *s, C
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -4372,13 +4057,13 @@ Variant c_underflowexception::o_invoke(MethodIndex methodIndex, const char *s, C
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_underflowexception
-Variant c_underflowexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_UnderflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_UnderflowException
+Variant c_UnderflowException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -4439,59 +4124,59 @@ Variant c_underflowexception::o_invoke_few_args(MethodIndex methodIndex, const c
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -4501,21 +4186,21 @@ Variant c_underflowexception::o_invoke_few_args(MethodIndex methodIndex, const c
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_underflowexception
-Variant c_underflowexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_UnderflowException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_UnderflowException
+Variant c_UnderflowException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_underflowexception
-Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_UnderflowException
+Variant c_UnderflowException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -4657,11 +4342,11 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -4675,7 +4360,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -4689,7 +4374,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -4703,7 +4388,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -4717,7 +4402,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -4731,7 +4416,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -4745,7 +4430,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -4759,7 +4444,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -4773,7 +4458,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -4799,130 +4484,85 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
     default:
       break;
   }
-#endif
-  return c_runtimeexception::o_invoke_from_eval(s, env, caller, hash, fatal);
+  #endif
+  return c_RuntimeException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_underflowexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+Variant c_UnderflowException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
-  return c_runtimeexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+  #else
+  #endif
+  return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_underflowexception = {
-  c_underflowexception::os_getInit,
-  c_underflowexception::os_get,
-  c_underflowexception::os_lval,
-  c_underflowexception::os_invoke,
-  c_underflowexception::os_constant,
+struct ObjectStaticCallbacks cw_UnderflowException = {
+  c_UnderflowException::os_getInit,
+  c_UnderflowException::os_get,
+  c_UnderflowException::os_lval,
+  c_UnderflowException::os_invoke,
+  c_UnderflowException::os_constant,
 };
-void c_underflowexception::init() {
-  c_runtimeexception::init();
+void c_UnderflowException::init() {
+  c_RuntimeException::init();
 }
 /* SRC: classes/exception.php line 209 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_outofrangeexception
-Variant c_outofrangeexception::os_getInit(const char *s, int64 hash) {
-  return c_logicexception::os_getInit(s, hash);
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfRangeException
+Variant c_OutOfRangeException::os_getInit(CStrRef s) {
+  return c_LogicException::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_outofrangeexception
-Variant c_outofrangeexception::os_get(const char *s, int64 hash) {
-  return c_logicexception::os_get(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfRangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_OutOfRangeException
+Variant c_OutOfRangeException::os_get(CStrRef s) {
+  return c_LogicException::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_outofrangeexception
-Variant &c_outofrangeexception::os_lval(const char *s, int64 hash) {
-  return c_logicexception::os_lval(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_OutOfRangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_OutOfRangeException
+Variant &c_OutOfRangeException::os_lval(CStrRef s) {
+  return c_LogicException::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_outofrangeexception
-void c_outofrangeexception::o_getArray(Array &props) const {
-  c_logicexception::o_getArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_OutOfRangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_OutOfRangeException
+void c_OutOfRangeException::o_getArray(Array &props) const {
+  c_LogicException::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_outofrangeexception
-void c_outofrangeexception::o_setArray(CArrRef props) {
-  c_logicexception::o_setArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_OutOfRangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_OutOfRangeException
+void c_OutOfRangeException::o_setArray(CArrRef props) {
+  c_LogicException::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_outofrangeexception
-Variant c_outofrangeexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_OutOfRangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_OutOfRangeException
+Variant * c_OutOfRangeException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_outofrangeexception
-Variant c_outofrangeexception::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_logicexception::o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_OutOfRangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_OutOfRangeException
+Variant * c_OutOfRangeException::o_realPropPublic(CStrRef s, int flags) const {
+  return c_LogicException::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_outofrangeexception
-Variant c_outofrangeexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_OutOfRangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OutOfRangeException
+Variant * c_OutOfRangeException::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_outofrangeexception
-bool c_outofrangeexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OutOfRangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_OutOfRangeException
+Variant c_OutOfRangeException::os_constant(const char *s) {
+  return c_LogicException::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_outofrangeexception
-bool c_outofrangeexception::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_logicexception::o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_outofrangeexception
-bool c_outofrangeexception::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_outofrangeexception
-Variant c_outofrangeexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_outofrangeexception
-Variant c_outofrangeexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_logicexception::o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_outofrangeexception
-Variant c_outofrangeexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_outofrangeexception
-Variant& c_outofrangeexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_outofrangeexception
-Variant& c_outofrangeexception::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_logicexception::o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_outofrangeexception
-Variant& c_outofrangeexception::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_outofrangeexception
-Variant c_outofrangeexception::os_constant(const char *s) {
-  return c_logicexception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_outofrangeexception
-IMPLEMENT_CLASS(outofrangeexception)
-ObjectData *c_outofrangeexception::cloneImpl() {
-  c_outofrangeexception *obj = NEW(c_outofrangeexception)();
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_OutOfRangeException
+IMPLEMENT_CLASS(OutOfRangeException)
+ObjectData *c_OutOfRangeException::cloneImpl() {
+  c_OutOfRangeException *obj = NEW(c_OutOfRangeException)();
   cloneSet(obj);
   return obj;
 }
-void c_outofrangeexception::cloneSet(c_outofrangeexception *clone) {
-  c_logicexception::cloneSet(clone);
+void c_OutOfRangeException::cloneSet(c_OutOfRangeException *clone) {
+  c_LogicException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_outofrangeexception
-Variant c_outofrangeexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_OutOfRangeException
+Variant c_OutOfRangeException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -4945,7 +4585,7 @@ Variant c_outofrangeexception::o_invoke(MethodIndex methodIndex, const char *s, 
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -4989,59 +4629,59 @@ Variant c_outofrangeexception::o_invoke(MethodIndex methodIndex, const char *s, 
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         {
           ArrayData *ad(params.get());
@@ -5049,7 +4689,7 @@ Variant c_outofrangeexception::o_invoke(MethodIndex methodIndex, const char *s, 
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -5057,13 +4697,13 @@ Variant c_outofrangeexception::o_invoke(MethodIndex methodIndex, const char *s, 
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_outofrangeexception
-Variant c_outofrangeexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_OutOfRangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_OutOfRangeException
+Variant c_OutOfRangeException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -5124,59 +4764,59 @@ Variant c_outofrangeexception::o_invoke_few_args(MethodIndex methodIndex, const 
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -5186,21 +4826,21 @@ Variant c_outofrangeexception::o_invoke_few_args(MethodIndex methodIndex, const 
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_outofrangeexception
-Variant c_outofrangeexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_OutOfRangeException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_OutOfRangeException
+Variant c_OutOfRangeException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_outofrangeexception
-Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_OutOfRangeException
+Variant c_OutOfRangeException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -5342,11 +4982,11 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -5360,7 +5000,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -5374,7 +5014,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -5388,7 +5028,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -5402,7 +5042,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -5416,7 +5056,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -5430,7 +5070,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -5444,7 +5084,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -5458,7 +5098,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -5484,130 +5124,85 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
     default:
       break;
   }
-#endif
-  return c_logicexception::o_invoke_from_eval(s, env, caller, hash, fatal);
+  #endif
+  return c_LogicException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_outofrangeexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+Variant c_OutOfRangeException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
-  return c_logicexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+  #else
+  #endif
+  return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_outofrangeexception = {
-  c_outofrangeexception::os_getInit,
-  c_outofrangeexception::os_get,
-  c_outofrangeexception::os_lval,
-  c_outofrangeexception::os_invoke,
-  c_outofrangeexception::os_constant,
+struct ObjectStaticCallbacks cw_OutOfRangeException = {
+  c_OutOfRangeException::os_getInit,
+  c_OutOfRangeException::os_get,
+  c_OutOfRangeException::os_lval,
+  c_OutOfRangeException::os_invoke,
+  c_OutOfRangeException::os_constant,
 };
-void c_outofrangeexception::init() {
-  c_logicexception::init();
+void c_OutOfRangeException::init() {
+  c_LogicException::init();
 }
 /* SRC: classes/exception.php line 175 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_badmethodcallexception
-Variant c_badmethodcallexception::os_getInit(const char *s, int64 hash) {
-  return c_badfunctioncallexception::os_getInit(s, hash);
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_BadMethodCallException
+Variant c_BadMethodCallException::os_getInit(CStrRef s) {
+  return c_BadFunctionCallException::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_badmethodcallexception
-Variant c_badmethodcallexception::os_get(const char *s, int64 hash) {
-  return c_badfunctioncallexception::os_get(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_BadMethodCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_BadMethodCallException
+Variant c_BadMethodCallException::os_get(CStrRef s) {
+  return c_BadFunctionCallException::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_badmethodcallexception
-Variant &c_badmethodcallexception::os_lval(const char *s, int64 hash) {
-  return c_badfunctioncallexception::os_lval(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_BadMethodCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_BadMethodCallException
+Variant &c_BadMethodCallException::os_lval(CStrRef s) {
+  return c_BadFunctionCallException::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_badmethodcallexception
-void c_badmethodcallexception::o_getArray(Array &props) const {
-  c_badfunctioncallexception::o_getArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_BadMethodCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_BadMethodCallException
+void c_BadMethodCallException::o_getArray(Array &props) const {
+  c_BadFunctionCallException::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_badmethodcallexception
-void c_badmethodcallexception::o_setArray(CArrRef props) {
-  c_badfunctioncallexception::o_setArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_BadMethodCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_BadMethodCallException
+void c_BadMethodCallException::o_setArray(CArrRef props) {
+  c_BadFunctionCallException::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_badmethodcallexception
-Variant c_badmethodcallexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_BadMethodCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_BadMethodCallException
+Variant * c_BadMethodCallException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_badmethodcallexception
-Variant c_badmethodcallexception::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_badfunctioncallexception::o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_BadMethodCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_BadMethodCallException
+Variant * c_BadMethodCallException::o_realPropPublic(CStrRef s, int flags) const {
+  return c_BadFunctionCallException::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_badmethodcallexception
-Variant c_badmethodcallexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_BadMethodCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_BadMethodCallException
+Variant * c_BadMethodCallException::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_badmethodcallexception
-bool c_badmethodcallexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_BadMethodCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_BadMethodCallException
+Variant c_BadMethodCallException::os_constant(const char *s) {
+  return c_BadFunctionCallException::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_badmethodcallexception
-bool c_badmethodcallexception::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_badfunctioncallexception::o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_badmethodcallexception
-bool c_badmethodcallexception::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_badmethodcallexception
-Variant c_badmethodcallexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_badmethodcallexception
-Variant c_badmethodcallexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_badfunctioncallexception::o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_badmethodcallexception
-Variant c_badmethodcallexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_badmethodcallexception
-Variant& c_badmethodcallexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_badmethodcallexception
-Variant& c_badmethodcallexception::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_badfunctioncallexception::o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_badmethodcallexception
-Variant& c_badmethodcallexception::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_badmethodcallexception
-Variant c_badmethodcallexception::os_constant(const char *s) {
-  return c_badfunctioncallexception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_badmethodcallexception
-IMPLEMENT_CLASS(badmethodcallexception)
-ObjectData *c_badmethodcallexception::cloneImpl() {
-  c_badmethodcallexception *obj = NEW(c_badmethodcallexception)();
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_BadMethodCallException
+IMPLEMENT_CLASS(BadMethodCallException)
+ObjectData *c_BadMethodCallException::cloneImpl() {
+  c_BadMethodCallException *obj = NEW(c_BadMethodCallException)();
   cloneSet(obj);
   return obj;
 }
-void c_badmethodcallexception::cloneSet(c_badmethodcallexception *clone) {
-  c_badfunctioncallexception::cloneSet(clone);
+void c_BadMethodCallException::cloneSet(c_BadMethodCallException *clone) {
+  c_BadFunctionCallException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_badmethodcallexception
-Variant c_badmethodcallexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_BadMethodCallException
+Variant c_BadMethodCallException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -5630,7 +5225,7 @@ Variant c_badmethodcallexception::o_invoke(MethodIndex methodIndex, const char *
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -5674,59 +5269,59 @@ Variant c_badmethodcallexception::o_invoke(MethodIndex methodIndex, const char *
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         {
           ArrayData *ad(params.get());
@@ -5734,7 +5329,7 @@ Variant c_badmethodcallexception::o_invoke(MethodIndex methodIndex, const char *
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -5742,13 +5337,13 @@ Variant c_badmethodcallexception::o_invoke(MethodIndex methodIndex, const char *
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_badmethodcallexception
-Variant c_badmethodcallexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_BadMethodCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_BadMethodCallException
+Variant c_BadMethodCallException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -5809,59 +5404,59 @@ Variant c_badmethodcallexception::o_invoke_few_args(MethodIndex methodIndex, con
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -5871,21 +5466,21 @@ Variant c_badmethodcallexception::o_invoke_few_args(MethodIndex methodIndex, con
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badmethodcallexception
-Variant c_badmethodcallexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_BadMethodCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_BadMethodCallException
+Variant c_BadMethodCallException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badmethodcallexception
-Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_BadMethodCallException
+Variant c_BadMethodCallException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -6027,11 +5622,11 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -6045,7 +5640,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -6059,7 +5654,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -6073,7 +5668,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -6087,7 +5682,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -6101,7 +5696,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -6115,7 +5710,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -6129,7 +5724,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -6143,7 +5738,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -6169,130 +5764,85 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
     default:
       break;
   }
-#endif
-  return c_badfunctioncallexception::o_invoke_from_eval(s, env, caller, hash, fatal);
+  #endif
+  return c_BadFunctionCallException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_badmethodcallexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+Variant c_BadMethodCallException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
-  return c_badfunctioncallexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+  #else
+  #endif
+  return c_BadFunctionCallException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_badmethodcallexception = {
-  c_badmethodcallexception::os_getInit,
-  c_badmethodcallexception::os_get,
-  c_badmethodcallexception::os_lval,
-  c_badmethodcallexception::os_invoke,
-  c_badmethodcallexception::os_constant,
+struct ObjectStaticCallbacks cw_BadMethodCallException = {
+  c_BadMethodCallException::os_getInit,
+  c_BadMethodCallException::os_get,
+  c_BadMethodCallException::os_lval,
+  c_BadMethodCallException::os_invoke,
+  c_BadMethodCallException::os_constant,
 };
-void c_badmethodcallexception::init() {
-  c_badfunctioncallexception::init();
+void c_BadMethodCallException::init() {
+  c_BadFunctionCallException::init();
 }
 /* SRC: classes/exception.php line 217 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_runtimeexception
-Variant c_runtimeexception::os_getInit(const char *s, int64 hash) {
-  return c_exception::os_getInit(s, hash);
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RuntimeException
+Variant c_RuntimeException::os_getInit(CStrRef s) {
+  return c_Exception::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_runtimeexception
-Variant c_runtimeexception::os_get(const char *s, int64 hash) {
-  return c_exception::os_get(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RuntimeException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_RuntimeException
+Variant c_RuntimeException::os_get(CStrRef s) {
+  return c_Exception::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_runtimeexception
-Variant &c_runtimeexception::os_lval(const char *s, int64 hash) {
-  return c_exception::os_lval(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_RuntimeException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RuntimeException
+Variant &c_RuntimeException::os_lval(CStrRef s) {
+  return c_Exception::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_runtimeexception
-void c_runtimeexception::o_getArray(Array &props) const {
-  c_exception::o_getArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RuntimeException
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_RuntimeException
+void c_RuntimeException::o_getArray(Array &props) const {
+  c_Exception::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_runtimeexception
-void c_runtimeexception::o_setArray(CArrRef props) {
-  c_exception::o_setArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_RuntimeException
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_RuntimeException
+void c_RuntimeException::o_setArray(CArrRef props) {
+  c_Exception::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_runtimeexception
-Variant c_runtimeexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_RuntimeException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_RuntimeException
+Variant * c_RuntimeException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_runtimeexception
-Variant c_runtimeexception::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_exception::o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_RuntimeException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RuntimeException
+Variant * c_RuntimeException::o_realPropPublic(CStrRef s, int flags) const {
+  return c_Exception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_runtimeexception
-Variant c_runtimeexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RuntimeException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RuntimeException
+Variant * c_RuntimeException::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_runtimeexception
-bool c_runtimeexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RuntimeException
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_RuntimeException
+Variant c_RuntimeException::os_constant(const char *s) {
+  return c_Exception::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_runtimeexception
-bool c_runtimeexception::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_exception::o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_runtimeexception
-bool c_runtimeexception::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_runtimeexception
-Variant c_runtimeexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_runtimeexception
-Variant c_runtimeexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_exception::o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_runtimeexception
-Variant c_runtimeexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_runtimeexception
-Variant& c_runtimeexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_runtimeexception
-Variant& c_runtimeexception::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_exception::o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_runtimeexception
-Variant& c_runtimeexception::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_runtimeexception
-Variant c_runtimeexception::os_constant(const char *s) {
-  return c_exception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_runtimeexception
-IMPLEMENT_CLASS(runtimeexception)
-ObjectData *c_runtimeexception::cloneImpl() {
-  c_runtimeexception *obj = NEW(c_runtimeexception)();
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_RuntimeException
+IMPLEMENT_CLASS(RuntimeException)
+ObjectData *c_RuntimeException::cloneImpl() {
+  c_RuntimeException *obj = NEW(c_RuntimeException)();
   cloneSet(obj);
   return obj;
 }
-void c_runtimeexception::cloneSet(c_runtimeexception *clone) {
-  c_exception::cloneSet(clone);
+void c_RuntimeException::cloneSet(c_RuntimeException *clone) {
+  c_Exception::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_runtimeexception
-Variant c_runtimeexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_RuntimeException
+Variant c_RuntimeException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -6315,7 +5865,7 @@ Variant c_runtimeexception::o_invoke(MethodIndex methodIndex, const char *s, CAr
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -6359,59 +5909,59 @@ Variant c_runtimeexception::o_invoke(MethodIndex methodIndex, const char *s, CAr
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         {
           ArrayData *ad(params.get());
@@ -6419,7 +5969,7 @@ Variant c_runtimeexception::o_invoke(MethodIndex methodIndex, const char *s, CAr
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -6427,13 +5977,13 @@ Variant c_runtimeexception::o_invoke(MethodIndex methodIndex, const char *s, CAr
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_runtimeexception
-Variant c_runtimeexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_RuntimeException
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_RuntimeException
+Variant c_RuntimeException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -6494,59 +6044,59 @@ Variant c_runtimeexception::o_invoke_few_args(MethodIndex methodIndex, const cha
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -6556,21 +6106,21 @@ Variant c_runtimeexception::o_invoke_few_args(MethodIndex methodIndex, const cha
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_runtimeexception
-Variant c_runtimeexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_RuntimeException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RuntimeException
+Variant c_RuntimeException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_runtimeexception
-Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RuntimeException
+Variant c_RuntimeException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -6712,11 +6262,11 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -6730,7 +6280,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -6744,7 +6294,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -6758,7 +6308,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -6772,7 +6322,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -6786,7 +6336,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -6800,7 +6350,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -6814,7 +6364,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -6828,7 +6378,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -6854,245 +6404,125 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     default:
       break;
   }
-#endif
-  return c_exception::o_invoke_from_eval(s, env, caller, hash, fatal);
+  #endif
+  return c_Exception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_runtimeexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+Variant c_RuntimeException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
-  return c_exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+  #else
+  #endif
+  return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_runtimeexception = {
-  c_runtimeexception::os_getInit,
-  c_runtimeexception::os_get,
-  c_runtimeexception::os_lval,
-  c_runtimeexception::os_invoke,
-  c_runtimeexception::os_constant,
+struct ObjectStaticCallbacks cw_RuntimeException = {
+  c_RuntimeException::os_getInit,
+  c_RuntimeException::os_get,
+  c_RuntimeException::os_lval,
+  c_RuntimeException::os_invoke,
+  c_RuntimeException::os_constant,
 };
-void c_runtimeexception::init() {
-  c_exception::init();
+void c_RuntimeException::init() {
+  c_Exception::init();
 }
 /* SRC: classes/exception.php line 10 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_exception
-Variant c_exception::os_getInit(const char *s, int64 hash) {
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Exception
+Variant c_Exception::os_getInit(CStrRef s) {
   DECLARE_SYSTEM_GLOBALS(g);
-  if (hash < 0) hash = hash_string(s);
+  int64 hash = s->hash();
   switch (hash & 15) {
     case 7:
-      HASH_RETURN(0x3CCB986B2CF0A747LL,
-                  null, "trace");
+      HASH_RETURN_NAMSTR(0x3CCB986B2CF0A747LL, NAMSTR(s_sys_ss2cf0a747, "trace"),
+                         null, 5);
       break;
     case 9:
-      HASH_RETURN(0x58C72230857ACDB9LL,
-                  0LL, "code");
+      HASH_RETURN_NAMSTR(0x58C72230857ACDB9LL, NAMSTR(s_sys_ss7a853247, "code"),
+                         0LL, 4);
       break;
     case 10:
-      HASH_RETURN(0x04AB35CACF8C8C9ALL,
-                  null, "line");
+      HASH_RETURN_NAMSTR(0x04AB35CACF8C8C9ALL, NAMSTR(s_sys_ss30737366, "line"),
+                         null, 4);
       break;
     case 11:
-      HASH_RETURN(0x0247CDBB94C9D47BLL,
-                  "", "message");
+      HASH_RETURN_NAMSTR(0x0247CDBB94C9D47BLL, NAMSTR(s_sys_ss6b362b85, "message"),
+                         NAMSTR(s_sys_ss00000000, ""), 7);
       break;
     case 15:
-      HASH_RETURN(0x7863294A8F33D14FLL,
-                  null, "file");
+      HASH_RETURN_NAMSTR(0x7863294A8F33D14FLL, NAMSTR(s_sys_ss70cc2eb1, "file"),
+                         null, 4);
       break;
     default:
       break;
   }
-  return c_ObjectData::os_getInit(s, hash);
+  return c_ObjectData::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_exception
-Variant c_exception::os_get(const char *s, int64 hash) {
-  return c_ObjectData::os_get(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Exception
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_Exception
+Variant c_Exception::os_get(CStrRef s) {
+  return c_ObjectData::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_exception
-Variant &c_exception::os_lval(const char *s, int64 hash) {
-  return c_ObjectData::os_lval(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_Exception
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Exception
+Variant &c_Exception::os_lval(CStrRef s) {
+  return c_ObjectData::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_exception
-void c_exception::o_getArray(Array &props) const {
-  if (isInitialized(m_message)) props.set("message", m_message.isReferenced() ? ref(m_message) : m_message, 0x0247CDBB94C9D47BLL, true);
-  if (isInitialized(m_code)) props.set("code", m_code.isReferenced() ? ref(m_code) : m_code, 0x58C72230857ACDB9LL, true);
-  if (isInitialized(m_file)) props.set("file", m_file.isReferenced() ? ref(m_file) : m_file, 0x7863294A8F33D14FLL, true);
-  if (isInitialized(m_line)) props.set("line", m_line.isReferenced() ? ref(m_line) : m_line, 0x04AB35CACF8C8C9ALL, true);
-  if (isInitialized(m_trace)) props.set("trace", m_trace.isReferenced() ? ref(m_trace) : m_trace, 0x3CCB986B2CF0A747LL, true);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Exception
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Exception
+void c_Exception::o_getArray(Array &props) const {
+  if (isInitialized(m_message)) props.set(NAMSTR(s_sys_ss6b362b85, "message"), m_message.isReferenced() ? ref(m_message) : m_message, true);
+  if (isInitialized(m_code)) props.set(NAMSTR(s_sys_ss7a853247, "code"), m_code.isReferenced() ? ref(m_code) : m_code, true);
+  if (isInitialized(m_file)) props.set(NAMSTR(s_sys_ss70cc2eb1, "file"), m_file.isReferenced() ? ref(m_file) : m_file, true);
+  if (isInitialized(m_line)) props.set(NAMSTR(s_sys_ss30737366, "line"), m_line.isReferenced() ? ref(m_line) : m_line, true);
+  if (isInitialized(m_trace)) props.set(NAMSTR(s_sys_ss2cf0a747, "trace"), m_trace.isReferenced() ? ref(m_trace) : m_trace, true);
   c_ObjectData::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_exception
-void c_exception::o_setArray(CArrRef props) {
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Exception
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Exception
+void c_Exception::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_exception
-Variant c_exception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Exception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_Exception
+Variant * c_Exception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_exception
-Variant c_exception::o_getPublic(CStrRef s, int64 hash, bool error) {
-  if (hash < 0) hash = s->hash();
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_Exception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Exception
+Variant * c_Exception::o_realPropPublic(CStrRef s, int flags) const {
+  int64 hash = s->hash();
   switch (hash & 15) {
     case 7:
-      HASH_RETURN_STRING(0x3CCB986B2CF0A747LL, m_trace,
-                         "trace", 5);
+      HASH_REALPROP_STRING(0x3CCB986B2CF0A747LL, "trace", 5, trace);
       break;
     case 9:
-      HASH_RETURN_STRING(0x58C72230857ACDB9LL, m_code,
-                         "code", 4);
+      HASH_REALPROP_STRING(0x58C72230857ACDB9LL, "code", 4, code);
       break;
     case 10:
-      HASH_RETURN_STRING(0x04AB35CACF8C8C9ALL, m_line,
-                         "line", 4);
+      HASH_REALPROP_STRING(0x04AB35CACF8C8C9ALL, "line", 4, line);
       break;
     case 11:
-      HASH_RETURN_STRING(0x0247CDBB94C9D47BLL, m_message,
-                         "message", 7);
+      HASH_REALPROP_STRING(0x0247CDBB94C9D47BLL, "message", 7, message);
       break;
     case 15:
-      HASH_RETURN_STRING(0x7863294A8F33D14FLL, m_file,
-                         "file", 4);
+      HASH_REALPROP_STRING(0x7863294A8F33D14FLL, "file", 4, file);
       break;
     default:
       break;
   }
-  return c_ObjectData::o_getPublic(s, hash, error);
+  return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_exception
-Variant c_exception::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Exception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Exception
+Variant * c_Exception::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_exception
-bool c_exception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_exception
-bool c_exception::o_existsPublic(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = s->hash();
-  switch (hash & 15) {
-    case 7:
-      HASH_EXISTS_STRING(0x3CCB986B2CF0A747LL, "trace", 5);
-      break;
-    case 9:
-      HASH_EXISTS_STRING(0x58C72230857ACDB9LL, "code", 4);
-      break;
-    case 10:
-      HASH_EXISTS_STRING(0x04AB35CACF8C8C9ALL, "line", 4);
-      break;
-    case 11:
-      HASH_EXISTS_STRING(0x0247CDBB94C9D47BLL, "message", 7);
-      break;
-    case 15:
-      HASH_EXISTS_STRING(0x7863294A8F33D14FLL, "file", 4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_exception
-bool c_exception::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_exception
-Variant c_exception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_exception
-Variant c_exception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  if (hash < 0) hash = s->hash();
-  switch (hash & 15) {
-    case 7:
-      HASH_SET_STRING(0x3CCB986B2CF0A747LL, m_trace,
-                      "trace", 5);
-      break;
-    case 9:
-      HASH_SET_STRING(0x58C72230857ACDB9LL, m_code,
-                      "code", 4);
-      break;
-    case 10:
-      HASH_SET_STRING(0x04AB35CACF8C8C9ALL, m_line,
-                      "line", 4);
-      break;
-    case 11:
-      HASH_SET_STRING(0x0247CDBB94C9D47BLL, m_message,
-                      "message", 7);
-      break;
-    case 15:
-      HASH_SET_STRING(0x7863294A8F33D14FLL, m_file,
-                      "file", 4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_exception
-Variant c_exception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_exception
-Variant& c_exception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_exception
-Variant& c_exception::o_lvalPublic(CStrRef s, int64 hash) {
-  if (hash < 0) hash = s->hash();
-  switch (hash & 15) {
-    case 7:
-      HASH_RETURN_STRING(0x3CCB986B2CF0A747LL, m_trace,
-                         "trace", 5);
-      break;
-    case 9:
-      HASH_RETURN_STRING(0x58C72230857ACDB9LL, m_code,
-                         "code", 4);
-      break;
-    case 10:
-      HASH_RETURN_STRING(0x04AB35CACF8C8C9ALL, m_line,
-                         "line", 4);
-      break;
-    case 11:
-      HASH_RETURN_STRING(0x0247CDBB94C9D47BLL, m_message,
-                         "message", 7);
-      break;
-    case 15:
-      HASH_RETURN_STRING(0x7863294A8F33D14FLL, m_file,
-                         "file", 4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_exception
-Variant& c_exception::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_exception
-Variant c_exception::os_constant(const char *s) {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Exception
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Exception
+Variant c_Exception::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_exception
-IMPLEMENT_CLASS(exception)
-c_exception *c_exception::create(Variant v_message //  = ""
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Exception
+IMPLEMENT_CLASS(Exception)
+c_Exception *c_Exception::create(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
 , Variant v_code //  = 0LL
 ) {
   CountableHelper h(this);
@@ -7100,7 +6530,7 @@ c_exception *c_exception::create(Variant v_message //  = ""
   t___construct(v_message, v_code);
   return this;
 }
-ObjectData *c_exception::dynCreate(CArrRef params, bool construct /* = true */) {
+ObjectData *c_Exception::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
     CountableHelper h(this);
@@ -7118,13 +6548,13 @@ ObjectData *c_exception::dynCreate(CArrRef params, bool construct /* = true */) 
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1));
     } while (false);
   }
   return this;
 }
-void c_exception::dynConstruct(CArrRef params) {
+void c_Exception::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 2) throw_toomany_arguments("Exception::__construct", 2, 2);
   do {
@@ -7139,11 +6569,11 @@ void c_exception::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1));
   } while (false);
 }
-void c_exception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+void c_Exception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -7165,12 +6595,12 @@ void c_exception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   else if (count == 1) (t___construct(a0), null);
   else (t___construct(a0, a1), null);
 }
-ObjectData *c_exception::cloneImpl() {
-  c_exception *obj = NEW(c_exception)();
+ObjectData *c_Exception::cloneImpl() {
+  c_Exception *obj = NEW(c_Exception)();
   cloneSet(obj);
   return obj;
 }
-void c_exception::cloneSet(c_exception *clone) {
+void c_Exception::cloneSet(c_Exception *clone) {
   clone->m_message = m_message.isReferenced() ? ref(m_message) : m_message;
   clone->m_code = m_code.isReferenced() ? ref(m_code) : m_code;
   clone->m_file = m_file.isReferenced() ? ref(m_file) : m_file;
@@ -7178,10 +6608,10 @@ void c_exception::cloneSet(c_exception *clone) {
   clone->m_trace = m_trace.isReferenced() ? ref(m_trace) : m_trace;
   ObjectData::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_exception
-Variant c_exception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_Exception
+Variant c_Exception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -7204,7 +6634,7 @@ Variant c_exception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -7248,59 +6678,59 @@ Variant c_exception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         {
           ArrayData *ad(params.get());
@@ -7308,7 +6738,7 @@ Variant c_exception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -7316,13 +6746,13 @@ Variant c_exception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_exception
-Variant c_exception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_Exception
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_Exception
+Variant c_Exception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -7383,59 +6813,59 @@ Variant c_exception::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -7445,21 +6875,21 @@ Variant c_exception::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_exception
-Variant c_exception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_Exception
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_Exception
+Variant c_Exception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_exception
-Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_Exception
+Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -7601,11 +7031,11 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -7619,7 +7049,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -7633,7 +7063,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -7647,7 +7077,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -7661,7 +7091,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -7675,7 +7105,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -7689,7 +7119,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -7703,7 +7133,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -7717,7 +7147,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -7743,25 +7173,25 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_exception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+Variant c_Exception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
+  #else
+  #endif
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_exception = {
-  c_exception::os_getInit,
-  c_exception::os_get,
-  c_exception::os_lval,
-  c_exception::os_invoke,
-  c_exception::os_constant,
+struct ObjectStaticCallbacks cw_Exception = {
+  c_Exception::os_getInit,
+  c_Exception::os_get,
+  c_Exception::os_lval,
+  c_Exception::os_invoke,
+  c_Exception::os_constant,
 };
-void c_exception::init() {
-  m_message = "";
+void c_Exception::init() {
+  m_message = NAMSTR(s_sys_ss00000000, "");
   m_code = 0LL;
   m_file = null;
   m_line = null;
@@ -7769,7 +7199,7 @@ void c_exception::init() {
   {CountableHelper h(this); t___init__();}
 }
 /* SRC: classes/exception.php line 23 */
-void c_exception::t___init__() {
+void c_Exception::t___init__() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::__init__);
   Variant v_top;
   Variant v_frame;
@@ -7784,23 +7214,32 @@ void c_exception::t___init__() {
       LOOP_COUNTER_CHECK(2);
       {
         {
-          Variant tmp3((m_trace.rvalAt(0LL, 0x77CFA1EEF01BCA90LL, true)));
+          Variant tmp3((m_trace.rvalAt(0LL, true)));
           v_top = tmp3;
         }
         {
           bool tmp4;
           {
-            bool tmp5 = (empty(v_top, "class", 0x2E3A246D1F74C210LL, true));
+            bool tmp5 = (empty(v_top, NAMSTR(s_sys_ss1f74c210, "class"), true));
             if (!tmp5) {
-              bool tmp6 = ((toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x7356F680A745A524LL, true, true)), "__init__")) && toBoolean(x_strcasecmp(toString(v_top.rvalAt("function", 0x7356F680A745A524LL, true, true)), "__construct"))));
+              bool tmp6 = ((toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss58ba5adc, "function"), true, true)), NAMSTR(s_sys_ss55f425c0, "__init__"))) && toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss58ba5adc, "function"), true, true)), NAMSTR(s_sys_ss229c615f, "__construct")))));
               if (tmp6) {
-                String tmp7((toString(v_top.rvalAt("function", 0x7356F680A745A524LL, true, true))));
-                String tmp8((toString(v_top.rvalAt("class", 0x2E3A246D1F74C210LL, true, true))));
+                const String &tmp7((toString(v_top.rvalAt(NAMSTR(s_sys_ss58ba5adc, "function"), true, true))));
+                const String &tmp8((toString(v_top.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
                 tmp6 = (toBoolean(x_strcasecmp(tmp7, tmp8)));
               }
               tmp5 = (tmp6);
             }
-            tmp4 = ((tmp5 || (toBoolean(x_strcasecmp(toString(v_top.rvalAt("class", 0x2E3A246D1F74C210LL, true, true)), "exception")) && !(x_is_subclass_of(v_top.rvalAt("class", 0x2E3A246D1F74C210LL, true, true), "exception")))));
+            bool tmp9 = (tmp5);
+            if (!tmp9) {
+              bool tmp10 = (toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true)), NAMSTR(s_sys_ss7f49956c, "exception"))));
+              if (tmp10) {
+                bool tmp11((x_is_subclass_of(v_top.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true), NAMSTR(s_sys_ss7f49956c, "exception"))));
+                tmp10 = (!(tmp11));
+              }
+              tmp9 = (tmp10);
+            }
+            tmp4 = (tmp9);
           }
           if (tmp4) {
             {
@@ -7809,27 +7248,27 @@ void c_exception::t___init__() {
           }
         }
         {
-          const Variant &tmp9((x_array_shift(ref(lval(m_trace)))));
-          v_frame = tmp9;
+          const Variant &tmp12((x_array_shift(ref(m_trace))));
+          v_frame = tmp12;
         }
       }
     }
   }
-  if (isset(v_frame, "file", 0x7863294A8F33D14FLL, true)) {
+  if (isset(v_frame, NAMSTR(s_sys_ss70cc2eb1, "file"), true)) {
     {
-      Variant tmp10((v_frame.rvalAt("file", 0x7863294A8F33D14FLL, true, true)));
-      m_file = tmp10;
+      Variant tmp13((v_frame.rvalAt(NAMSTR(s_sys_ss70cc2eb1, "file"), true, true)));
+      m_file = tmp13;
     }
   }
-  if (isset(v_frame, "line", 0x04AB35CACF8C8C9ALL, true)) {
+  if (isset(v_frame, NAMSTR(s_sys_ss30737366, "line"), true)) {
     {
-      Variant tmp11((v_frame.rvalAt("line", 0x04AB35CACF8C8C9ALL, true, true)));
-      m_line = tmp11;
+      Variant tmp14((v_frame.rvalAt(NAMSTR(s_sys_ss30737366, "line"), true, true)));
+      m_line = tmp14;
     }
   }
 } /* function */
 /* SRC: classes/exception.php line 44 */
-void c_exception::t___construct(Variant v_message //  = ""
+void c_Exception::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
 , Variant v_code //  = 0LL
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::__construct);
@@ -7839,39 +7278,39 @@ void c_exception::t___construct(Variant v_message //  = ""
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/exception.php line 58 */
-Variant c_exception::t_getmessage() {
+Variant c_Exception::t_getmessage() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getMessage);
   return m_message;
 } /* function */
 /* SRC: classes/exception.php line 71 */
-Variant c_exception::t_getcode() {
+Variant c_Exception::t_getcode() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getCode);
   return m_code;
 } /* function */
 /* SRC: classes/exception.php line 85 */
-Variant c_exception::t_getfile() {
+Variant c_Exception::t_getfile() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getFile);
   return m_file;
 } /* function */
 /* SRC: classes/exception.php line 99 */
-Variant c_exception::t_getline() {
+Variant c_Exception::t_getline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getLine);
   return m_line;
 } /* function */
 /* SRC: classes/exception.php line 112 */
-Variant c_exception::t_gettrace() {
+Variant c_Exception::t_gettrace() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getTrace);
   return m_trace;
 } /* function */
 /* SRC: classes/exception.php line 125 */
-String c_exception::t_gettraceasstring() {
+String c_Exception::t_gettraceasstring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getTraceAsString);
   int64 v_i = 0;
   String v_s;
   Variant v_frame;
 
   v_i = 0LL;
-  v_s = "";
+  v_s = NAMSTR(s_sys_ss00000000, "");
   {
     LOOP_COUNTER(1);
     Variant map2 = t_gettrace();
@@ -7889,20 +7328,20 @@ String c_exception::t_gettraceasstring() {
             tmp4_buf.append("#", 1);
             tmp4_buf.append(toString(v_i));
             tmp4_buf.append(" ", 1);
-            tmp4_buf.append(toString(v_frame.rvalAt("file", 0x7863294A8F33D14FLL, true, true)));
+            tmp4_buf.append(toString(v_frame.rvalAt(NAMSTR(s_sys_ss70cc2eb1, "file"), true, true)));
             tmp4_buf.append("(", 1);
-            tmp4_buf.append(toString(v_frame.rvalAt("line", 0x04AB35CACF8C8C9ALL, true, true)));
+            tmp4_buf.append(toString(v_frame.rvalAt(NAMSTR(s_sys_ss30737366, "line"), true, true)));
             tmp4_buf.append("): ", 3);
             Variant tmp5;
-            if (isset(v_frame, "class", 0x2E3A246D1F74C210LL, true)) {
-              String tmp6((toString(v_frame.rvalAt("class", 0x2E3A246D1F74C210LL, true, true))));
-              String tmp7((toString(v_frame.rvalAt("type", 0x7B5ABDA0E01EF853LL, true, true))));
+            if (isset(v_frame, NAMSTR(s_sys_ss1f74c210, "class"), true)) {
+              const String &tmp6((toString(v_frame.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
+              const String &tmp7((toString(v_frame.rvalAt(NAMSTR(s_sys_ss1fe107ad, "type"), true, true))));
               tmp5 = (concat(tmp6, tmp7));
             } else {
-              tmp5 = ("");
+              tmp5 = (NAMSTR(s_sys_ss00000000, ""));
             }
             tmp4_buf.append(toString(tmp5));
-            tmp4_buf.append(toString(v_frame.rvalAt("function", 0x7356F680A745A524LL, true, true)));
+            tmp4_buf.append(toString(v_frame.rvalAt(NAMSTR(s_sys_ss58ba5adc, "function"), true, true)));
             tmp4_buf.append("()\n", 3);
             CStrRef tmp4(tmp4_buf.detach());
             tmp_sbuf_v_s.add(tmp4);
@@ -7913,153 +7352,81 @@ String c_exception::t_gettraceasstring() {
       concat_assign(v_s, tmp_sbuf_v_s.detach());
     }
   }
-  concat_assign(v_s, concat3("#", toString(v_i), " {main}"));
+  concat_assign(v_s, concat3(NAMSTR(s_sys_ss2e45e4ea, "#"), toString(v_i), NAMSTR(s_sys_ss10600e60, " {main}")));
   return v_s;
 } /* function */
 /* SRC: classes/exception.php line 143 */
-String c_exception::t___tostring() {
+String c_Exception::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::__toString);
   return toString(t_getmessage());
 } /* function */
 /* SRC: classes/exception.php line 268 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_errorexception
-Variant c_errorexception::os_getInit(const char *s, int64 hash) {
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ErrorException
+Variant c_ErrorException::os_getInit(CStrRef s) {
   DECLARE_SYSTEM_GLOBALS(g);
-  if (hash < 0) hash = hash_string(s);
+  int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_RETURN(0x4FDAA620FA5F15F9LL,
-                  null, "severity");
+      HASH_RETURN_NAMSTR(0x4FDAA620FA5F15F9LL, NAMSTR(s_sys_ss05a0ea07, "severity"),
+                         null, 8);
       break;
     default:
       break;
   }
-  return c_exception::os_getInit(s, hash);
+  return c_Exception::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_errorexception
-Variant c_errorexception::os_get(const char *s, int64 hash) {
-  return c_exception::os_get(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ErrorException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_ErrorException
+Variant c_ErrorException::os_get(CStrRef s) {
+  return c_Exception::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_errorexception
-Variant &c_errorexception::os_lval(const char *s, int64 hash) {
-  return c_exception::os_lval(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_ErrorException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ErrorException
+Variant &c_ErrorException::os_lval(CStrRef s) {
+  return c_Exception::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_errorexception
-void c_errorexception::o_getArray(Array &props) const {
-  if (isInitialized(m_severity)) props.set("severity", m_severity.isReferenced() ? ref(m_severity) : m_severity, 0x4FDAA620FA5F15F9LL, true);
-  c_exception::o_getArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ErrorException
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ErrorException
+void c_ErrorException::o_getArray(Array &props) const {
+  if (isInitialized(m_severity)) props.set(NAMSTR(s_sys_ss05a0ea07, "severity"), m_severity.isReferenced() ? ref(m_severity) : m_severity, true);
+  c_Exception::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_errorexception
-void c_errorexception::o_setArray(CArrRef props) {
-  c_exception::o_setArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ErrorException
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ErrorException
+void c_ErrorException::o_setArray(CArrRef props) {
+  c_Exception::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_errorexception
-Variant c_errorexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ErrorException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_ErrorException
+Variant * c_ErrorException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_errorexception
-Variant c_errorexception::o_getPublic(CStrRef s, int64 hash, bool error) {
-  if (hash < 0) hash = s->hash();
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_ErrorException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ErrorException
+Variant * c_ErrorException::o_realPropPublic(CStrRef s, int flags) const {
+  int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_RETURN_STRING(0x4FDAA620FA5F15F9LL, m_severity,
-                         "severity", 8);
+      HASH_REALPROP_STRING(0x4FDAA620FA5F15F9LL, "severity", 8, severity);
       break;
     default:
       break;
   }
-  return c_exception::o_getPublic(s, hash, error);
+  return c_Exception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_errorexception
-Variant c_errorexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ErrorException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ErrorException
+Variant * c_ErrorException::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_errorexception
-bool c_errorexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ErrorException
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ErrorException
+Variant c_ErrorException::os_constant(const char *s) {
+  return c_Exception::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_errorexception
-bool c_errorexception::o_existsPublic(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_EXISTS_STRING(0x4FDAA620FA5F15F9LL, "severity", 8);
-      break;
-    default:
-      break;
-  }
-  return c_exception::o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_errorexception
-bool c_errorexception::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_errorexception
-Variant c_errorexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_errorexception
-Variant c_errorexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  if (hash < 0) hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_SET_STRING(0x4FDAA620FA5F15F9LL, m_severity,
-                      "severity", 8);
-      break;
-    default:
-      break;
-  }
-  return c_exception::o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_errorexception
-Variant c_errorexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_errorexception
-Variant& c_errorexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_errorexception
-Variant& c_errorexception::o_lvalPublic(CStrRef s, int64 hash) {
-  if (hash < 0) hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_RETURN_STRING(0x4FDAA620FA5F15F9LL, m_severity,
-                         "severity", 8);
-      break;
-    default:
-      break;
-  }
-  return c_exception::o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_errorexception
-Variant& c_errorexception::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_errorexception
-Variant c_errorexception::os_constant(const char *s) {
-  return c_exception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_errorexception
-IMPLEMENT_CLASS(errorexception)
-c_errorexception *c_errorexception::create(Variant v_message //  = ""
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ErrorException
+IMPLEMENT_CLASS(ErrorException)
+c_ErrorException *c_ErrorException::create(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
 , Variant v_code //  = 0LL
 , Variant v_severity //  = 0LL
 , Variant v_filename //  = null
@@ -8070,7 +7437,7 @@ c_errorexception *c_errorexception::create(Variant v_message //  = ""
   t___construct(v_message, v_code, v_severity, v_filename, v_lineno);
   return this;
 }
-ObjectData *c_errorexception::dynCreate(CArrRef params, bool construct /* = true */) {
+ObjectData *c_ErrorException::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
     CountableHelper h(this);
@@ -8088,28 +7455,28 @@ ObjectData *c_errorexception::dynCreate(CArrRef params, bool construct /* = true
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 2) {
         (t___construct(arg0, arg1));
         break;
       }
-      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 3) {
         (t___construct(arg0, arg1, arg2));
         break;
       }
-      CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 4) {
         (t___construct(arg0, arg1, arg2, arg3));
         break;
       }
-      CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1, arg2, arg3, arg4));
     } while (false);
   }
   return this;
 }
-void c_errorexception::dynConstruct(CArrRef params) {
+void c_ErrorException::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 5) throw_toomany_arguments("ErrorException::__construct", 5, 2);
   do {
@@ -8124,26 +7491,26 @@ void c_errorexception::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) {
       (t___construct(arg0, arg1));
       break;
     }
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) {
       (t___construct(arg0, arg1, arg2));
       break;
     }
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) {
       (t___construct(arg0, arg1, arg2, arg3));
       break;
     }
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1, arg2, arg3, arg4));
   } while (false);
 }
-void c_errorexception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+void c_ErrorException::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
   Variant a2;
@@ -8180,19 +7547,19 @@ void c_errorexception::dynConstructFromEval(Eval::VariableEnvironment &env, cons
   else if (count == 4) (t___construct(a0, a1, a2, a3), null);
   else (t___construct(a0, a1, a2, a3, a4), null);
 }
-ObjectData *c_errorexception::cloneImpl() {
-  c_errorexception *obj = NEW(c_errorexception)();
+ObjectData *c_ErrorException::cloneImpl() {
+  c_ErrorException *obj = NEW(c_ErrorException)();
   cloneSet(obj);
   return obj;
 }
-void c_errorexception::cloneSet(c_errorexception *clone) {
+void c_ErrorException::cloneSet(c_ErrorException *clone) {
   clone->m_severity = m_severity.isReferenced() ? ref(m_severity) : m_severity;
-  c_exception::cloneSet(clone);
+  c_Exception::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_errorexception
-Variant c_errorexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ErrorException
+Variant c_ErrorException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -8215,13 +7582,13 @@ Variant c_errorexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
         }
       }
@@ -8271,59 +7638,59 @@ Variant c_errorexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
         {
           ArrayData *ad(params.get());
@@ -8331,17 +7698,17 @@ Variant c_errorexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
         }
       }
-      HASH_GUARD(0x4B378D0258AF461FLL, getseverity) {
+      HASH_GUARD_LITSTR(0x4B378D0258AF461FLL, NAMSTR(s_sys_ss58af461f, "getSeverity")) {
         if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
         return (t_getseverity());
       }
@@ -8349,13 +7716,13 @@ Variant c_errorexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_errorexception
-Variant c_errorexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ErrorException
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ErrorException
+Variant c_ErrorException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -8425,59 +7792,59 @@ Variant c_errorexception::o_invoke_few_args(MethodIndex methodIndex, const char 
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -8486,7 +7853,7 @@ Variant c_errorexception::o_invoke_few_args(MethodIndex methodIndex, const char 
         if (count == 4) return (t___construct(a0, a1, a2, a3), null);
         return (t___construct(a0, a1, a2, a3, a4), null);
       }
-      HASH_GUARD(0x4B378D0258AF461FLL, getseverity) {
+      HASH_GUARD_LITSTR(0x4B378D0258AF461FLL, NAMSTR(s_sys_ss58af461f, "getSeverity")) {
         if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
         return (t_getseverity());
       }
@@ -8494,21 +7861,21 @@ Variant c_errorexception::o_invoke_few_args(MethodIndex methodIndex, const char 
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_errorexception
-Variant c_errorexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ErrorException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ErrorException
+Variant c_ErrorException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_errorexception
-Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ErrorException
+Variant c_ErrorException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -8679,11 +8046,11 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -8697,7 +8064,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -8711,7 +8078,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -8725,7 +8092,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -8739,7 +8106,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -8753,7 +8120,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -8767,7 +8134,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -8781,7 +8148,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -8795,7 +8162,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -8832,7 +8199,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         else if (count == 4) return (t___construct(a0, a1, a2, a3), null);
         else return (t___construct(a0, a1, a2, a3, a4), null);
       }
-      HASH_GUARD(0x4B378D0258AF461FLL, getseverity) {
+      HASH_GUARD_LITSTR(0x4B378D0258AF461FLL, NAMSTR(s_sys_ss58af461f, "getSeverity")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
@@ -8848,29 +8215,29 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     default:
       break;
   }
-#endif
-  return c_exception::o_invoke_from_eval(s, env, caller, hash, fatal);
+  #endif
+  return c_Exception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_errorexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+Variant c_ErrorException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
-  return c_exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+  #else
+  #endif
+  return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_errorexception = {
-  c_errorexception::os_getInit,
-  c_errorexception::os_get,
-  c_errorexception::os_lval,
-  c_errorexception::os_invoke,
-  c_errorexception::os_constant,
+struct ObjectStaticCallbacks cw_ErrorException = {
+  c_ErrorException::os_getInit,
+  c_ErrorException::os_get,
+  c_ErrorException::os_lval,
+  c_ErrorException::os_invoke,
+  c_ErrorException::os_constant,
 };
-void c_errorexception::init() {
-  c_exception::init();
+void c_ErrorException::init() {
+  c_Exception::init();
   m_severity = null;
 }
 /* SRC: classes/exception.php line 270 */
-void c_errorexception::t___construct(Variant v_message //  = ""
+void c_ErrorException::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
 , Variant v_code //  = 0LL
 , Variant v_severity //  = 0LL
 , Variant v_filename //  = null
@@ -8878,7 +8245,7 @@ void c_errorexception::t___construct(Variant v_message //  = ""
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ErrorException, ErrorException::__construct);
   bool oldInCtor = gasInCtor(true);
-  c_exception::t___construct(v_message, v_code);
+  c_Exception::t___construct(v_message, v_code);
   m_severity = v_severity;
   if (!(x_is_null(v_filename))) {
     {
@@ -8893,114 +8260,69 @@ void c_errorexception::t___construct(Variant v_message //  = ""
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/exception.php line 290 */
-Variant c_errorexception::t_getseverity() {
+Variant c_ErrorException::t_getseverity() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ErrorException, ErrorException::getSeverity);
   return m_severity;
 } /* function */
 /* SRC: classes/exception.php line 165 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_badfunctioncallexception
-Variant c_badfunctioncallexception::os_getInit(const char *s, int64 hash) {
-  return c_logicexception::os_getInit(s, hash);
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_BadFunctionCallException
+Variant c_BadFunctionCallException::os_getInit(CStrRef s) {
+  return c_LogicException::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_badfunctioncallexception
-Variant c_badfunctioncallexception::os_get(const char *s, int64 hash) {
-  return c_logicexception::os_get(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_BadFunctionCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_BadFunctionCallException
+Variant c_BadFunctionCallException::os_get(CStrRef s) {
+  return c_LogicException::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_badfunctioncallexception
-Variant &c_badfunctioncallexception::os_lval(const char *s, int64 hash) {
-  return c_logicexception::os_lval(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_BadFunctionCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_BadFunctionCallException
+Variant &c_BadFunctionCallException::os_lval(CStrRef s) {
+  return c_LogicException::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_badfunctioncallexception
-void c_badfunctioncallexception::o_getArray(Array &props) const {
-  c_logicexception::o_getArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_BadFunctionCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_BadFunctionCallException
+void c_BadFunctionCallException::o_getArray(Array &props) const {
+  c_LogicException::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_badfunctioncallexception
-void c_badfunctioncallexception::o_setArray(CArrRef props) {
-  c_logicexception::o_setArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_BadFunctionCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_BadFunctionCallException
+void c_BadFunctionCallException::o_setArray(CArrRef props) {
+  c_LogicException::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_badfunctioncallexception
-Variant c_badfunctioncallexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_BadFunctionCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_BadFunctionCallException
+Variant * c_BadFunctionCallException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_badfunctioncallexception
-Variant c_badfunctioncallexception::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_logicexception::o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_BadFunctionCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_BadFunctionCallException
+Variant * c_BadFunctionCallException::o_realPropPublic(CStrRef s, int flags) const {
+  return c_LogicException::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_badfunctioncallexception
-Variant c_badfunctioncallexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_BadFunctionCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_BadFunctionCallException
+Variant * c_BadFunctionCallException::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_badfunctioncallexception
-bool c_badfunctioncallexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_BadFunctionCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_BadFunctionCallException
+Variant c_BadFunctionCallException::os_constant(const char *s) {
+  return c_LogicException::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_badfunctioncallexception
-bool c_badfunctioncallexception::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_logicexception::o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_badfunctioncallexception
-bool c_badfunctioncallexception::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_badfunctioncallexception
-Variant c_badfunctioncallexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_badfunctioncallexception
-Variant c_badfunctioncallexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_logicexception::o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_badfunctioncallexception
-Variant c_badfunctioncallexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_badfunctioncallexception
-Variant& c_badfunctioncallexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_badfunctioncallexception
-Variant& c_badfunctioncallexception::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_logicexception::o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_badfunctioncallexception
-Variant& c_badfunctioncallexception::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_badfunctioncallexception
-Variant c_badfunctioncallexception::os_constant(const char *s) {
-  return c_logicexception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_badfunctioncallexception
-IMPLEMENT_CLASS(badfunctioncallexception)
-ObjectData *c_badfunctioncallexception::cloneImpl() {
-  c_badfunctioncallexception *obj = NEW(c_badfunctioncallexception)();
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_BadFunctionCallException
+IMPLEMENT_CLASS(BadFunctionCallException)
+ObjectData *c_BadFunctionCallException::cloneImpl() {
+  c_BadFunctionCallException *obj = NEW(c_BadFunctionCallException)();
   cloneSet(obj);
   return obj;
 }
-void c_badfunctioncallexception::cloneSet(c_badfunctioncallexception *clone) {
-  c_logicexception::cloneSet(clone);
+void c_BadFunctionCallException::cloneSet(c_BadFunctionCallException *clone) {
+  c_LogicException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_badfunctioncallexception
-Variant c_badfunctioncallexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_BadFunctionCallException
+Variant c_BadFunctionCallException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -9023,7 +8345,7 @@ Variant c_badfunctioncallexception::o_invoke(MethodIndex methodIndex, const char
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -9067,59 +8389,59 @@ Variant c_badfunctioncallexception::o_invoke(MethodIndex methodIndex, const char
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         {
           ArrayData *ad(params.get());
@@ -9127,7 +8449,7 @@ Variant c_badfunctioncallexception::o_invoke(MethodIndex methodIndex, const char
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -9135,13 +8457,13 @@ Variant c_badfunctioncallexception::o_invoke(MethodIndex methodIndex, const char
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_badfunctioncallexception
-Variant c_badfunctioncallexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_BadFunctionCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_BadFunctionCallException
+Variant c_BadFunctionCallException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -9202,59 +8524,59 @@ Variant c_badfunctioncallexception::o_invoke_few_args(MethodIndex methodIndex, c
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -9264,21 +8586,21 @@ Variant c_badfunctioncallexception::o_invoke_few_args(MethodIndex methodIndex, c
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badfunctioncallexception
-Variant c_badfunctioncallexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_BadFunctionCallException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_BadFunctionCallException
+Variant c_BadFunctionCallException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badfunctioncallexception
-Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_BadFunctionCallException
+Variant c_BadFunctionCallException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -9420,11 +8742,11 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -9438,7 +8760,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -9452,7 +8774,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -9466,7 +8788,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -9480,7 +8802,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -9494,7 +8816,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -9508,7 +8830,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -9522,7 +8844,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -9536,7 +8858,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -9562,130 +8884,85 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
     default:
       break;
   }
-#endif
-  return c_logicexception::o_invoke_from_eval(s, env, caller, hash, fatal);
+  #endif
+  return c_LogicException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_badfunctioncallexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+Variant c_BadFunctionCallException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
-  return c_logicexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+  #else
+  #endif
+  return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_badfunctioncallexception = {
-  c_badfunctioncallexception::os_getInit,
-  c_badfunctioncallexception::os_get,
-  c_badfunctioncallexception::os_lval,
-  c_badfunctioncallexception::os_invoke,
-  c_badfunctioncallexception::os_constant,
+struct ObjectStaticCallbacks cw_BadFunctionCallException = {
+  c_BadFunctionCallException::os_getInit,
+  c_BadFunctionCallException::os_get,
+  c_BadFunctionCallException::os_lval,
+  c_BadFunctionCallException::os_invoke,
+  c_BadFunctionCallException::os_constant,
 };
-void c_badfunctioncallexception::init() {
-  c_logicexception::init();
+void c_BadFunctionCallException::init() {
+  c_LogicException::init();
 }
 /* SRC: classes/exception.php line 201 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_lengthexception
-Variant c_lengthexception::os_getInit(const char *s, int64 hash) {
-  return c_logicexception::os_getInit(s, hash);
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LengthException
+Variant c_LengthException::os_getInit(CStrRef s) {
+  return c_LogicException::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_lengthexception
-Variant c_lengthexception::os_get(const char *s, int64 hash) {
-  return c_logicexception::os_get(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LengthException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_LengthException
+Variant c_LengthException::os_get(CStrRef s) {
+  return c_LogicException::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_lengthexception
-Variant &c_lengthexception::os_lval(const char *s, int64 hash) {
-  return c_logicexception::os_lval(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_LengthException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_LengthException
+Variant &c_LengthException::os_lval(CStrRef s) {
+  return c_LogicException::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_lengthexception
-void c_lengthexception::o_getArray(Array &props) const {
-  c_logicexception::o_getArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_LengthException
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_LengthException
+void c_LengthException::o_getArray(Array &props) const {
+  c_LogicException::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_lengthexception
-void c_lengthexception::o_setArray(CArrRef props) {
-  c_logicexception::o_setArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_LengthException
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_LengthException
+void c_LengthException::o_setArray(CArrRef props) {
+  c_LogicException::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_lengthexception
-Variant c_lengthexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_LengthException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_LengthException
+Variant * c_LengthException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_lengthexception
-Variant c_lengthexception::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_logicexception::o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_LengthException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_LengthException
+Variant * c_LengthException::o_realPropPublic(CStrRef s, int flags) const {
+  return c_LogicException::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_lengthexception
-Variant c_lengthexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_LengthException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LengthException
+Variant * c_LengthException::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_lengthexception
-bool c_lengthexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LengthException
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_LengthException
+Variant c_LengthException::os_constant(const char *s) {
+  return c_LogicException::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_lengthexception
-bool c_lengthexception::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_logicexception::o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_lengthexception
-bool c_lengthexception::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_lengthexception
-Variant c_lengthexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_lengthexception
-Variant c_lengthexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_logicexception::o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_lengthexception
-Variant c_lengthexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_lengthexception
-Variant& c_lengthexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_lengthexception
-Variant& c_lengthexception::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_logicexception::o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_lengthexception
-Variant& c_lengthexception::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_lengthexception
-Variant c_lengthexception::os_constant(const char *s) {
-  return c_logicexception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_lengthexception
-IMPLEMENT_CLASS(lengthexception)
-ObjectData *c_lengthexception::cloneImpl() {
-  c_lengthexception *obj = NEW(c_lengthexception)();
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_LengthException
+IMPLEMENT_CLASS(LengthException)
+ObjectData *c_LengthException::cloneImpl() {
+  c_LengthException *obj = NEW(c_LengthException)();
   cloneSet(obj);
   return obj;
 }
-void c_lengthexception::cloneSet(c_lengthexception *clone) {
-  c_logicexception::cloneSet(clone);
+void c_LengthException::cloneSet(c_LengthException *clone) {
+  c_LogicException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_lengthexception
-Variant c_lengthexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_LengthException
+Variant c_LengthException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -9708,7 +8985,7 @@ Variant c_lengthexception::o_invoke(MethodIndex methodIndex, const char *s, CArr
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -9752,59 +9029,59 @@ Variant c_lengthexception::o_invoke(MethodIndex methodIndex, const char *s, CArr
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         {
           ArrayData *ad(params.get());
@@ -9812,7 +9089,7 @@ Variant c_lengthexception::o_invoke(MethodIndex methodIndex, const char *s, CArr
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -9820,13 +9097,13 @@ Variant c_lengthexception::o_invoke(MethodIndex methodIndex, const char *s, CArr
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_lengthexception
-Variant c_lengthexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_LengthException
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_LengthException
+Variant c_LengthException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -9887,59 +9164,59 @@ Variant c_lengthexception::o_invoke_few_args(MethodIndex methodIndex, const char
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -9949,21 +9226,21 @@ Variant c_lengthexception::o_invoke_few_args(MethodIndex methodIndex, const char
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_lengthexception
-Variant c_lengthexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_LengthException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_LengthException
+Variant c_LengthException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_lengthexception
-Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_LengthException
+Variant c_LengthException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -10105,11 +9382,11 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -10123,7 +9400,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -10137,7 +9414,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -10151,7 +9428,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -10165,7 +9442,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -10179,7 +9456,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -10193,7 +9470,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -10207,7 +9484,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -10221,7 +9498,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -10247,130 +9524,85 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     default:
       break;
   }
-#endif
-  return c_logicexception::o_invoke_from_eval(s, env, caller, hash, fatal);
+  #endif
+  return c_LogicException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_lengthexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+Variant c_LengthException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
-  return c_logicexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+  #else
+  #endif
+  return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_lengthexception = {
-  c_lengthexception::os_getInit,
-  c_lengthexception::os_get,
-  c_lengthexception::os_lval,
-  c_lengthexception::os_invoke,
-  c_lengthexception::os_constant,
+struct ObjectStaticCallbacks cw_LengthException = {
+  c_LengthException::os_getInit,
+  c_LengthException::os_get,
+  c_LengthException::os_lval,
+  c_LengthException::os_invoke,
+  c_LengthException::os_constant,
 };
-void c_lengthexception::init() {
-  c_logicexception::init();
+void c_LengthException::init() {
+  c_LogicException::init();
 }
 /* SRC: classes/exception.php line 184 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domainexception
-Variant c_domainexception::os_getInit(const char *s, int64 hash) {
-  return c_logicexception::os_getInit(s, hash);
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DomainException
+Variant c_DomainException::os_getInit(CStrRef s) {
+  return c_LogicException::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_domainexception
-Variant c_domainexception::os_get(const char *s, int64 hash) {
-  return c_logicexception::os_get(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DomainException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DomainException
+Variant c_DomainException::os_get(CStrRef s) {
+  return c_LogicException::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domainexception
-Variant &c_domainexception::os_lval(const char *s, int64 hash) {
-  return c_logicexception::os_lval(s, hash);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DomainException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DomainException
+Variant &c_DomainException::os_lval(CStrRef s) {
+  return c_LogicException::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_domainexception
-void c_domainexception::o_getArray(Array &props) const {
-  c_logicexception::o_getArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DomainException
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DomainException
+void c_DomainException::o_getArray(Array &props) const {
+  c_LogicException::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_domainexception
-void c_domainexception::o_setArray(CArrRef props) {
-  c_logicexception::o_setArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DomainException
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DomainException
+void c_DomainException::o_setArray(CArrRef props) {
+  c_LogicException::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_domainexception
-Variant c_domainexception::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DomainException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DomainException
+Variant * c_DomainException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domainexception
-Variant c_domainexception::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_logicexception::o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_DomainException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DomainException
+Variant * c_DomainException::o_realPropPublic(CStrRef s, int flags) const {
+  return c_LogicException::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domainexception
-Variant c_domainexception::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DomainException
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DomainException
+Variant * c_DomainException::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_domainexception
-bool c_domainexception::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DomainException
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DomainException
+Variant c_DomainException::os_constant(const char *s) {
+  return c_LogicException::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domainexception
-bool c_domainexception::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_logicexception::o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domainexception
-bool c_domainexception::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_domainexception
-Variant c_domainexception::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domainexception
-Variant c_domainexception::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_logicexception::o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domainexception
-Variant c_domainexception::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_domainexception
-Variant& c_domainexception::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domainexception
-Variant& c_domainexception::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_logicexception::o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domainexception
-Variant& c_domainexception::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_domainexception
-Variant c_domainexception::os_constant(const char *s) {
-  return c_logicexception::os_constant(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_domainexception
-IMPLEMENT_CLASS(domainexception)
-ObjectData *c_domainexception::cloneImpl() {
-  c_domainexception *obj = NEW(c_domainexception)();
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DomainException
+IMPLEMENT_CLASS(DomainException)
+ObjectData *c_DomainException::cloneImpl() {
+  c_DomainException *obj = NEW(c_DomainException)();
   cloneSet(obj);
   return obj;
 }
-void c_domainexception::cloneSet(c_domainexception *clone) {
-  c_logicexception::cloneSet(clone);
+void c_DomainException::cloneSet(c_DomainException *clone) {
+  c_LogicException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domainexception
-Variant c_domainexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DomainException
+Variant c_DomainException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -10393,7 +9625,7 @@ Variant c_domainexception::o_invoke(MethodIndex methodIndex, const char *s, CArr
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -10437,59 +9669,59 @@ Variant c_domainexception::o_invoke(MethodIndex methodIndex, const char *s, CArr
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         {
           ArrayData *ad(params.get());
@@ -10497,7 +9729,7 @@ Variant c_domainexception::o_invoke(MethodIndex methodIndex, const char *s, CArr
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -10505,13 +9737,13 @@ Variant c_domainexception::o_invoke(MethodIndex methodIndex, const char *s, CArr
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domainexception
-Variant c_domainexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_DomainException
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DomainException
+Variant c_DomainException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -10572,59 +9804,59 @@ Variant c_domainexception::o_invoke_few_args(MethodIndex methodIndex, const char
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -10634,21 +9866,21 @@ Variant c_domainexception::o_invoke_few_args(MethodIndex methodIndex, const char
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domainexception
-Variant c_domainexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_DomainException
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_DomainException
+Variant c_DomainException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domainexception
-Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_DomainException
+Variant c_DomainException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -10790,11 +10022,11 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD(0x625661A755F425C0LL, __init__) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -10808,7 +10040,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 3:
-      HASH_GUARD(0x31D981FD9D2728E3LL, getline) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -10822,7 +10054,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 10:
-      HASH_GUARD(0x03CA4360169ECC8ALL, gettraceasstring) {
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -10836,7 +10068,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 15:
-      HASH_GUARD(0x5C108B351DC3D04FLL, getcode) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -10850,7 +10082,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 18:
-      HASH_GUARD(0x71859D7313E682D2LL, getmessage) {
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -10864,7 +10096,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -10878,7 +10110,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 26:
-      HASH_GUARD(0x6800B2B4C4EC4CBALL, gettrace) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -10892,7 +10124,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 30:
-      HASH_GUARD(0x3CE90CB8F0C9579ELL, getfile) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -10906,7 +10138,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -10932,70 +10164,70 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     default:
       break;
   }
-#endif
-  return c_logicexception::o_invoke_from_eval(s, env, caller, hash, fatal);
+  #endif
+  return c_LogicException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_domainexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+Variant c_DomainException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
-  return c_logicexception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+  #else
+  #endif
+  return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_domainexception = {
-  c_domainexception::os_getInit,
-  c_domainexception::os_get,
-  c_domainexception::os_lval,
-  c_domainexception::os_invoke,
-  c_domainexception::os_constant,
+struct ObjectStaticCallbacks cw_DomainException = {
+  c_DomainException::os_getInit,
+  c_DomainException::os_get,
+  c_DomainException::os_lval,
+  c_DomainException::os_invoke,
+  c_DomainException::os_constant,
 };
-void c_domainexception::init() {
-  c_logicexception::init();
+void c_DomainException::init() {
+  c_LogicException::init();
 }
-Object co_unexpectedvalueexception(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_unexpectedvalueexception)())->dynCreate(params, init));
+Object co_UnexpectedValueException(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_UnexpectedValueException)())->dynCreate(params, init));
 }
-Object co_overflowexception(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_overflowexception)())->dynCreate(params, init));
+Object co_OverflowException(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_OverflowException)())->dynCreate(params, init));
 }
-Object co_outofboundsexception(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_outofboundsexception)())->dynCreate(params, init));
+Object co_OutOfBoundsException(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_OutOfBoundsException)())->dynCreate(params, init));
 }
-Object co_logicexception(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_logicexception)())->dynCreate(params, init));
+Object co_LogicException(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_LogicException)())->dynCreate(params, init));
 }
-Object co_rangeexception(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_rangeexception)())->dynCreate(params, init));
+Object co_RangeException(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_RangeException)())->dynCreate(params, init));
 }
-Object co_invalidargumentexception(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_invalidargumentexception)())->dynCreate(params, init));
+Object co_InvalidArgumentException(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_InvalidArgumentException)())->dynCreate(params, init));
 }
-Object co_underflowexception(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_underflowexception)())->dynCreate(params, init));
+Object co_UnderflowException(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_UnderflowException)())->dynCreate(params, init));
 }
-Object co_outofrangeexception(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_outofrangeexception)())->dynCreate(params, init));
+Object co_OutOfRangeException(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_OutOfRangeException)())->dynCreate(params, init));
 }
-Object co_badmethodcallexception(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_badmethodcallexception)())->dynCreate(params, init));
+Object co_BadMethodCallException(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_BadMethodCallException)())->dynCreate(params, init));
 }
-Object co_runtimeexception(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_runtimeexception)())->dynCreate(params, init));
+Object co_RuntimeException(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_RuntimeException)())->dynCreate(params, init));
 }
-Object co_exception(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_exception)())->dynCreate(params, init));
+Object co_Exception(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_Exception)())->dynCreate(params, init));
 }
-Object co_errorexception(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_errorexception)())->dynCreate(params, init));
+Object co_ErrorException(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_ErrorException)())->dynCreate(params, init));
 }
-Object co_badfunctioncallexception(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_badfunctioncallexception)())->dynCreate(params, init));
+Object co_BadFunctionCallException(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_BadFunctionCallException)())->dynCreate(params, init));
 }
-Object co_lengthexception(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_lengthexception)())->dynCreate(params, init));
+Object co_LengthException(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_LengthException)())->dynCreate(params, init));
 }
-Object co_domainexception(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_domainexception)())->dynCreate(params, init));
+Object co_DomainException(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_DomainException)())->dynCreate(params, init));
 }
 Variant pm_php$classes$exception_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/exception.php, pm_php$classes$exception_php);

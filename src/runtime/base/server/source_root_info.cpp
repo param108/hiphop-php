@@ -38,6 +38,26 @@ SourceRootInfo::SourceRootInfo(const char *host)
   }
   Array pair = StringUtil::Explode(matches.rvalAt(1), "-", 2);
   m_user = pair.rvalAt(0).toString();
+  bool defaultSb = pair.size() == 1;
+  if (defaultSb) {
+    m_sandbox = "default";
+  } else {
+    m_sandbox = pair.rvalAt(1).toString();
+  }
+
+  create();
+}
+
+SourceRootInfo::SourceRootInfo(const std::string &user,
+                               const std::string &sandbox)
+    : m_sandboxCond(RuntimeOption::SandboxMode ? SandboxOn : SandboxOff) {
+  if (!sandboxOn()) return;
+  m_user = user;
+  m_sandbox = sandbox;
+  create();
+}
+
+void SourceRootInfo::create() {
   String homePath = String(RuntimeOption::SandboxHome) + "/" + m_user + "/";
   {
     struct stat hstat;
@@ -50,12 +70,6 @@ SourceRootInfo::SourceRootInfo(const char *host)
         }
       }
     }
-  }
-  bool defaultSb = pair.size() == 1;
-  if (defaultSb) {
-    m_sandbox = "default";
-  } else {
-    m_sandbox = pair.rvalAt(1).toString();
   }
 
   string confpath = string(homePath.c_str()) +
@@ -82,7 +96,7 @@ SourceRootInfo::SourceRootInfo(const char *host)
   if (!userOverride.empty()) {
     m_user = userOverride;
   }
-  if (defaultSb) {
+  if (m_sandbox == "default") {
     if (sp.isNull()) {
       sp = "www/";
     }
@@ -141,10 +155,6 @@ void SourceRootInfo::setServerVariables(Variant &server) const {
                String(parseSandboxServerVariable(it->second)));
   }
 
-  // EvalDebugger needs these to associate debugger clients
-  server.set("HPHP_SANDBOX_USER", m_user);
-  server.set("HPHP_SANDBOX_NAME", m_sandbox);
-  server.set("HPHP_SANDBOX_PATH", m_path);
   if (!m_serverVars.empty()) {
     server += m_serverVars;
   }
@@ -153,6 +163,7 @@ void SourceRootInfo::setServerVariables(Variant &server) const {
   sandbox.m_user = m_user.data();
   sandbox.m_name = m_sandbox.data();
   sandbox.m_path = m_path.data();
+  server.set("HPHP_SANDBOX_ID", sandbox.id()); // EvalDebugger needs this
   Eval::Debugger::RegisterSandbox(sandbox);
 }
 

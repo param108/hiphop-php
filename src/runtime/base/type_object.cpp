@@ -15,7 +15,6 @@
 */
 
 #include <runtime/base/complex_types.h>
-#include <runtime/base/object_offset.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/variable_serializer.h>
 #include <system/gen/php/classes/stdclass.h>
@@ -57,31 +56,57 @@ bool Object::more(CObjRef v2) const {
   return m_px != v2.m_px && toArray().more(v2.toArray());
 }
 
-Variant Object::o_get(CStrRef propName, int64 hash /* = -1 */,
-                      bool error /* = true */,
+Variant Object::o_get(CStrRef propName, bool error /* = true */,
                       CStrRef context /* = null_string */) const {
   if (!m_px) throw NullPointerException();
-  return m_px->o_get(propName, hash, error, context);
+  return m_px->o_get(propName, error, context);
 }
 
-ObjectOffset Object::o_lval(CStrRef propName, int64 hash /* = -1 */,
-                            CStrRef context /* = null_string */) {
+Variant Object::o_getPublic(CStrRef propName, bool error /* = true */) const {
+  if (!m_px) throw NullPointerException();
+  return m_px->o_getPublic(propName, error);
+}
+
+Variant Object::o_set(CStrRef propName, CVarRef val,
+                      CStrRef context /* = null_string */) {
   if (!m_px) {
-    operator=(NEW(c_stdclass)());
+    operator=(NEW(c_stdClass)());
   }
-  return ObjectOffset(m_px, propName, hash, context);
+  return m_px->o_set(propName, val, false, context);
 }
 
-bool Object::doIsSet(CStrRef propName, int64 hash,
-                     CStrRef context /* = null_string */) const {
-  if (!m_px) throw NullPointerException();
-  return m_px->doIsSet(propName, hash, context);
+Variant &Object::o_lval(CStrRef propName, CVarRef tmpForGet,
+                        CStrRef context /* = null_string */) {
+  if (!m_px) {
+    operator=(NEW(c_stdClass)());
+  }
+  return m_px->o_lval(propName, tmpForGet, context);
 }
 
-bool Object::doEmpty(CStrRef propName, int64 hash,
+Variant &Object::o_unsetLval(CStrRef propName, CVarRef tmpForGet,
+                             CStrRef context /* = null_string */) {
+  if (!m_px) {
+    return const_cast<Variant&>(tmpForGet);
+  }
+  return m_px->o_lval(propName, tmpForGet, context);
+}
+
+bool Object::o_isset(CStrRef propName,
                      CStrRef context /* = null_string */) const {
   if (!m_px) throw NullPointerException();
-  return m_px->doEmpty(propName, hash, context);
+  return m_px->o_isset(propName, context);
+}
+
+bool Object::o_empty(CStrRef propName,
+                     CStrRef context /* = null_string */) const {
+  if (!m_px) throw NullPointerException();
+  return m_px->o_empty(propName, context);
+}
+
+Variant Object::o_unset(CStrRef propName,
+                        CStrRef context /* = null_string */) const {
+  if (!m_px) throw NullPointerException();
+  return m_px->o_unset(propName, context);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

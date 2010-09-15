@@ -15,6 +15,7 @@
 */
 
 #include <compiler/expression/unary_op_expression.h>
+#include <compiler/expression/object_property_expression.h>
 #include <compiler/parser/hphp.tab.hpp>
 #include <compiler/analysis/dependency_graph.h>
 #include <compiler/analysis/code_error.h>
@@ -101,8 +102,6 @@ bool UnaryOpExpression::isScalar() const {
   case '!':
   case '+':
   case '-':
-  case T_INC:
-  case T_DEC:
   case '~':
   case '@':
   case '(':
@@ -140,8 +139,15 @@ bool UnaryOpExpression::containsDynamicConstant(AnalysisResultPtr ar) const {
 }
 
 bool UnaryOpExpression::getScalarValue(Variant &value) {
+  if (m_exp) {
+    if (m_op == T_ARRAY) {
+      return m_exp->getScalarValue(value);
+    }
+    Variant t;
+    return m_exp->getScalarValue(t) &&
+      preCompute(t, value);
+  }
   if (m_op != T_ARRAY) return false;
-  if (m_exp) return (m_exp->getScalarValue(value));
   value = Array::Create();
   return true;
 }
@@ -184,8 +190,7 @@ void UnaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
-bool UnaryOpExpression::preCompute(AnalysisResultPtr ar, CVarRef value,
-                                   Variant &result) {
+bool UnaryOpExpression::preCompute(CVarRef value, Variant &result) {
   switch(m_op) {
   case '!':
     result = (!toBoolean(value)); break;
@@ -196,6 +201,7 @@ bool UnaryOpExpression::preCompute(AnalysisResultPtr ar, CVarRef value,
   case '~':
     result = ~value; break;
   case '(':
+  case '@':
     result = value; break;
   case T_INT_CAST:
     result = value.toInt64(); break;
@@ -253,7 +259,6 @@ bool UnaryOpExpression::canonCompare(ExpressionPtr e) const {
 ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultPtr ar) {
   Variant value;
   Variant result;
-  bool hasResult;
 
   ar->preOptimize(m_exp);
   if (m_exp && ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
@@ -261,22 +266,20 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultPtr ar) {
       return m_exp;
     }
     if (m_op == T_UNSET) {
-      if (m_exp->isScalar()) {
-        return m_exp;
-      }
-      if (m_exp->is(KindOfExpressionList)) {
-        if (static_pointer_cast<ExpressionList>(m_exp)->getCount() == 0) {
-          return CONSTANT("null");
-        }
+      if (m_exp->isScalar() ||
+          (m_exp->is(KindOfExpressionList) &&
+           static_pointer_cast<ExpressionList>(m_exp)->getCount() == 0)) {
+        return CONSTANT("null");
       }
       return ExpressionPtr();
     }
   }
 
-  if (!m_exp || !m_exp->isScalar()) return ExpressionPtr();
-  if (!m_exp->getScalarValue(value)) return ExpressionPtr();
-  hasResult = preCompute(ar, value, result);
-  if (hasResult) {
+  if (m_op != T_ARRAY &&
+      m_exp &&
+      m_exp->isScalar() &&
+      m_exp->getScalarValue(value) &&
+      preCompute(value, result)) {
     return MakeScalarExpression(ar, getLocation(), result);
   }
   return ExpressionPtr();
@@ -402,19 +405,6 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       break;
     case T_INC:
     case T_DEC:
-      if (m_exp->is(Expression::KindOfSimpleVariable)) {
-        FunctionScopePtr func =
-          dynamic_pointer_cast<FunctionScope>(ar->getScope());
-        if (func) {
-          SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(m_exp);
-          VariableTablePtr variables = ar->getScope()->getVariables();
-          const std::string &name = var->getName();
-          if (variables->isParameter(name)) {
-            variables->addLvalParam(name);
-          }
-        }
-      }
-      // fall through
     case '~':
       if (Type::SameType(expType, Type::Int64) ||
           Type::SameType(expType, Type::Double) ||
@@ -509,7 +499,8 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 void UnaryOpExpression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                                        int state) {
   if (hasCPPTemp() || m_op == T_FILE) return;
-  if (m_exp && !getLocalEffects() && m_op != '@' &&
+  if (m_exp && !getLocalEffects() &&
+      m_op != '@' && m_op != T_ISSET && m_op != T_EMPTY &&
       !m_exp->is(KindOfExpressionList)) {
     m_exp->preOutputStash(cg, ar, state);
   } else {
@@ -604,28 +595,46 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   return Expression::preOutputCPP(cg, ar, state);
 }
 
+bool UnaryOpExpression::outputCPPImplOpEqual(CodeGenerator &cg,
+                                             AnalysisResultPtr ar) {
+  if (m_exp->is(Expression::KindOfObjectPropertyExpression)) {
+    ObjectPropertyExpressionPtr var(
+      dynamic_pointer_cast<ObjectPropertyExpression>(m_exp));
+    if (var->isValid()) return false;
+    var->outputCPPObject(cg, ar);
+    cg_printf("o_assign_op<%s,%d>(",
+              isUnused() ? "void" : "Variant", m_op);
+    var->outputCPPProperty(cg, ar);
+    cg_printf(", %s, %s)",
+              isUnused() || m_front ? "null_variant" : "Variant(0)",
+              ar->getClassScope() ? "s_class_name" : "empty_string");
+    return true;
+  }
+  return false;
+}
+
 void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
                                       AnalysisResultPtr ar) {
+  if ((m_op == T_INC || m_op == T_DEC) && outputCPPImplOpEqual(cg, ar)) {
+    return;
+  }
   if (m_op == T_ARRAY &&
       (getContext() & (RefValue|LValue)) == 0 &&
       !ar->getInsideScalarArray()) {
     int id = -1;
+    int hash = -1;
+    int index = -1;
     if (m_exp) {
       ExpressionListPtr pairs = dynamic_pointer_cast<ExpressionList>(m_exp);
-      if (pairs && pairs->isScalarArrayPairs()) {
-        id = ar->registerScalarArray(m_exp);
+      Variant v;
+      if (pairs && pairs->isScalarArrayPairs() && pairs->getScalarValue(v)) {
+        id = ar->registerScalarArray(m_exp, hash, index);
       }
     } else {
-      id = ar->registerScalarArray(m_exp); // empty array
+      id = ar->registerScalarArray(m_exp, hash, index); // empty array
     }
     if (id != -1) {
-      if (cg.getOutput() == CodeGenerator::SystemCPP) {
-        cg_printf("SystemScalarArrays::%s[%d]",
-                  Option::SystemScalarArrayName, id);
-      } else {
-        cg_printf("ScalarArrays::%s[%d]",
-                  Option::ScalarArrayName, id);
-      }
+      ar->outputCPPScalarArrayId(cg, id, hash, index);
       return;
     }
   }
@@ -677,7 +686,13 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     case T_ARRAY_CAST:    cg_printf("(");          break;
     case T_OBJECT_CAST:   cg_printf("(");          break;
     case T_BOOL_CAST:     cg_printf("(");          break;
-    case T_UNSET_CAST:    cg_printf("(");          break;
+    case T_UNSET_CAST:
+      if (m_exp->hasCPPTemp()) {
+        cg_printf("(id(");
+      } else {
+        cg_printf("(");
+      }
+      break;
     case T_EXIT:          cg_printf("f_exit(");    break;
     case T_ARRAY:
       cg_printf("Array(");
@@ -759,7 +774,11 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       }
       break;
     case T_UNSET_CAST:
-      cg_printf(",null");
+      if (m_exp->hasCPPTemp()) {
+        cg_printf("),null");
+      } else {
+        cg_printf(",null");
+      }
     case T_CLONE:
     case '!':
     case '(':

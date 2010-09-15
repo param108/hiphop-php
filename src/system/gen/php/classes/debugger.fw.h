@@ -25,12 +25,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// 1. Static Strings 
+// 1. Static Strings
 
-// 2. Constants
+// 2. Static Arrays
 
-// 3. Classes
-FORWARD_DECLARE_GENERIC_INTERFACE(debuggercommand);
+// 3. Constants
+
+// 4. Classes
+FORWARD_DECLARE_GENERIC_INTERFACE(DebuggerCommand);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

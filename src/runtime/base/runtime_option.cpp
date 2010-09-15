@@ -56,11 +56,13 @@ bool RuntimeOption::ThrowTooManyArguments = false;
 bool RuntimeOption::WarnTooManyArguments = false;
 bool RuntimeOption::ThrowMissingArguments = false;
 bool RuntimeOption::ThrowInvalidArguments = false;
+bool RuntimeOption::FatalOnWeirdForEach = true;
 bool RuntimeOption::AssertActive = false;
 bool RuntimeOption::AssertWarning = false;
 int RuntimeOption::NoticeFrequency = 1;
 int RuntimeOption::WarningFrequency = 1;
 int64 RuntimeOption::SerializationSizeLimit = 0;
+int64 RuntimeOption::StringOffsetLimit = 10 * 1024 * 1024; // 10MB
 
 std::string RuntimeOption::AccessLogDefaultFormat;
 std::vector<std::pair<std::string, std::string> >  RuntimeOption::AccessLogs;
@@ -147,6 +149,7 @@ std::string RuntimeOption::FontPath;
 bool RuntimeOption::EnableStaticContentCache = true;
 bool RuntimeOption::EnableStaticContentFromDisk = true;
 bool RuntimeOption::EnableOnDemandUncompress = true;
+bool RuntimeOption::EnableStaticContentMMap = true;
 
 std::string RuntimeOption::RTTIDirectory;
 bool RuntimeOption::EnableCliRTTI = false;
@@ -232,7 +235,6 @@ int64 RuntimeOption::MaxMemcacheKeyCount = 0;
 int RuntimeOption::SocketDefaultTimeout = 5;
 bool RuntimeOption::EnableMemoryManager = true;
 bool RuntimeOption::CheckMemory = false;
-bool RuntimeOption::UseZendArray = true;
 bool RuntimeOption::UseSmallArray = false;
 bool RuntimeOption::UseDirectCopy = false;
 bool RuntimeOption::EnableApc = true;
@@ -248,7 +250,6 @@ RuntimeOption::ApcTableLockTypes RuntimeOption::ApcTableLockType =
 time_t RuntimeOption::ApcKeyMaturityThreshold = 20;
 size_t RuntimeOption::ApcMaximumCapacity = 0;
 int RuntimeOption::ApcKeyFrequencyUpdatePeriod = 1000;
-bool RuntimeOption::ApcUseLockedRefs = false;
 bool RuntimeOption::ApcExpireOnSets = false;
 int RuntimeOption::ApcPurgeFrequency = 4096;
 
@@ -444,6 +445,7 @@ void RuntimeOption::Load(Hdf &config) {
     WarnTooManyArguments = error["WarnTooManyArguments"].getBool();
     ThrowMissingArguments = error["ThrowMissingArguments"].getBool();
     ThrowInvalidArguments = error["ThrowInvalidArguments"].getBool();
+    FatalOnWeirdForEach = error["FatalOnWeirdForEach"].getBool(true);
     AssertActive = error["AssertActive"].getBool();
     AssertWarning = error["AssertWarning"].getBool();
     NoticeFrequency = error["NoticeFrequency"].getInt32(1);
@@ -461,6 +463,7 @@ void RuntimeOption::Load(Hdf &config) {
     MaxSQLRowCount = rlimit["MaxSQLRowCount"].getInt64(0);
     MaxMemcacheKeyCount = rlimit["MaxMemcacheKeyCount"].getInt64(0);
     SerializationSizeLimit = rlimit["SerializationSizeLimit"].getInt64(0);
+    StringOffsetLimit = rlimit["StringOffsetLimit"].getInt64(10 * 1024 * 1024);
   }
   {
     Hdf server = config["Server"];
@@ -549,7 +552,11 @@ void RuntimeOption::Load(Hdf &config) {
       server["EnableStaticContentFromDisk"].getBool(true);
     EnableOnDemandUncompress =
       server["EnableOnDemandUncompress"].getBool(true);
-
+    EnableStaticContentMMap =
+      server["EnableStaticContentMMap"].getBool(true);
+    if (EnableStaticContentMMap) {
+      EnableOnDemandUncompress = true;
+    }
     RTTIDirectory = server["RTTIDirectory"].getString("/tmp/");
     if (!RTTIDirectory.empty() &&
         RTTIDirectory[RTTIDirectory.length() - 1] != '/') {
@@ -583,7 +590,6 @@ void RuntimeOption::Load(Hdf &config) {
 
     EnableMemoryManager = server["EnableMemoryManager"].getBool(true);
     CheckMemory = server["CheckMemory"].getBool();
-    UseZendArray = server["UseZendArray"].getBool(true);
     UseSmallArray = server["UseSmallArray"].getBool(false);
     UseDirectCopy = server["UseDirectCopy"].getBool(false);
 
@@ -615,7 +621,6 @@ void RuntimeOption::Load(Hdf &config) {
                                      "Invalid lock type");
     }
 
-    ApcUseLockedRefs = apc["UseLockedRefs"].getBool();
     ApcExpireOnSets = apc["ExpireOnSets"].getBool();
     ApcPurgeFrequency = apc["PurgeFrequency"].getInt32(4096);
 

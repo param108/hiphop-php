@@ -128,6 +128,7 @@ bool ExpressionList::containsDynamicConstant(AnalysisResultPtr ar) const {
 }
 
 bool ExpressionList::isScalarArrayPairs() const {
+  if (!m_arrayElements) return false;
   for (unsigned int i = 0; i < m_exps.size(); i++) {
     ArrayPairExpressionPtr exp =
       dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
@@ -157,14 +158,14 @@ bool ExpressionList::getScalarValue(Variant &value) {
         Variant v;
         bool ret = val->getScalarValue(v);
         if (!ret) ASSERT(false);
-        init.set(i, v);
+        init.set(v);
       } else {
         Variant n;
         Variant v;
         bool ret1 = name->getScalarValue(n);
         bool ret2 = val->getScalarValue(v);
         if (!(ret1 && ret2)) return ExpressionPtr();
-        init.set(i, n, v);
+        init.set(n, v);
       }
     }
     value = Array(init.create());
@@ -421,7 +422,12 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   ar->setInExpression(false);
   bool ret = false;
   if (m_arrayElements) {
-    ret = Expression::preOutputCPP(cg, ar, state);
+    /*
+     * would like to do:
+     *  ret = Expression::preOutputCPP(cg, ar, state);
+     * but icc has problems with the generated code.
+     */
+    ret = hasEffect();
   } else if (n > 1 && m_kind == ListKindLeft) {
     ret = true;
   } else {
@@ -470,6 +476,151 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   return true;
 }
 
+unsigned int ExpressionList::checkLitstrKeys() const {
+  ASSERT(m_arrayElements);
+  set<string> keys;
+  for (unsigned int i = 0; i < m_exps.size(); i++) {
+    ArrayPairExpressionPtr ap =
+      dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
+    ExpressionPtr name = ap->getName();
+    if (!name) return 0;
+    Variant value;
+    bool ret = name->getScalarValue(value);
+    if (!ret) return 0;
+    if (!value.isString()) return 0;
+    String str = value.toString();
+    if (str->isInteger()) return 0;
+    string s(str.data(), str.size());
+    keys.insert(s);
+  }
+  return keys.size();
+}
+
+unsigned int ExpressionList::checkIntegerKeys(int64 &max) const {
+  ASSERT(m_arrayElements);
+  max = 0;
+  set<int64> keys;
+  for (unsigned int i = 0; i < m_exps.size(); i++) {
+    ArrayPairExpressionPtr ap =
+      dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
+    ExpressionPtr name = ap->getName();
+    if (!name) return 0;
+    Variant value;
+    bool ret = name->getScalarValue(value);
+    if (!ret) return 0;
+    if (!value.isInteger()) return 0;
+    int64 v = value.toInt64();
+    if (i == 0) {
+      max = v;
+    } else if (max < v) {
+      max = v;
+    }
+    keys.insert(v);
+  }
+  if (max >= 0) {
+    max++;
+  } else {
+    max = 0;
+  }
+  return keys.size();
+}
+
+bool ExpressionList::hasNonArrayCreateValue(
+  bool arrayElements /* = true */, unsigned int start /* = 0 */) const {
+  for (unsigned int i = start; i < m_exps.size(); i++) {
+    ExpressionPtr value = m_exps[i];
+    if (arrayElements) {
+      ArrayPairExpressionPtr ap =
+        dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
+      value = ap->getValue();
+    }
+    ASSERT(value);
+    if (value->hasContext(RefValue) ||
+        (value->hasEffect() && !value->isTemporary())) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void ExpressionList::outputCPPUniqLitKeyArrayInit(
+  CodeGenerator &cg, AnalysisResultPtr ar, int64 max,
+  bool arrayElements /* = true */, unsigned int start /* = 0 */) {
+  if (arrayElements) ASSERT(m_arrayElements);
+  unsigned int n =  m_exps.size();
+  cg_printf("array_create%d(%lu, ", n - start, max);
+  for (unsigned int i = start; i < n; i++) {
+    if (ExpressionPtr exp = m_exps[i]) {
+      ExpressionPtr name;
+      ExpressionPtr value = exp;
+      if (arrayElements) {
+        ArrayPairExpressionPtr ap =
+          dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
+        name = ap->getName();
+        value = ap->getValue();
+      }
+      if (name) {
+        name->outputCPP(cg, ar);
+      } else {
+        cg_printf("%d", i - start);
+      }
+      cg_printf(", ");
+      value->outputCPP(cg, ar);
+      if (i < n-1) {
+        cg_printf(", ");
+      } else {
+        cg_printf(")");
+      }
+    }
+  }
+}
+
+bool ExpressionList::outputCPPArrayCreate(CodeGenerator &cg,
+                                          AnalysisResultPtr ar,
+                                          bool isVector,
+                                          bool pre) {
+  ASSERT(pre == !m_cppTemp.empty());
+  if (!Option::GenArrayCreate || cg.getOutput() == CodeGenerator::SystemCPP) {
+    return false;
+  }
+  if (hasNonArrayCreateValue()) return false;
+
+  int64 max = m_exps.size();
+  unsigned int n = isVector ? m_exps.size() : checkIntegerKeys(max);
+  bool uniqIntegerKeys = false;
+  bool uniqLitstrKeys = false;
+  if (n > 0 && n == m_exps.size()) {
+    uniqIntegerKeys = true;
+  } else if (!isVector) {
+    n = checkLitstrKeys();
+    if (n > 0 && n == m_exps.size()) uniqLitstrKeys = true;
+  }
+  if (uniqIntegerKeys) {
+    ar->m_arrayIntegerKeySizes.insert(n);
+  } else if (uniqLitstrKeys) {
+    ar->m_arrayLitstrKeySizes.insert(n);
+  } else {
+    return false;
+  }
+
+  if (pre) {
+    for (unsigned i = 0; i < m_exps.size(); i++) {
+      cg.setItemIndex(i);
+      if (ExpressionPtr exp = m_exps[i]) {
+        exp->preOutputCPP(cg, ar, 0);
+      }
+    }
+    cg_printf("ArrayInit %s(", m_cppTemp.c_str());
+    outputCPPUniqLitKeyArrayInit(cg, ar, uniqIntegerKeys ? max : 0);
+    cg_printf(");\n");
+  } else if (uniqIntegerKeys) {
+    outputCPPUniqLitKeyArrayInit(cg, ar, max);
+  } else {
+    outputCPPUniqLitKeyArrayInit(cg, ar, 0);
+  }
+  return true;
+}
+
 void ExpressionList::outputCPPInternal(CodeGenerator &cg,
                                        AnalysisResultPtr ar,
                                        bool needed, bool pre) {
@@ -484,6 +635,7 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
         break;
       }
     }
+    if (outputCPPArrayCreate(cg, ar, isVector, pre)) return;
     cg_printf("ArrayInit");
     if (pre) {
       cg_printf(" %s", m_cppTemp.c_str());
@@ -507,11 +659,11 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
         ArrayPairExpressionPtr ap =
           dynamic_pointer_cast<ArrayPairExpression>(exp);
         if (ap->isRef()) {
-          cg_printf("setRef(%d, ", i);
+          cg_printf("setRef(");
           // The value itself shouldn't be wrapped with ref() any more.
           ap->getValue()->setContext(NoRefWrapper);
         } else {
-          cg_printf("set(%d, ", i);
+          cg_printf("set(");
         }
         exp->outputCPP(cg, ar);
         cg_printf(")");

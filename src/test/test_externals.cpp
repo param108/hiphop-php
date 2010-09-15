@@ -36,35 +36,46 @@ extern const MethodIndex methodIndexMapInit[];
 const MethodIndex methodIndexMapInit[] = {MethodIndex(0,0)};
 const char * methodIndexMapInitName[] = {NULL};
 
+
+const unsigned methodIndexHMapSize = 0;
+const MethodIndexHMap methodIndexHMap[] = {MethodIndexHMap()};
+const unsigned methodIndexReverseCallIndex[] = {0};
+const char * methodIndexReverseIndex[] = {0};
+
 // Used by test_ext_preg
 static String test_preg_rep(CStrRef a, CStrRef b, CStrRef c) {
   return concat(f_strtoupper(c), a);
 }
 
+#define CLASS_INFO_EMPTY_ENTRY   "", NULL, NULL, NULL
+#define METHOD_INFO_EMPTY_ENTRY  NULL, NULL, NULL, NULL, NULL, NULL, NULL
+
 const char *g_class_map[] = {
-  /* header */ (const char *)ClassInfo::IsSystem, NULL, "",
+  /* header */ (const char *)ClassInfo::IsSystem,
+  NULL, CLASS_INFO_EMPTY_ENTRY,
   /* interfaces */
   NULL,
   /* methods    */
   (const char *)ClassInfo::IsPublic, "xbox_process_message",
-  NULL, NULL, NULL, NULL,
-  (const char *)ClassInfo::IsPublic, "test", NULL, NULL, NULL, NULL,
-  (const char *)ClassInfo::IsPublic, "lower", NULL, NULL, NULL, NULL,
-  (const char *)ClassInfo::IsPublic, "sumlen_step", NULL, NULL, NULL, NULL,
-  (const char *)ClassInfo::IsPublic, "sumlen_fini", NULL, NULL, NULL, NULL,
-  (const char *)ClassInfo::IsPublic, "hello", NULL, NULL, NULL, NULL,
-  (const char *)ClassInfo::IsPublic, "sub", NULL, NULL, NULL, NULL,
-  (const char *)ClassInfo::IsPublic, "add", NULL, NULL, NULL, NULL,
-  (const char *)ClassInfo::IsPublic, "sum", NULL, NULL, NULL, NULL,
-  (const char *)ClassInfo::IsPublic, "fault", NULL, NULL, NULL, NULL,
-  (const char *)ClassInfo::IsPublic, "strlen", NULL, NULL, NULL, NULL,
+  METHOD_INFO_EMPTY_ENTRY,
+  (const char *)ClassInfo::IsPublic, "test",        METHOD_INFO_EMPTY_ENTRY,
+  (const char *)ClassInfo::IsPublic, "lower",       METHOD_INFO_EMPTY_ENTRY,
+  (const char *)ClassInfo::IsPublic, "sumlen_step", METHOD_INFO_EMPTY_ENTRY,
+  (const char *)ClassInfo::IsPublic, "sumlen_fini", METHOD_INFO_EMPTY_ENTRY,
+  (const char *)ClassInfo::IsPublic, "hello",       METHOD_INFO_EMPTY_ENTRY,
+  (const char *)ClassInfo::IsPublic, "sub",         METHOD_INFO_EMPTY_ENTRY,
+  (const char *)ClassInfo::IsPublic, "add",         METHOD_INFO_EMPTY_ENTRY,
+  (const char *)ClassInfo::IsPublic, "sum",         METHOD_INFO_EMPTY_ENTRY,
+  (const char *)ClassInfo::IsPublic, "fault",       METHOD_INFO_EMPTY_ENTRY,
+  (const char *)ClassInfo::IsPublic, "strlen",      METHOD_INFO_EMPTY_ENTRY,
   NULL,
   /* properties */
   NULL,
   /* constants */
   NULL,
 
-  /* header */ (const char *)ClassInfo::IsNothing, NULL, "",
+  /* header */ (const char *)ClassInfo::IsNothing,
+  NULL, CLASS_INFO_EMPTY_ENTRY,
   /* interfaces */
   NULL,
   /* methods    */
@@ -74,28 +85,30 @@ const char *g_class_map[] = {
   /* constants */
   NULL,
 
-  /* header */ (const char *)ClassInfo::IsSystem, "test", "",
+  /* header */ (const char *)ClassInfo::IsSystem,
+  "test", CLASS_INFO_EMPTY_ENTRY,
   /* interfaces */
   "itestable", NULL,
   /* methods    */
-  (const char *)ClassInfo::IsPublic, "foo", NULL, NULL, NULL, NULL,
-  (const char *)ClassInfo::IsProtected, "func", NULL, NULL, NULL, NULL,
-  (const char *)ClassInfo::IsPrivate, "bar", NULL, NULL, NULL, NULL,
+  (const char *)ClassInfo::IsPublic,    "foo",  METHOD_INFO_EMPTY_ENTRY,
+  (const char *)ClassInfo::IsProtected, "func", METHOD_INFO_EMPTY_ENTRY,
+  (const char *)ClassInfo::IsPrivate,   "bar",  METHOD_INFO_EMPTY_ENTRY,
   NULL,
   /* properties */
-  (const char *)ClassInfo::IsPublic, "foo",
+  (const char *)ClassInfo::IsPublic,    "foo",
   (const char *)ClassInfo::IsProtected, "prop",
-  (const char *)ClassInfo::IsPrivate, "bar",
+  (const char *)ClassInfo::IsPrivate,   "bar",
   NULL,
   /* constants */
   NULL,
 
-  /* header */ (const char *)ClassInfo::IsInterface, "itestable", "",
+  /* header */ (const char *)ClassInfo::IsInterface,
+  "itestable", CLASS_INFO_EMPTY_ENTRY,
   /* interfaces */
   NULL,
   /* methods    */
-  (const char *)ClassInfo::IsPublic, "foo", NULL, NULL, NULL, NULL,
-  (const char *)ClassInfo::IsPrivate, "bar", NULL, NULL, NULL, NULL,
+  (const char *)ClassInfo::IsPublic,  "foo", METHOD_INFO_EMPTY_ENTRY,
+  (const char *)ClassInfo::IsPrivate, "bar", METHOD_INFO_EMPTY_ENTRY,
   NULL,
   /* properties */
   NULL,
@@ -270,7 +283,7 @@ Variant invoke(const char *function, CArrRef params, int64 hash,
     return f_strlen(params[0]);
   }
   if (strcasecmp(function, "fault") == 0) {
-    return Object((NEW(c_soapfault)())->create("MyFault","My fault string"));
+    return Object((NEW(c_SoapFault)())->create("MyFault","My fault string"));
   }
 
   // for TestExtServer

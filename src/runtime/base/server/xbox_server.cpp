@@ -107,22 +107,17 @@ public:
 
   // ref counting
   void incRefCount() {
-    Lock lock(m_mutex);
-    ++m_refCount;
+    atomic_inc(m_refCount);
   }
   void decRefCount() {
-    {
-      Lock lock(m_mutex);
-      --m_refCount;
-    }
-    if (m_refCount == 0) {
+    ASSERT(m_refCount);
+    if (atomic_dec(m_refCount) == 0) {
       delete this;
     }
   }
 
   void setHost(const std::string &host) { m_host = host;}
 private:
-  Mutex m_mutex;
   int m_refCount;
 
   string m_message;
@@ -135,19 +130,22 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static XboxServerInfoPtr s_xbox_server_info;
+static IMPLEMENT_THREAD_LOCAL(XboxServerInfoPtr, s_xbox_server_info);
 static IMPLEMENT_THREAD_LOCAL(RPCRequestHandler, s_rpc_request_handler);
 ///////////////////////////////////////////////////////////////////////////////
 
 class XboxWorker : public JobQueueWorker<XboxTransport*> {
 public:
   RequestHandler *createRequestHandler() {
-    s_rpc_request_handler->setServerInfo(s_xbox_server_info);
+    if (!*s_xbox_server_info) {
+      *s_xbox_server_info = XboxServerInfoPtr(new XboxServerInfo());
+    }
+    s_rpc_request_handler->setServerInfo(*s_xbox_server_info);
     if (s_rpc_request_handler->needReset() ||
         s_rpc_request_handler->incRequest() >
-        s_xbox_server_info->getMaxRequest()) {
+        (*s_xbox_server_info)->getMaxRequest()) {
       s_rpc_request_handler.reset();
-      s_rpc_request_handler->setServerInfo(s_xbox_server_info);
+      s_rpc_request_handler->setServerInfo(*s_xbox_server_info);
       s_rpc_request_handler->incRequest();
     }
     return s_rpc_request_handler.get();
@@ -173,9 +171,6 @@ void XboxServer::Restart() {
     delete s_dispatcher;
     s_dispatcher = NULL;
   }
-
-  s_xbox_server_info = XboxServerInfoPtr(new XboxServerInfo());
-  s_xbox_server_info->reload();
 
   if (RuntimeOption::XboxServerThreadCount > 0) {
     s_dispatcher = new JobQueueDispatcher<XboxTransport*, XboxWorker>
@@ -367,6 +362,18 @@ int XboxServer::TaskResult(CObjRef task, int timeout_ms, Variant &ret) {
     ret = response;
   }
   return code;
+}
+
+XboxServerInfoPtr XboxServer::GetServerInfo() {
+  if (s_xbox_server_info.isNull() || !*s_xbox_server_info) {
+    return XboxServerInfoPtr();
+  }
+  return *s_xbox_server_info;
+}
+
+RPCRequestHandler *XboxServer::GetRequestHandler() {
+  if (s_rpc_request_handler.isNull()) return NULL;
+  return s_rpc_request_handler.get();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

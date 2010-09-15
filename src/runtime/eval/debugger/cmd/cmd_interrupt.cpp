@@ -28,20 +28,27 @@ void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_interrupt);
   thrift.write(m_program);
+  thrift.write(m_errorMsg);
   thrift.write(m_threadId);
   thrift.write(m_pendingJump);
   if (m_site) {
     thrift.write(true);
     thrift.write(m_site->getFile());
-    thrift.write(m_site->getLine());
+    thrift.write(m_site->getLine0());
+    thrift.write(m_site->getChar0());
+    thrift.write(m_site->getLine1());
+    thrift.write(m_site->getChar1());
     thrift.write(m_site->getNamespace());
     thrift.write(m_site->getClass());
     thrift.write(m_site->getFunction());
-    Object e = m_site->getException();
+    Variant e = m_site->getException();
     if (e.isNull()) {
       thrift.write("");
+    } else if (e.isObject()) {
+      thrift.write(e.toObject()->o_getClassName());
     } else {
-      thrift.write(e->o_getClassName());
+      String ex(BreakPointInfo::ErrorClassName);
+      thrift.write(ex);
     }
     thrift.write(DebuggerClient::FormatVariable(e));
   } else {
@@ -54,6 +61,7 @@ void CmdInterrupt::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_interrupt);
   thrift.read(m_program);
+  thrift.read(m_errorMsg);
   thrift.read(m_threadId);
   thrift.read(m_pendingJump);
   m_bpi = BreakPointInfoPtr(new BreakPointInfo());
@@ -61,6 +69,9 @@ void CmdInterrupt::recvImpl(DebuggerThriftBuffer &thrift) {
   if (site) {
     thrift.read(m_bpi->m_file);
     thrift.read(m_bpi->m_line1);
+    thrift.read(m_bpi->m_char1);
+    thrift.read(m_bpi->m_line2);
+    thrift.read(m_bpi->m_char2);
     DFunctionInfoPtr func(new DFunctionInfo());
     thrift.read(func->m_namespace);
     thrift.read(func->m_class);
@@ -99,13 +110,12 @@ std::string CmdInterrupt::desc() const {
         return "Post-Send Processing for " + m_program + " was ended.";
       }
       return "Post-Send Processing was ended.";
+    case HardBreakPoint:
     case BreakPointReached:
     case ExceptionThrown: {
-      if (m_bpi) {
-        if (m_interrupt == BreakPointReached) {
-          return m_bpi->site();
-        }
-        return "Throwing " + m_bpi->m_exceptionClass + " " + m_bpi->site();
+      ASSERT(m_site);
+      if (m_site) {
+        return m_site->desc();
       }
       return "Breakpoint reached.";
     }
@@ -159,6 +169,7 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
                      m_program.c_str());
       }
       break;
+    case HardBreakPoint:
     case BreakPointReached:
     case ExceptionThrown: {
       bool found = false;
@@ -180,14 +191,26 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
             bp->m_state = BreakPointInfo::Disabled;
             toggled = true;
           }
-          if (m_interrupt == BreakPointReached) {
-            client->info("Breakpoint %d reached %s", index + 1,
+          if (m_interrupt == BreakPointReached ||
+              m_interrupt == HardBreakPoint) {
+            client->info("Breakpoint %d reached %s", bp->index(),
                          m_bpi->site().c_str());
+            client->shortCode(m_bpi);
           } else {
-            client->info("Breakpoint %d reached: Throwing %s %s", index + 1,
-                         m_bpi->m_exceptionClass.c_str(),
-                         m_bpi->site().c_str());
-            client->output(m_bpi->m_exceptionObject);
+            if (m_bpi->m_exceptionClass == BreakPointInfo::ErrorClassName) {
+              client->info("Breakpoint %d reached: An error occurred %s",
+                           bp->index(), m_bpi->site().c_str());
+              client->shortCode(m_bpi);
+              client->error("Error Message: %s",
+                            m_bpi->m_exceptionObject.c_str());
+            } else {
+              client->info("Breakpoint %d reached: Throwing %s %s",
+                           bp->index(),
+                           m_bpi->m_exceptionClass.c_str(),
+                           m_bpi->site().c_str());
+              client->shortCode(m_bpi);
+              client->output(m_bpi->m_exceptionObject);
+            }
           }
           if (!bpm->m_output.empty()) {
             client->print(bpm->m_output);
@@ -199,9 +222,14 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
       }
       if (!found) {
         client->info("Break %s", m_bpi->site().c_str());
+        client->shortCode(m_bpi);
       }
       break;
     }
+  }
+
+  if (!m_errorMsg.empty()) {
+    client->error(m_errorMsg);
   }
 
   // watches
@@ -213,7 +241,7 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
       DebuggerClient::WatchPtrVec &watches = client->getWatches();
       for (int i = 0; i < (int)watches.size(); i++) {
         if (i > 0) client->output("");
-        client->info("Watch %d: %s =", i, watches[i]->second.c_str());
+        client->info("Watch %d: %s =", i + 1, watches[i]->second.c_str());
         CmdPrint().processWatch(client, watches[i]->first, watches[i]->second);
       }
     }
@@ -230,6 +258,7 @@ bool CmdInterrupt::shouldBreak(const BreakPointInfoPtrVec &bps) {
   switch (m_interrupt) {
     case SessionStarted:
     case SessionEnded:
+    case HardBreakPoint:
       return true; // always break
     case RequestStarted:
     case RequestEnded:
@@ -259,7 +288,7 @@ std::string CmdInterrupt::getFileLine() const {
     if (m_site->getFile()) {
       ret = m_site->getFile();
     }
-    ret += ":" + lexical_cast<string>(m_site->getLine());
+    ret += ":" + lexical_cast<string>(m_site->getLine0());
   }
   return ret;
 }

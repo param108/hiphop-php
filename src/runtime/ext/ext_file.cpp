@@ -961,14 +961,21 @@ bool f_touch(CStrRef filename, int64 mtime /* = 0 */, int64 atime /* = 0 */) {
 
 bool f_copy(CStrRef source, CStrRef dest,
             CObjRef context /* = null_object */) {
-  int ret =
-    RuntimeOption::UseDirectCopy ?
+  if (!context.isNull() || !File::IsPlainFilePath(source) ||
+      !File::IsPlainFilePath(dest)) {
+    Variant sfile = f_fopen(source, "r", false, context);
+    Variant dfile = f_fopen(dest, "w", false, context);
+    return f_stream_copy_to_stream(sfile, dfile).toBoolean();
+  } else {
+    int ret =
+      RuntimeOption::UseDirectCopy ?
       Util::directCopy(File::TranslatePath(source).data(),
-                       File::TranslatePath(dest).data())
-                                 :
+          File::TranslatePath(dest).data())
+      :
       Util::copy(File::TranslatePath(source).data(),
-                 File::TranslatePath(dest).data());
-  return (ret == 0);
+          File::TranslatePath(dest).data());
+    return (ret == 0);
+  }
 }
 
 bool f_rename(CStrRef oldname, CStrRef newname,
@@ -1292,7 +1299,7 @@ Variant f_dir(CStrRef directory) {
   if (same(dir, false)) {
     return false;
   }
-  c_directory *c_d = NEW(c_directory)();
+  c_Directory *c_d = NEW(c_Directory)();
   c_d->m_path = directory;
   c_d->m_handle = dir;
   return c_d;

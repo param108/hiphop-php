@@ -35,6 +35,7 @@
 #include <test/test_ext_iconv.h>
 #include <test/test_ext_icu.h>
 #include <test/test_ext_image.h>
+#include <test/test_ext_imagesprite.h>
 #include <test/test_ext_intl.h>
 #include <test/test_ext_ipc.h>
 #include <test/test_ext_iterator.h>
@@ -62,8 +63,8 @@
 #include <test/test_ext_simplexml.h>
 #include <test/test_ext_soap.h>
 #include <test/test_ext_socket.h>
-#include <test/test_ext_spl.h>
 #include <test/test_ext_splfile.h>
+#include <test/test_ext_spl.h>
 #include <test/test_ext_sqlite3.h>
 #include <test/test_ext_stream.h>
 #include <test/test_ext_string.h>

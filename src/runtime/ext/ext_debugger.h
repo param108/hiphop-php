@@ -23,35 +23,35 @@
 #include <runtime/base/base_includes.h>
 #include <runtime/eval/debugger/debugger_client.h>
 #include <runtime/eval/debugger/debugger_proxy.h>
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool f_hphpd_install_user_command(CStrRef cmd, CStrRef clsname);
 Array f_hphpd_get_user_commands();
+void f_hphpd_break(bool condition = true);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DebuggerProxy
 
-FORWARD_DECLARE_CLASS(debuggerproxy);
-class c_debuggerproxy : public ExtObjectData {
+FORWARD_DECLARE_CLASS(DebuggerProxy);
+class c_DebuggerProxy : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(debuggerproxy)
-  END_CLASS_MAP(debuggerproxy)
-  DECLARE_CLASS(debuggerproxy, DebuggerProxy, ObjectData)
+  BEGIN_CLASS_MAP(DebuggerProxy)
+  END_CLASS_MAP(DebuggerProxy)
+  DECLARE_CLASS(DebuggerProxy, DebuggerProxy, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
   ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
-  public: c_debuggerproxy();
-  public: ~c_debuggerproxy();
+  public: c_DebuggerProxy();
+  public: ~c_DebuggerProxy();
   public: void t___construct();
   public: bool t_islocal();
-  public: Variant t_send(p_debuggercommand cmd);
+  public: Variant t_send(p_DebuggerCommand cmd);
   public: Variant t___destruct();
 
   // implemented by HPHP
-  public: c_debuggerproxy *create();
+  public: c_DebuggerProxy *create();
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
@@ -60,32 +60,32 @@ class c_debuggerproxy : public ExtObjectData {
  public:
   Eval::DebuggerProxy *m_proxy;
 };
-extern const int64 q_debuggerclient_AUTO_COMPLETE_FILENAMES;
-extern const int64 q_debuggerclient_AUTO_COMPLETE_VARIABLES;
-extern const int64 q_debuggerclient_AUTO_COMPLETE_CONSTANTS;
-extern const int64 q_debuggerclient_AUTO_COMPLETE_CLASSES;
-extern const int64 q_debuggerclient_AUTO_COMPLETE_FUNCTIONS;
-extern const int64 q_debuggerclient_AUTO_COMPLETE_CLASS_METHODS;
-extern const int64 q_debuggerclient_AUTO_COMPLETE_CLASS_PROPERTIES;
-extern const int64 q_debuggerclient_AUTO_COMPLETE_CLASS_CONSTANTS;
-extern const int64 q_debuggerclient_AUTO_COMPLETE_KEYWORDS;
-extern const int64 q_debuggerclient_AUTO_COMPLETE_CODE;
+extern const int64 q_DebuggerClient_AUTO_COMPLETE_FILENAMES;
+extern const int64 q_DebuggerClient_AUTO_COMPLETE_VARIABLES;
+extern const int64 q_DebuggerClient_AUTO_COMPLETE_CONSTANTS;
+extern const int64 q_DebuggerClient_AUTO_COMPLETE_CLASSES;
+extern const int64 q_DebuggerClient_AUTO_COMPLETE_FUNCTIONS;
+extern const int64 q_DebuggerClient_AUTO_COMPLETE_CLASS_METHODS;
+extern const int64 q_DebuggerClient_AUTO_COMPLETE_CLASS_PROPERTIES;
+extern const int64 q_DebuggerClient_AUTO_COMPLETE_CLASS_CONSTANTS;
+extern const int64 q_DebuggerClient_AUTO_COMPLETE_KEYWORDS;
+extern const int64 q_DebuggerClient_AUTO_COMPLETE_CODE;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DebuggerClient
 
-FORWARD_DECLARE_CLASS(debuggerclient);
-class c_debuggerclient : public ExtObjectData {
+FORWARD_DECLARE_CLASS(DebuggerClient);
+class c_DebuggerClient : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(debuggerclient)
-  END_CLASS_MAP(debuggerclient)
-  DECLARE_CLASS(debuggerclient, DebuggerClient, ObjectData)
+  BEGIN_CLASS_MAP(DebuggerClient)
+  END_CLASS_MAP(DebuggerClient)
+  DECLARE_CLASS(DebuggerClient, DebuggerClient, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
   ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
-  public: c_debuggerclient();
-  public: ~c_debuggerclient();
+  public: c_DebuggerClient();
+  public: ~c_DebuggerClient();
   public: void t___construct();
   public: void t_quit();
   public: void t_print(int _argc, CStrRef format, CArrRef _argv = null_array);
@@ -93,7 +93,7 @@ class c_debuggerclient : public ExtObjectData {
   public: void t_info(int _argc, CStrRef format, CArrRef _argv = null_array);
   public: void t_output(int _argc, CStrRef format, CArrRef _argv = null_array);
   public: void t_error(int _argc, CStrRef format, CArrRef _argv = null_array);
-  public: void t_code(CStrRef source, int start_line_no = 0);
+  public: void t_code(CStrRef source, int highlight_line = 0, int start_line_no = 0, int end_line_no = 0);
   public: Variant t_ask(int _argc, CStrRef format, CArrRef _argv = null_array);
   public: String t_wrap(CStrRef str);
   public: void t_helptitle(CStrRef str);
@@ -108,8 +108,8 @@ class c_debuggerclient : public ExtObjectData {
   public: String t_argvalue(int index);
   public: String t_argrest(int index);
   public: Array t_args();
-  public: Variant t_send(p_debuggercommand cmd);
-  public: Variant t_xend(p_debuggercommand cmd);
+  public: Variant t_send(p_DebuggerCommand cmd);
+  public: Variant t_xend(p_DebuggerCommand cmd);
   public: Variant t_getcurrentlocation();
   public: Variant t_getstacktrace();
   public: int t_getframe();
@@ -118,7 +118,7 @@ class c_debuggerclient : public ExtObjectData {
   public: Variant t___destruct();
 
   // implemented by HPHP
-  public: c_debuggerclient *create();
+  public: c_DebuggerClient *create();
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);

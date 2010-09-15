@@ -136,7 +136,7 @@ Numeric f_pow(CVarRef base, CVarRef exp) {
   double bdbl, edbl;
   DataType bt = base.toNumeric(bint, bdbl, true);
   DataType et = exp.toNumeric(eint, edbl, true);
-  if (bt == KindOfInt64 && et == KindOfInt64) {
+  if (bt == KindOfInt64 && et == KindOfInt64 && eint >= 0) {
     if (eint == 0) return 1LL;
     if (bint == 0) return 0LL;
 
@@ -173,6 +173,7 @@ Numeric f_pow(CVarRef base, CVarRef exp) {
 static bool s_rand_is_seeded = false;
 
 void f_srand(CVarRef seed /* = null_variant */) {
+  s_rand_is_seeded = true;
   if (seed.isNull()) {
     return srand(GENERATE_SEED());
   }

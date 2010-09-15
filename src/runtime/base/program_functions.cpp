@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/base/types.h>
 #include <runtime/base/program_functions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/execution_context.h>
@@ -68,22 +69,20 @@ namespace HPHP {
 // helpers
 
 struct ProgramOptions {
-  string mode;
-  string config;
-  StringVec confStrings;
-  int    port;
-  int    admin_port;
-  string debug_host;
-  int    debug_port;
-  string debug_extension;
-  StringVec debug_cmds;
-  string user;
-  string file;
-  int    count;
-  bool   noSafeAccessCheck;
-  StringVec args;
-  string buildId;
-  int    xhprofFlags;
+  string     mode;
+  string     config;
+  StringVec  confStrings;
+  int        port;
+  int        admin_port;
+  string     user;
+  string     file;
+  int        count;
+  bool       noSafeAccessCheck;
+  StringVec  args;
+  string     buildId;
+  int        xhprofFlags;
+
+  Eval::DebuggerClientOptions debugger_options;
 };
 
 class StartTime {
@@ -241,9 +240,7 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
   bool ret = false;
   try {
     throw;
-  } catch (const Eval::DebuggerRestartException &e) {
-    throw;
-  } catch (const Eval::DebuggerClientExitException &e) {
+  } catch (const Eval::DebuggerException &e) {
     throw;
   } catch (const ExitException &e) {
     ret = true;
@@ -547,7 +544,7 @@ static int execute_program_impl(int argc, char **argv) {
     ("compiler-id", "display the git hash for the compiler id")
 #endif
     ("mode,m", value<string>(&po.mode)->default_value("run"),
-     "run | debug | server | daemon | replay | translate")
+     "run | debug (d) | server (s) | daemon | replay | translate (t)")
     ("config,c", value<string>(&po.config),
      "load specified config file")
     ("config-value,v", value<StringVec >(&po.confStrings)->composing(),
@@ -557,14 +554,17 @@ static int execute_program_impl(int argc, char **argv) {
      "start an HTTP server at specified port")
     ("admin-port", value<int>(&po.admin_port)->default_value(-1),
      "start admin listerner at specified port")
-    ("debug-host", value<string>(&po.debug_host),
+    ("debug-host,h", value<string>(&po.debugger_options.host),
      "connect to debugger server at specified address")
-    ("debug-port", value<int>(&po.debug_port)->default_value(-1),
+    ("debug-port", value<int>(&po.debugger_options.port)->default_value(-1),
      "connect to debugger server at specified port")
-    ("debug-extension", value<string>(&po.debug_extension),
+    ("debug-extension", value<string>(&po.debugger_options.extension),
      "PHP file that extends y command")
-    ("debug-cmd", value<StringVec >(&po.debug_cmds)->composing(),
+    ("debug-cmd", value<StringVec>(&po.debugger_options.cmds)->composing(),
      "executes this debugger command and returns its output in stdout")
+    ("debug-sandbox",
+     value<string>(&po.debugger_options.sandbox)->default_value("default"),
+     "initial sandbox to attach to when debugger is started")
     ("user,u", value<string>(&po.user),
      "run server under this user account")
     ("file,f", value<string>(&po.file),
@@ -647,7 +647,11 @@ static int execute_program_impl(int argc, char **argv) {
     }
   }
 
-  methodIndexMap.initialize();
+  if (po.mode == "d") po.mode = "debug";
+  if (po.mode == "s") po.mode = "server";
+  if (po.mode == "t") po.mode = "translate";
+
+  MethodIndexHMap::initialize(false);
   if (argc <= 1 || po.mode == "run" || po.mode == "debug") {
     RuntimeOption::ExecutionMode = "cli";
 
@@ -660,9 +664,7 @@ static int execute_program_impl(int argc, char **argv) {
 
     if (po.mode == "debug") {
       RuntimeOption::EnableDebugger = true;
-      Eval::Debugger::StartClient(po.debug_host, po.debug_port,
-                                  po.debug_extension, po.debug_cmds);
-      Eval::Debugger::RegisterSandbox(Eval::DSandboxInfo());
+      Eval::Debugger::StartClient(po.debugger_options);
 
       string file = po.file;
       StringVecPtr client_args; bool restarting = false;
@@ -670,8 +672,17 @@ static int execute_program_impl(int argc, char **argv) {
       while (true) {
         try {
           execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
-          // even if it's empty, still need to call for warmup
-          hphp_invoke_simple(po.debug_extension);
+
+          DECLARE_THREAD_INFO;
+          FRAME_INJECTION_FLAGS(empty_string, _, FrameInjection::PseudoMain);
+
+          if (po.debugger_options.extension.empty()) {
+            // even if it's empty, still need to call for warmup
+            hphp_invoke_simple(" "); // so not to run the 1st file if compiled
+          } else {
+            hphp_invoke_simple(po.debugger_options.extension);
+          }
+          Eval::Debugger::RegisterSandbox(Eval::DSandboxInfo());
           if (!restarting) {
             Eval::Debugger::InterruptSessionStarted(new_argv[0]);
           }
@@ -819,9 +830,9 @@ ExecutionContext *hphp_context_init() {
 }
 
 static bool hphp_warmup(ExecutionContext *context,
-                        const std::string &warmupDoc,
-                        const std::string &reqInitFunc,
-                        const std::string &reqInitDoc, bool &error) {
+                        const string &warmupDoc,
+                        const string &reqInitFunc,
+                        const string &reqInitDoc, bool &error) {
   bool ret = true;
   error = false;
   std::string errorMsg;
@@ -894,9 +905,9 @@ bool hphp_invoke_simple(const std::string &filename) {
 
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool func, CArrRef funcParams, Variant funcRet,
-                 const std::string &warmupDoc, const std::string &reqInitFunc,
-                 const std::string &reqInitDoc,
-                 bool &error, std::string &errorMsg) {
+                 const string &warmupDoc, const string &reqInitFunc,
+                 const string &reqInitDoc,
+                 bool &error, string &errorMsg) {
   bool isServer = (strcmp(RuntimeOption::ExecutionMode, "srv") == 0);
   error = false;
 
@@ -953,7 +964,9 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
     context->onShutdownPostSend();
   }
   if (RuntimeOption::EnableDebugger) {
-    Eval::Debugger::InterruptPSPEnded(program);
+    try {
+      Eval::Debugger::InterruptPSPEnded(program);
+    } catch (const Eval::DebuggerException &e) {}
   }
   Eval::RequestEvalState::DestructObjects();
   if (shutdown) {
@@ -998,6 +1011,8 @@ void hphp_session_exit() {
     ServerStatsHelper ssh("free");
     free_global_variables();
   }
+
+  ThreadInfo::s_threadInfo->onSessionExit();
 }
 
 void hphp_process_exit() {

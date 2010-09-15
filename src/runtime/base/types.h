@@ -73,14 +73,12 @@ class ResourceData;
  * objects will help to store temporary information to make the task easier.
  */
 class StringOffset;
-class ObjectOffset;
 
 /**
  * Miscellaneous objects to help arrays to construct or to iterate.
  */
 class ArrayIter;
 class MutableArrayIter;
-class ArrayElement;
 
 struct FullPos;
 
@@ -91,9 +89,7 @@ class FiberReferenceMap;
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * LiteralString is separated from non-literal ones (KindOfString), because
- * they deserve separate treatment for better optimizations. This means a lot
- * of functions may elect to take "litstr" separately from "String" class.
+ * Many functions may elect to take "litstr" separately from "String" class.
  * This code specialization helps speed a lot by not instantiating a String
  * object to box an otherwise literal value. This also means, though not
  * obviously thus dangerous not to know, whenever a function takes a parameter
@@ -109,9 +105,8 @@ class FiberReferenceMap;
 
 enum DataType {
   /**
-   * Do not rearrange the order, we have check such as m_type <= LiteralString.
-   * The integer values for KindOfNull, KindOfBoolean, etc. were chosen
-   * deliberately to make the GET_VARIANT_METHOD macro as fast as possible.
+   * Beware if you change the order, as we may have a few type checks in the
+   * code that depend on the order.
    */
   KindOfNull    = 0,
   KindOfBoolean = 1,
@@ -121,18 +116,20 @@ enum DataType {
   KindOfInt64   = 5,
   KindOfDouble  = 6,
   KindOfStaticString  = 7,
-  LiteralString = 8,
-  KindOfString  = 9,
-  KindOfArray   = 10,
-  KindOfObject  = 11,
-  KindOfVariant = 12,
+  KindOfString  = 8,
+  KindOfArray   = 9,
+  KindOfObject  = 10,
+  KindOfVariant = 11,
 
-  MaxNumDataTypes = 13, // marker, not a valid type
+  MaxNumDataTypes = 12, // marker, not a valid type
 };
 
 inline int getDataTypeIndex(DataType t) {
   return t;
 }
+
+// Helper macro for checking if a given type is refcounted
+#define IS_REFCOUNTED_TYPE(t) ((t) > KindOfStaticString)
 
 enum StringDataMode {
   AttachLiteral, // const char * points to a literal string
@@ -161,20 +158,23 @@ class RequestInjectionData {
 public:
   RequestInjectionData()
     : started(0), timeoutSeconds(-1), memExceeded(false), timedout(false),
-      signaled(false), surprised(false), debugger(false) {}
+      signaled(false), surprised(false), debugger(false), interrupt(NULL) {
+  }
 
-  time_t started;     // when a request was started
-  int timeoutSeconds; // how many seconds to timeout
+  time_t started;      // when a request was started
+  int timeoutSeconds;  // how many seconds to timeout
 
-  bool memExceeded;            // memory limit was exceeded
-  bool timedout;               // flag to set when timeout is detected
-  bool signaled;               // flag to set when a signal was raised
+  bool memExceeded;    // memory limit was exceeded
+  bool timedout;       // flag to set when timeout is detected
+  bool signaled;       // flag to set when a signal was raised
 
-  bool surprised;              // any surprise happened
-  Mutex surpriseMutex;         // mutex protecting per-request data
+  bool surprised;      // any surprise happened
+  Mutex surpriseMutex; // mutex protecting per-request data
 
-  bool debugger; // whether there is a DebuggerProxy attached to me
+  bool debugger;       // whether there is a DebuggerProxy attached to me
+  void *interrupt;     // current CmdInterrupt this thread's handling
 
+  void reset();
   void onSessionInit();
 };
 
@@ -203,6 +203,7 @@ public:
   ThreadInfo();
 
   void onSessionInit();
+  void onSessionExit();
 };
 
 extern void throw_infinite_recursion_exception();
@@ -253,6 +254,8 @@ private:
   ThreadInfo *m_info;
 };
 
+//////////////////////////////////
+// Fast Method Call
 struct MethodIndex {
   unsigned int m_callIndex:32;
   unsigned int m_overloadIndex:32;
@@ -267,40 +270,38 @@ struct MethodIndex {
   MethodIndex() {}
 };
 
-struct MethodIndexHash {
-  size_t operator()(MethodIndex mi) const { return (size_t) mi.val(); }
+struct MethodIndexHMap {
+  MethodIndexHMap() : name(NULL), methodIndex(0,0) {}
+  MethodIndexHMap(const char *name, MethodIndex methodIndex)
+    : name(name), methodIndex(methodIndex) {}
+  const char* name;
+  MethodIndex methodIndex;
+  static MethodIndex methodIndexExists(const char * methodName);
+  static void initialize(bool useSystem);
 };
 
-class MethodIndexMap : public hphp_const_char_imap<MethodIndex> {
-  public:
-  void initialize();
-  typedef hphp_hash_map<const MethodIndex, const char *, MethodIndexHash >
-    MethodIndexReverseMap;
-  MethodIndexReverseMap methodIndexReverseMap;
-  private:
-  void addEntry(const char * methodName, MethodIndex mi) ;
-};
-extern MethodIndexMap methodIndexMap;
+extern const unsigned methodIndexHMapSize;
+extern const MethodIndexHMap methodIndexHMap[];
+extern const unsigned methodIndexReverseCallIndex[];
+extern const char * methodIndexReverseIndex[];
+
+extern const unsigned methodIndexHMapSizeSys;
+extern const MethodIndexHMap methodIndexHMapSys[];
+extern const unsigned methodIndexReverseCallIndexSys[];
+extern const char * methodIndexReverseIndexSys[];
 
 inline MethodIndex methodIndexExists(const char * methodName) {
-  MethodIndexMap::const_iterator i = methodIndexMap.find(methodName);
-  if (i == methodIndexMap.end()) return MethodIndex::fail();
-  return (*i).second;
+  return MethodIndexHMap::methodIndexExists(methodName);
 }
 
 inline MethodIndex methodIndexLookup(const char * methodName) {
-  MethodIndex ret = methodIndexExists(methodName);
-  MethodIndexMap::const_iterator i = methodIndexMap.find(methodName);
-  ASSERT(i != methodIndexMap.end()); // only for testing
-  return (*i).second;
+  MethodIndex methodIndex = MethodIndexHMap::methodIndexExists(methodName);
+  ASSERT(!methodIndex.isFail());
+  return methodIndex;
 }
 
-inline const char * methodIndexLookupReverse(MethodIndex methodIndex) {
-  MethodIndexMap::MethodIndexReverseMap::const_iterator i =
-     methodIndexMap.methodIndexReverseMap.find(methodIndex);
-  ASSERT(i != methodIndexMap.methodIndexReverseMap.end());
-  return (*i).second;
-}
+const bool g_bypassMILR = true;
+const char * methodIndexLookupReverse(MethodIndex methodIndex) ;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

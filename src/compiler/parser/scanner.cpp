@@ -78,13 +78,14 @@ void Scanner::resetHeredoc() {
   m_heredocLabel.clear();
 }
 
-int Scanner::getNextToken(token_type& t, location_type& l)
-{
+int Scanner::getNextToken(token_type& t, location_type& l) {
   int tokid;
   bool done = false;
 
   do {
     tokid = next(t);
+    int line0 = m_line;
+    int char0 = m_column;
     if (tokid != 0) { // not EOF
       for (const char *s = t.rawtext().c_str(); *s; s++) {
         if (*s == '\n') {
@@ -102,6 +103,8 @@ int Scanner::getNextToken(token_type& t, location_type& l)
     case T_WHITESPACE:
       break;
     default:
+      l.first_line(line0);
+      l.first_column(char0);
       done = true;
       break;
     }

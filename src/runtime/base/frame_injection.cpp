@@ -102,8 +102,8 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
     // add it to the trace
     if (filename != "") {
       Array frame = Array::Create();
-      frame.set(s_file, filename, -1, true);
-      frame.set(s_line, t->m_line, -1, true);
+      frame.set(s_file, filename, true);
+      frame.set(s_line, t->m_line, true);
       bt.append(frame);
     }
   }
@@ -113,8 +113,8 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
     if (t->m_prev) {
       String file = t->m_prev->getFileName();
       if (!file.empty() && t->m_prev->m_line) {
-        frame.set(s_file, file, -1, true);
-        frame.set(s_line, t->m_prev->m_line, -1, true);
+        frame.set(s_file, file, true);
+        frame.set(s_line, t->m_prev->m_line, true);
       }
     } else if (t->m_flags & PseudoMain) {
       // Stop at top, don't include top file
@@ -122,30 +122,30 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
     }
 
     if (t->m_flags & PseudoMain) {
-      frame.set(s_function, "include", -1, true);
-      frame.set(s_args, Array::Create(t->getFileName()), -1, true);
+      frame.set(s_function, "include", true);
+      frame.set(s_args, Array::Create(t->getFileName()), true);
     } else {
       const char *c = strstr(t->m_name, "::");
       if (c) {
-        frame.set(s_function, String(c + 2), -1, true);
-        frame.set(s_class, t->m_class->copy(), -1, true);
+        frame.set(s_function, String(c + 2), true);
+        frame.set(s_class, t->m_class->copy(), true);
         if (!t->m_object.isNull()) {
           if (withThis) {
-            frame.set(s_object, t->m_object, -1, true);
+            frame.set(s_object, t->m_object, true);
           }
-          frame.set(s_type, "->", -1, true);
+          frame.set(s_type, "->", true);
         } else {
-          frame.set(s_type, "::", -1, true);
+          frame.set(s_type, "::", true);
         }
       } else {
-        frame.set(s_function, t->m_name, -1, true);
+        frame.set(s_function, t->m_name, true);
       }
 
       Array args = t->getArgs();
       if (!args.isNull()) {
-        frame.set(s_args, args, -1, true);
+        frame.set(s_args, args, true);
       } else {
-        frame.set(s_args, Array::Create(), -1, true);
+        frame.set(s_args, Array::Create(), true);
       }
     }
 
@@ -164,6 +164,33 @@ int FrameInjection::GetLine(bool skip /* = false */) {
     return t->m_line;
   }
   return -1;
+}
+
+bool FrameInjection::IsGlobalScope() {
+  return IsGlobalScope(ThreadInfo::s_threadInfo->m_top);
+}
+
+bool FrameInjection::IsGlobalScope(FrameInjection *frame) {
+  while (frame) {
+    if ((frame->m_flags & PseudoMain) == 0) {
+      return false;
+    }
+    frame = frame->getPrev();
+  }
+  return true;
+}
+
+FrameInjection *FrameInjection::GetStackFrame(int level) {
+  FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
+  for (int i = 0; i < level && frame; i++) {
+    while (frame && (frame->m_flags & PseudoMain)) {
+      frame = frame->getPrev();
+    }
+    if (frame) {
+      frame = frame->getPrev();
+    }
+  }
+  return frame;
 }
 
 String FrameInjection::getFileName() {

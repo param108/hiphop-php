@@ -16,6 +16,7 @@
 
 #include <runtime/eval/debugger/cmd/cmd_print.h>
 #include <runtime/base/time/datetime.h>
+#include <runtime/base/string_util.h>
 
 using namespace std;
 
@@ -119,27 +120,31 @@ std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
 void CmdPrint::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_ret);
+  thrift.write(m_output);
+  thrift.write(m_frame);
 }
 
 void CmdPrint::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_ret);
+  thrift.read(m_output);
+  thrift.read(m_frame);
 }
 
 void CmdPrint::list(DebuggerClient *client) {
+  if (client->arg(1, "clear")) {
+    client->addCompletion("all");
+    return;
+  }
+  client->addCompletion(DebuggerClient::AutoCompleteCode);
+
   if (client->argCount() == 0) {
     client->addCompletion(Formats);
     client->addCompletion("always");
     client->addCompletion("list");
     client->addCompletion("clear");
-    client->addCompletion(DebuggerClient::AutoCompleteCode);
-  } else if (client->argCount() == 1) {
-    if (client->arg(1, "always")) {
-      client->addCompletion(Formats);
-      client->addCompletion(DebuggerClient::AutoCompleteCode);
-    } else if (client->arg(1, "clear")) {
-      client->addCompletion("all");
-    }
+  } else if (client->argCount() == 1 && client->arg(1, "always")) {
+    client->addCompletion(Formats);
   }
 }
 
@@ -172,8 +177,9 @@ bool CmdPrint::help(DebuggerClient *client) {
 bool CmdPrint::processList(DebuggerClient *client) {
   DebuggerClient::WatchPtrVec &watches = client->getWatches();
   for (int i = 0; i < (int)watches.size(); i++) {
-    client->print("  %d\t%s  %s", i + 1,
-                  watches[i]->first,
+    client->print("  %d %s  %s", i + 1,
+                  StringUtil::Pad(watches[i]->first, 8, " ",
+                                  StringUtil::PadLeft).data(),
                   watches[i]->second.c_str());
   }
   if (watches.empty()) {
@@ -231,11 +237,12 @@ bool CmdPrint::processClear(DebuggerClient *client) {
 void CmdPrint::processWatch(DebuggerClient *client, const char *format,
                             const std::string &php) {
   m_body = php;
+  m_frame = client->getFrame();
   CmdPrintPtr res = client->xend<CmdPrint>(this);
-  client->output(FormatResult(format, res->m_ret));
-  if (!res->m_body.empty()) {
-    client->output(res->m_body);
+  if (!res->m_output.empty()) {
+    client->output(res->m_output);
   }
+  client->output(FormatResult(format, res->m_ret));
 }
 
 bool CmdPrint::onClient(DebuggerClient *client) {
@@ -247,6 +254,10 @@ bool CmdPrint::onClient(DebuggerClient *client) {
   bool watch = false;
   int index = 1;
   if (client->arg(1, "always")) {
+    if (client->argCount() == 1) {
+      client->error("'[p]rint [a]lways' needs an expression to watch.");
+      return true;
+    }
     watch = true;
     index++;
   } else if (client->arg(1, "list")) {
@@ -272,10 +283,8 @@ bool CmdPrint::onClient(DebuggerClient *client) {
 }
 
 bool CmdPrint::onServer(DebuggerProxy *proxy) {
-  String output;
   m_ret = DebuggerProxy::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
-                                    output);
-  m_body = std::string(output.data(), output.size());
+                                    m_output, !proxy->isLocal(), m_frame);
   return proxy->send(this);
 }
 

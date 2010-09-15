@@ -232,13 +232,13 @@ bool TestCppBase::TestArray() {
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
     VERIFY((int)arr[0] == 0);
-    VS(arr, Array(ArrayInit(1, true).set(0, 0).create()));
+    VS(arr, Array(ArrayInit(1, true).set(0).create()));
 
     arr = Array::Create("test");
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
     VERIFY(arr[0] == "test");
-    VS(arr, Array(ArrayInit(1, true).set(0, "test").create()));
+    VS(arr, Array(ArrayInit(1, true).set("test").create()));
 
     Array arrCopy = arr;
     arr = Array::Create(arr);
@@ -246,19 +246,19 @@ bool TestCppBase::TestArray() {
     VERIFY(!arr.isNull());
     VERIFY(arr[0].toArray().size() == 1);
     VS(arr[0], arrCopy);
-    VS(arr, Array(ArrayInit(1, true).set(0, arrCopy).create()));
+    VS(arr, Array(ArrayInit(1, true).set(arrCopy).create()));
 
     arr = Array::Create("name", 1);
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
     VERIFY((int)arr["name"] == 1);
-    VS(arr, Array(ArrayInit(1, false).set(0, "name", 1).create()));
+    VS(arr, Array(ArrayInit(1, false).set("name", 1).create()));
 
     arr = Array::Create("name", "test");
     VERIFY(!arr.empty()); VERIFY(arr.size() == 1); VERIFY(arr.length() == 1);
     VERIFY(!arr.isNull());
     VERIFY(arr["name"] == "test");
-    VS(arr, Array(ArrayInit(1, false).set(0, "name", "test").create()));
+    VS(arr, Array(ArrayInit(1, false).set("name", "test").create()));
 
     arrCopy = arr;
     arr = Array::Create("name", arr);
@@ -266,7 +266,7 @@ bool TestCppBase::TestArray() {
     VERIFY(!arr.isNull());
     VS(arr["name"], arrCopy);
     VERIFY(arr["name"].toArray().size() == 1);
-    VS(arr, Array(ArrayInit(1, false).set(0, "name", arrCopy).create()));
+    VS(arr, Array(ArrayInit(1, false).set("name", arrCopy).create()));
   }
 
   // iteration
@@ -759,7 +759,7 @@ bool TestCppBase::TestVariant() {
   }
   {
     Variant v1 = 10;
-    Variant v2 = Array(ArrayInit(1, true).setRef(0, v1).create());
+    Variant v2 = Array(ArrayInit(1, true).setRef(v1).create());
     v1 = 20;
     VS(v2[0], 20);
   }
@@ -900,16 +900,16 @@ bool TestCppBase::TestMemoryManager() {
 
     // Circular reference between two objects.
     {
-      Object obj(NEW(c_stdclass)());
-      obj->o_set("a", -1, obj);
-      obj->o_set("f", -1, Object(NEW(PlainFile)()));
+      Object obj(NEW(c_stdClass)());
+      obj->o_set("a", obj);
+      obj->o_set("f", Object(NEW(PlainFile)()));
     }
     {
-      Object obj1(NEW(c_stdclass)());
-      Object obj2(NEW(c_stdclass)());
-      obj1->o_set("a", -1, obj2);
-      obj2->o_set("a", -1, obj1);
-      obj1->o_set("f", -1, Object(NEW(PlainFile)()));
+      Object obj1(NEW(c_stdClass)());
+      Object obj2(NEW(c_stdClass)());
+      obj1->o_set("a", obj2);
+      obj2->o_set("a", obj1);
+      obj1->o_set("f", Object(NEW(PlainFile)()));
     }
 
     // dangling APC variables inside circular arrays
@@ -947,6 +947,7 @@ bool TestCppBase::TestMemoryManager() {
 
   }
   DELETE(TestGlobals)(globals);
+  MemoryManager::TheMemoryManager().reset();
   return Count(true);
 }
 

@@ -254,14 +254,15 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
     ar->getScope()->getVariables()->
       setAttribute(VariableTable::NeedGlobalPointer);
   }
-  if (cls->getConstants()->isRecursivelyDeclared(ar, m_varName)) {
+  ClassScopePtr defClass = cls;
+  ConstructPtr decl =
+    cls->getConstants()->getDeclarationRecur(ar, m_varName, defClass);
+  if (decl) { // No decl means an extension class.
+    cls = defClass;
     string name = m_className + "::" + m_varName;
-    ConstructPtr decl = cls->getConstants()->getDeclaration(m_varName);
-    if (decl) { // No decl means an extension class.
-      ar->getDependencyGraph()->add(DependencyGraph::KindOfConstant,
-                                    ar->getName(),
-                                    name, shared_from_this(), name, decl);
-    }
+    ar->getDependencyGraph()->add(DependencyGraph::KindOfConstant,
+                                  ar->getName(),
+                                  name, shared_from_this(), name, decl);
     m_valid = true;
   }
   BlockScope *defScope;
@@ -339,9 +340,9 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
     } else {
       if (cls->getConstants()->isDynamic(m_varName)) {
         cg_printf("%s%s::lazy_initializer(%s)->", Option::ClassPrefix,
-                  trueClassName.c_str(), cg.getGlobals(ar));
+                  cls->getId(cg).c_str(), cg.getGlobals(ar));
       }
-      cg_printf("%s%s_%s", Option::ClassConstantPrefix, trueClassName.c_str(),
+      cg_printf("%s%s_%s", Option::ClassConstantPrefix, cls->getId(cg).c_str(),
                 m_varName.c_str());
     }
     if (outsideClass) {

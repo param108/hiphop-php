@@ -33,14 +33,14 @@ Variant ObjectPropertyExpression::eval(VariableEnvironment &env) const {
   Variant obj(m_obj->eval(env));
   String name(m_name->get(env));
   SET_LINE;
-  return obj.o_get(name, m_name->hash());
+  return obj.o_get(name);
 }
 
 Variant ObjectPropertyExpression::evalExist(VariableEnvironment &env) const {
   Variant obj(m_obj->evalExist(env));
   String name(m_name->get(env));
   SET_LINE;
-  return obj.o_get(name, m_name->hash(), false);
+  return obj.o_get(name, false);
 }
 
 Variant &ObjectPropertyExpression::lval(VariableEnvironment &env) const {
@@ -51,30 +51,33 @@ Variant &ObjectPropertyExpression::lval(VariableEnvironment &env) const {
     Variant &lv = lobj->lval(env);
     String name(m_name->get(env));
     SET_LINE;
-    return HPHP::lval(lv.o_lval(name, m_name->hash()));
+    return lv.o_lval(name, get_globals()->__lvalProxy);
   } else {
     Variant obj(m_obj->eval(env));
     String name(m_name->get(env));
     SET_LINE;
-    return HPHP::lval(obj.o_lval(name, m_name->hash()));
+    return obj.o_lval(name, get_globals()->__lvalProxy);
   }
 }
 
 bool ObjectPropertyExpression::weakLval(VariableEnvironment &env,
                                         Variant* &v) const {
-  Variant vobj(m_obj->eval(env));
-  if (vobj.is(KindOfObject)) {
-    Object obj(vobj);
+  Variant *obj;
+
+  const LvalExpression *lobj = m_obj->toLval();
+  if (lobj) {
+    bool ok = lobj->weakLval(env, obj);
     String name(m_name->get(env));
-    if (!SET_LINE_EXPR) return false;
-    if (obj->o_exists(name, m_name->hash())) {
-      v = &HPHP::lval(obj.o_lval(name, m_name->hash()));
-      return true;
-    }
+    if (!ok || !SET_LINE_EXPR) return false;
+    Variant tmp;
+    v = &obj->o_unsetLval(name, tmp);
+    return v != &tmp;
   }
+
+  m_obj->eval(env);
+  m_name->get(env);
   return false;
 }
-
 
 Variant ObjectPropertyExpression::set(VariableEnvironment &env, CVarRef val)
   const {
@@ -83,12 +86,12 @@ Variant ObjectPropertyExpression::set(VariableEnvironment &env, CVarRef val)
     Variant &lv = lobj->lval(env);
     String name(m_name->get(env));
     SET_LINE;
-    lv.o_lval(name, m_name->hash()) = val;
+    lv.o_set(name, val);
   } else {
     Variant obj(m_obj->eval(env));
     String name(m_name->get(env));
     SET_LINE;
-    obj.o_lval(name, m_name->hash()) = val;
+    obj.o_set(name, val);
   }
   return val;
 }
@@ -108,38 +111,31 @@ Variant ObjectPropertyExpression::setOp(VariableEnvironment &env, int op,
   SET_LINE;
   switch (op) {
   case T_PLUS_EQUAL:
-    vobj->o_lval(name, m_name->hash()) += rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_PLUS_EQUAL>(name, rhs);
   case T_MINUS_EQUAL:
-    vobj->o_lval(name, m_name->hash()) -= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_MINUS_EQUAL>(name, rhs);
   case T_MUL_EQUAL:
-    vobj->o_lval(name, m_name->hash()) *= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_MUL_EQUAL>(name, rhs);
   case T_DIV_EQUAL:
-    vobj->o_lval(name, m_name->hash()) /= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_DIV_EQUAL>(name, rhs);
   case T_CONCAT_EQUAL:
-    concat_assign(vobj->o_lval(name, m_name->hash()), rhs);
-    break;
+    return vobj->o_assign_op<Variant, T_CONCAT_EQUAL>(name, rhs);
   case T_MOD_EQUAL:
-    vobj->o_lval(name, m_name->hash()) %= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_MOD_EQUAL>(name, rhs);
   case T_AND_EQUAL:
-    vobj->o_lval(name, m_name->hash()) &= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_AND_EQUAL>(name, rhs);
   case T_OR_EQUAL:
-    vobj->o_lval(name, m_name->hash()) |= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_OR_EQUAL>(name, rhs);
   case T_XOR_EQUAL:
-    vobj->o_lval(name, m_name->hash()) ^= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_XOR_EQUAL>(name, rhs);
   case T_SL_EQUAL:
-    vobj->o_lval(name, m_name->hash()) <<= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_SL_EQUAL>(name, rhs);
   case T_SR_EQUAL:
-    vobj->o_lval(name, m_name->hash()) >>= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_SR_EQUAL>(name, rhs);
+  case T_INC:
+    return vobj->o_assign_op<Variant, T_INC>(name, rhs);
+  case T_DEC:
+    return vobj->o_assign_op<Variant, T_DEC>(name, rhs);
   default:
     ASSERT(false);
   }
@@ -151,16 +147,23 @@ bool ObjectPropertyExpression::exist(VariableEnvironment &env, int op) const {
   String name(m_name->get(env));
   SET_LINE;
   if (op == T_ISSET) {
-    return obj->doIsSet(name, -1);
+    return obj->o_isset(name);
   } else {
-    return obj->doEmpty(name, -1);
+    return obj->o_empty(name);
   }
 }
+
 void ObjectPropertyExpression::unset(VariableEnvironment &env) const {
-  Object obj(m_obj->eval(env));
-  String name(m_name->get(env));
-  SET_LINE_VOID;
-  obj->t___unset(name);
+  const LvalExpression *lobj = m_obj->toLval();
+  Variant *obj;
+  if (lobj && lobj->weakLval(env, obj)) {
+    String name(m_name->get(env));
+    toObject(*obj)->o_unset(name);
+  } else {
+    Object obj(toObject(m_obj->evalExist(env)));
+    String name(m_name->get(env));
+    obj->o_unset(name);
+  }
 }
 
 NamePtr ObjectPropertyExpression::getProperty() const { return m_name; }
