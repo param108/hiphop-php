@@ -264,7 +264,7 @@ void ConstantExpression::outputCPPImpl(CodeGenerator &cg,
                 cg.formatLabel(m_name).c_str());
     }
   } else {
-    cg_printf("getUndefinedConstant(%s%s)",
-              Option::ConstantPrefix, cg.formatLabel(m_name).c_str());
+    cg_printf("getUndefinedConstant(\"%s\")",
+              m_name.c_str());
   }
 }

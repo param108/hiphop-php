@@ -55,7 +55,8 @@ time_t HttpServer::StartTime;
 HttpServer::HttpServer()
   : m_stopped(false),
     m_loggerThread(this, &HttpServer::flushLog),
-    m_watchDog(this, &HttpServer::watchDog) {
+    m_watchDog(this, &HttpServer::watchDog),
+    m_rotateThread(this, &HttpServer::rotateLog) {
 
   // enabling mutex profiling, but it's not turned on
   LockProfiler::s_pfunc_profile = server_stats_log_mutex;
@@ -198,6 +199,7 @@ void HttpServer::run() {
   StartTime = time(0);
 
   m_loggerThread.start();
+  m_rotateThread.start();
   m_watchDog.start();
 
   for (unsigned int i = 0; i < m_serviceThreads.size(); i++) {
@@ -271,6 +273,7 @@ void HttpServer::run() {
   hphp_process_exit();
   m_watchDog.waitForEnd();
   m_loggerThread.waitForEnd();
+  m_rotateThread.waitForEnd();
   Logger::Info("all servers stopped");
 }
 
@@ -342,6 +345,28 @@ void HttpServer::killPid() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // logger thread
+
+
+void HttpServer::rotateLog() {
+  siginfo_t info;
+  sigset_t mask;
+  int retsig;
+
+  sigemptyset(&mask);
+  sigaddset(&mask, SIGHUP);
+
+  bool stopped = false;
+  while(!stopped) {
+ 	retsig = sigwaitinfo(&mask, &info);
+	// sometimes paranoia sets in
+        if (retsig == SIGHUP) {
+	    cout<<"Hit reorateLog\n";
+            Logger::rotateLog();
+        }
+        Lock lock(this);
+        stopped = m_stopped;
+  }
+}
 
 void HttpServer::flushLog() {
   if (!Logger::UseLogAggregator) return;

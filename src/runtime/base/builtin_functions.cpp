@@ -65,6 +65,9 @@ Variant getDynamicConstant(CVarRef v, CStrRef name) {
 }
 
 String getUndefinedConstant(CStrRef name) {
+  // check if a constant exists else return the string name.
+  CVarRef v = ((Globals *)get_global_variables())->getConstant(name.c_str());
+  if (isInitialized(v)) return v;
   raise_notice("Use of undefined constant %s -- assumed '%s'.",
                name.c_str(), name.c_str());
   return name;

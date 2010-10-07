@@ -13,7 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
+// Param: for signal handling
+#include <signal.h>
 #include <runtime/base/types.h>
 #include <runtime/base/program_functions.h>
 #include <runtime/base/builtin_functions.h>
@@ -468,6 +469,15 @@ static int start_server(const std::string &username) {
     LightProcess::ChangeUser(username);
   }
 #endif
+
+  {
+    // Param: block SIGHUP from all children threads so that we can use  
+    // that to rotate the logfile
+  sigset_t toblock;
+  sigemptyset(&toblock);
+  sigaddset(&toblock,SIGHUP);
+  sigprocmask(SIG_BLOCK,&toblock,NULL);
+  }
 
   HttpServer::Server = HttpServerPtr(new HttpServer());
   HttpServer::Server->run();

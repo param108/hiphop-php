@@ -20,13 +20,14 @@
 #include <string>
 #include <stdarg.h>
 #include "thread_local.h"
+#include "synchronizable.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class StackTrace;
 class Exception;
-class Logger {
+class Logger:public Synchronizable {
 public:
   enum LogLevelType {
     LogNone,
@@ -38,7 +39,9 @@ public:
 
   static bool UseLogAggregator;
   static bool UseLogFile;
-  static FILE *Output;
+  static FILE * Output;
+  // for rotate;
+  static std::string logFileName;
 
   static LogLevelType LogLevel;
 
@@ -72,6 +75,7 @@ public:
   static void OnNewRequest();
   static void ResetRequestCount();
 
+  static void rotateLog();
   static bool SetThreadLog(const char *file);
   static void ClearThreadLog();
   static void SetNewOutput(FILE *output);

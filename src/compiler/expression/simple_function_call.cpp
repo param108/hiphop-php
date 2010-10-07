@@ -277,9 +277,11 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
           ConstantTablePtr constants = block->getConstants();
           if (constants != ar->getConstants()) {
             constants->add(varName, NEW_TYPE(Some), value, ar, self);
-            if (name->hasHphpNote("Dynamic")) {
+            /*if (name->hasHphpNote("Dynamic")) {
+              //constants->setDynamic(ar, varName);
+            }*/
+	      //to allow define($,$) every define has to bee dynamic
               constants->setDynamic(ar, varName);
-            }
           }
         }
       }
@@ -1335,6 +1337,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
         dynamic_pointer_cast<ScalarExpression>((*m_params)[0]);
       string varName;
       ExpressionPtr value = (*m_params)[1];
+      ExpressionPtr defnam = (*m_params)[0];
       if (name) {
         varName = name->getIdentifier();
         if (varName.empty()) {
@@ -1365,7 +1368,14 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
           cg_printf("),");
           close = true;
         }
-        cg_printf("throw_fatal(\"bad define\")");
+        //dynamic constants are those that are not defined in the code 
+        //BUT are defined at run time
+        cg_printf("g->declareDynamicConstant(");
+	defnam->outputCPP(cg, ar);
+        cg_printf(", ");
+	value->outputCPP(cg, ar);
+        cg_printf(")");
+
         if (close) cg_printf(")");
       }
       return;

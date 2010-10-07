@@ -29,6 +29,15 @@ CVarRef Globals::declareConstant(const char *name, Variant &constant,
   return value;
 }
 
+CVarRef Globals::declareDynamicConstant(const char *name, CVarRef value) {
+  if (!m_dynamicConstants.exists(name)) {
+    m_dynamicConstants.set(String(name, CopyString), value);
+  }
+  return value;
+}
+
+
+
 void Globals::declareFunction(const char *name) {
   String func(Util::toLower(name));
   if (m_volatileFunctions.exists(func)) {

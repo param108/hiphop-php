@@ -41,6 +41,7 @@ public:
   void stop();
 
   void flushLog();
+  void rotateLog();
   void watchDog();
 
   void takeoverShutdown(LibEventServerWithTakeover* server);
@@ -57,6 +58,7 @@ private:
   AsyncFunc<HttpServer> m_loggerThread;
   AsyncFunc<HttpServer> m_watchDog;
   ServiceThreadPtrVec m_serviceThreads;
+  AsyncFunc<HttpServer> m_rotateThread;
 
   bool startServer(bool pageServer);
   void onServerShutdown();

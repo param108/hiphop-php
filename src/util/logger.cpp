@@ -21,6 +21,8 @@
 #include "exception.h"
 #include "log_aggregator.h"
 #include "text_color.h"
+#include <runtime/base/runtime_option.h>
+
 
 using namespace std;
 
@@ -51,7 +53,7 @@ IMPLEMENT_LOGLEVEL(Verbose);
 
 bool Logger::UseLogAggregator = false;
 bool Logger::UseLogFile = true;
-FILE *Logger::Output = NULL;
+FILE * Logger::Output = NULL;
 Logger::LogLevelType Logger::LogLevel = LogInfo;
 bool Logger::LogHeader = false;
 bool Logger::LogNativeStackTrace = true;
@@ -67,7 +69,11 @@ void Logger::Printf(std::string &msg, const char *fmt, ...) {
   VSNPrintf(msg, fmt, ap);
   va_end(ap);
 }
-
+void Logger::rotateLog() {
+	if (Output) {
+	   freopen(RuntimeOption::LogFile.c_str(), "w",Output);
+	}
+}
 void Logger::VSNPrintf(std::string &msg, const char *fmt, va_list ap) {
   int i = 0;
   for (int len = 1024; msg.empty(); len <<= 1) {
