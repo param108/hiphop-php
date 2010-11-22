@@ -59,8 +59,7 @@ bool ClassConstantExpression::containsDynamicConstant(AnalysisResultPtr ar)
   const {
   if (m_class) return true;
   ClassScopePtr cls = ar->findClass(m_className);
-  return !cls || cls->isVolatile() ||
-    !cls->getConstants()->isRecursivelyDeclared(ar, m_varName);
+  return !cls || cls->isVolatile() || cls->getConstants()->isDynamic(m_varName) || !cls->getConstants()->isRecursivelyDeclared(ar, m_varName);
 }
 
 void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
@@ -148,6 +147,7 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultPtr ar) {
 	 return ExpressionPtr();
 	 }
 	 std::cout<<"skipping volatile check\n";*/
+	 return ExpressionPtr();
     }
     if (cls->isRedeclaring()) {
   	 #ifdef PREOPTIMIZE_DEBUG

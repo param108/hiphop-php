@@ -17,13 +17,13 @@ IF(NOT EXISTS "${HPHP_HOME}/LICENSE.PHP")
 ENDIF()
 
 include_directories  (
-"$ENV{HPHP_HOME}/../gcc4.3.5/include/c++/4.3.5"
+"/opt/hiphop/gcc4.3.5/include/c++/4.3.5"
 )
 include_directories  (
-"$ENV{HPHP_HOME}/../gcc4.3.5/include/c++/4.3.5/backward"
+"/opt/hiphop/gcc4.3.5/include/c++/4.3.5/backward"
 )
 include_directories (
-"$ENV{HPHP_HOME}/../gcc4.3.5/include/c++/4.3.5/x86_64-unknown-linux-gnu"
+"/opt/hiphop/gcc4.3.5/include/c++/4.3.5/x86_64-unknown-linux-gnu"
 )
 
 
