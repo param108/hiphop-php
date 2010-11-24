@@ -38,6 +38,9 @@ include(HPHPSetup)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories  (
+"${HPHP_HOME}/../gcc4.3.5/include"
+)
+include_directories  (
 "${HPHP_HOME}/../gcc4.3.5/include/c++/4.3.5"
 )
 include_directories (
