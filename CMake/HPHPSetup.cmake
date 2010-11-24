@@ -2,6 +2,9 @@ OPTION(INFINITE_LOOP_DETECTION "Enable Infinite Loop Detection" ON)
 OPTION(INFINITE_RECURSION_DETECTION "Enable Infinite Recursion Detection" ON)
 OPTION(REQUEST_TIMEOUT_DETECTION "Enable Timeout Detection" ON)
 
+SET(CMAKE_LIBRARY_PATH /opt/hiphop/gcc4.3.5/lib /opt/hiphop/gcc4.3.5/lib64 ${CM
+SET(CMAKE_INCLUDE_PATH /opt/hiphop/gcc4.3.5/include ${CMAKE_INCLUDE_PATH})
+
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
