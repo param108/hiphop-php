@@ -1962,6 +1962,7 @@ define('CLOCK_PROCESS_CPUTIME_ID', 2);
 define('CLOCK_THREAD_CPUTIME_ID', 3);
 define('INI_SCANNER_NORMAL', 0);
 define('INI_SCANNER_RAW', 1);
+define('RUNNING_HIPHOP', 1);
 // HPHP system constants
 define('HPHP_TRIM_CHARLIST', " \n\r\t\v\0");
 define('GLOBAL_STATE_IGNORE', 0);
