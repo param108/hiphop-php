@@ -17,6 +17,9 @@ IF(NOT EXISTS "${HPHP_HOME}/LICENSE.PHP")
 ENDIF()
 
 include_directories  (
+"/opt/hiphop/gcc4.3.5/include"
+)
+include_directories  (
 "/opt/hiphop/gcc4.3.5/include/c++/4.3.5"
 )
 include_directories  (
