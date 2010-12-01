@@ -3312,6 +3312,7 @@ void AnalysisResult::outputCPPFiberGlobalState() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void AnalysisResult::outputCPPMain() {
+  {
   string mainPath = m_outputPath + "/" + Option::SystemFilePrefix +
     "main.no.cpp";
   Util::mkdir(mainPath);
@@ -3333,7 +3334,19 @@ void AnalysisResult::outputCPPMain() {
   cg_printf("\n");
   outputCPPGlobalImplementations(cg);
   cg.namespaceEnd();
+  fMain.close();
+  }
+  {
+  //seperating the main function to a new file
+  // <pwd>/main.cpp
+  string realMainPath = m_outputPath + "/" + "main.cpp";
+  Util::mkdir(realMainPath);
+  ofstream frealMain(realMainPath.c_str());
+  CodeGenerator cg(&frealMain, CodeGenerator::ClusterCPP);
 
+  cg_printInclude("<runtime/base/hphp.h>");
+  cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
+  cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   cg_printf("\n");
   cg_printf("#ifndef HPHP_BUILD_LIBRARY\n");
   cg_indentBegin("int main(int argc, char** argv) {\n");
@@ -3341,7 +3354,8 @@ void AnalysisResult::outputCPPMain() {
   cg_indentEnd("}\n");
   cg_printf("#endif\n");
 
-  fMain.close();
+  frealMain.close();
+  }
 }
 
 void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
