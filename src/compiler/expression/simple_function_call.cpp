@@ -640,6 +640,9 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
             return CONSTANT("true");
           }
           // user constant
+	  // Param: all defines are now dynamic
+	      return ExpressionPtr();
+          /*{
           BlockScopePtr block = ar->findConstantDeclarer(symbol);
           // not found (i.e., undefined)
           if (!block) {
@@ -660,6 +663,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
           } else {
             return ExpressionPtr();
           }
+	  }*/
           break;
         }
         case FunctionExistsFunction: {
