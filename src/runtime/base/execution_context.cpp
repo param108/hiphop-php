@@ -287,6 +287,7 @@ bool ExecutionContext::obFlush() {
           last->oss.reset();
         } catch (...) {
           prev->oss.absorb(last->oss);
+	  Logger::Error("unknown exception was thrown from obflush");
         }
       }
       return true;

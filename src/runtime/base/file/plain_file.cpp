@@ -47,14 +47,40 @@ PlainFile::~PlainFile() {
 bool PlainFile::open(CStrRef filename, CStrRef mode) {
   ASSERT(m_stream == NULL);
   ASSERT(m_fd == -1);
-
-  FILE *f = fopen(filename.data(), mode.data());
-  if (!f) {
-    return false;
-  }
-  m_stream = f;
-  m_fd = fileno(f);
-  return true;
+  if (mode != "x" && mode != "x+") {
+  	FILE *f = fopen(filename.data(), mode.data());
+  	if (!f) {
+    		return false;
+  	}
+  	m_stream = f;
+  	m_fd = fileno(f);
+  	return true;
+  } else {
+	FILE *f;
+	int fd;
+	int mode_int = O_EXCL|O_CREAT;
+	if (mode == "x+") {
+		mode_int |= O_RDWR;
+		fd = ::open(filename.data(),mode_int,00666);
+		if (fd <= 0) {
+			perror("open");
+			return false;
+		}
+		f = fdopen(fd,"r+");
+		m_stream = f;
+		m_fd = fd;
+	} else {
+		mode_int |= O_RDONLY;
+		fd = ::open(filename.data(),mode_int,00666);
+		if (fd <= 0) {
+			return false;
+		}
+		f = fdopen(fd,"r");
+		m_stream = f;
+		m_fd = fd;
+	}
+	return true;
+ }
 }
 
 bool PlainFile::close() {

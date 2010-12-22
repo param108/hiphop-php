@@ -319,6 +319,8 @@ void HttpServer::createPid() {
       Logger::Error("Unable to open pid file %s for write",
                     RuntimeOption::PidFile.c_str());
     }
+  } else {
+      Logger::Error("Unable to open pid empty file for write");
   }
 }
 
@@ -351,16 +353,18 @@ void HttpServer::rotateLog() {
   siginfo_t info;
   sigset_t mask;
   int retsig;
+  timespec timeout;
+
+  timeout.tv_sec=2;
+  timeout.tv_nsec=0;
 
   sigemptyset(&mask);
   sigaddset(&mask, SIGHUP);
 
   bool stopped = false;
   while(!stopped) {
- 	retsig = sigwaitinfo(&mask, &info);
-	// sometimes paranoia sets in
+ 	retsig = sigtimedwait(&mask, &info, &timeout);
         if (retsig == SIGHUP) {
-	    cout<<"Hit reorateLog\n";
             Logger::rotateLog();
         }
         Lock lock(this);
