@@ -663,7 +663,7 @@ void ArrayUtil::Walk(Variant input, PFUNC_WALK walk_function,
         seen->insert((void*)arr.get());
       }
 
-      Walk(arr, walk_function, data, recursive, seen, userdata);
+      Walk(ref(v), walk_function, data, recursive, seen, userdata);
     } else {
       walk_function(ref(v), k, userdata, data);
     }
