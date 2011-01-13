@@ -26,6 +26,7 @@ ThisExpression::ThisExpression(EXPRESSION_ARGS)
   : LvalExpression(EXPRESSION_PASS) {}
 
 Variant ThisExpression::eval(VariableEnvironment &env) const {
+	env.setThis(true);
   return env.currentObject();
 }
 

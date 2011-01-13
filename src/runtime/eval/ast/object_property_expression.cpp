@@ -32,6 +32,7 @@ ObjectPropertyExpression::ObjectPropertyExpression(EXPRESSION_ARGS,
 Variant ObjectPropertyExpression::eval(VariableEnvironment &env) const {
   Variant obj(m_obj->eval(env));
   String name(m_name->get(env));
+  env.setThis(false);
   SET_LINE;
   return obj.o_get(name);
 }
@@ -39,6 +40,7 @@ Variant ObjectPropertyExpression::eval(VariableEnvironment &env) const {
 Variant ObjectPropertyExpression::evalExist(VariableEnvironment &env) const {
   Variant obj(m_obj->evalExist(env));
   String name(m_name->get(env));
+  env.setThis(false);
   SET_LINE;
   return obj.o_get(name, false);
 }

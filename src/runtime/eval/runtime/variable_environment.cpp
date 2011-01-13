@@ -28,7 +28,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 VariableEnvironment::VariableEnvironment()
-  : m_currentClass(NULL), m_breakLevel(0), m_returning(false)
+  : m_currentClass(NULL), m_breakLevel(0), m_returning(false), m_isThis(false)
 {
 }
 
@@ -42,6 +42,7 @@ void VariableEnvironment::unset(CStrRef name, int64 hash) {
 
 void VariableEnvironment::setCurrentObject(CObjRef co) {
   ASSERT(!m_currentClass);
+  setThis(false);
   m_currentObject = co;
   m_currentClass = co->o_getClassName();
   get("this") = co;

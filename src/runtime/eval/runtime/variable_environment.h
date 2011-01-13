@@ -75,11 +75,14 @@ public:
     return false;
   }
   bool isEscaping() const { return isBreaking() || m_returning; }
+  bool isThis() const { return m_isThis; }
+  void setThis(bool val) { m_isThis = val; }
 protected:
   Variant m_currentObject;
   const char* m_currentClass;
   int m_breakLevel;
   bool m_returning;
+  bool m_isThis;
   Variant m_ret;
 };
 

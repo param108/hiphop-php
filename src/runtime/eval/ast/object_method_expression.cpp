@@ -34,8 +34,23 @@ Variant ObjectMethodExpression::eval(VariableEnvironment &env) const {
   String name(m_name->get(env));
   Variant obj(m_obj->eval(env));
   if (!obj.is(KindOfObject)) {
+    if ((!env.isThis()) || (!env.currentClass())) {
+       raise_error("Call to a member function %s() on a non-object",
+               name.c_str());
+    }
+    bool foundClass;
+    const MethodStatement *ms = RequestEvalState::findMethod(env.currentClass(),
+                                                           name.data(),
+                                                           foundClass);
+    if (foundClass) {
+    if(ms) {
+ 	return ref(ms->invokeStaticDirect(env.currentClass(), env, this));	
+    }
+    return ref(invoke_static_method_mil(env.currentClass(),
+                                  name.data(), getParams(env), -1));
+    }
     raise_error("Call to a member function %s() on a non-object",
-                name.c_str());
+               name.c_str());
   }
   EvalFrameInjection::EvalStaticClassNameHelper helper(obj.toObject());
 
