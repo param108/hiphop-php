@@ -231,6 +231,7 @@ public:
   static int64 MaxSQLRowCount;
   static int64 MaxMemcacheKeyCount;
   static int  SocketDefaultTimeout;
+  static int  SocketDefaultLingerTimeout;
   static bool EnableMemoryManager;
   static bool CheckMemory;
   static bool UseSmallArray;

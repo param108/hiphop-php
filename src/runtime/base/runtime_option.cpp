@@ -233,6 +233,9 @@ int64 RuntimeOption::DropCacheCycle = 0;
 int64 RuntimeOption::MaxSQLRowCount = 10000;
 int64 RuntimeOption::MaxMemcacheKeyCount = 0;
 int RuntimeOption::SocketDefaultTimeout = 5;
+//Default linger timeout.. Can be overridden by environment variable
+//Override cannot exceed this default timeout
+int RuntimeOption::SocketDefaultLingerTimeout = 60; //1 minutes
 bool RuntimeOption::EnableMemoryManager = true;
 bool RuntimeOption::CheckMemory = false;
 bool RuntimeOption::UseSmallArray = false;
@@ -458,6 +461,11 @@ void RuntimeOption::Load(Hdf &config) {
     setResourceLimit(RLIMIT_DATA,   rlimit, "RSS");
     MaxRSS = rlimit["MaxRSS"].getInt64(0);
     SocketDefaultTimeout = rlimit["SocketDefaultTimeout"].getInt16(5);
+    int LingerTimeout = rlimit["SocketDefaultLingerTimeout"].getInt16(60);
+    if(LingerTimeout<SocketDefaultLingerTimeout)
+    {
+      SocketDefaultLingerTimeout = LingerTimeout;
+    }
     MaxRSSPollingCycle = rlimit["MaxRSSPollingCycle"].getInt64(0);
     DropCacheCycle = rlimit["DropCacheCycle"].getInt64(0);
     MaxSQLRowCount = rlimit["MaxSQLRowCount"].getInt64(0);

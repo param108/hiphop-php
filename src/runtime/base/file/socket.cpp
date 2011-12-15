@@ -49,6 +49,13 @@ Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
   setsockopt(m_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
   setsockopt(m_fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
   setTimeout(tv);
+
+  struct linger so_linger;
+  so_linger.l_onoff = TRUE;  
+  so_linger.l_linger = RuntimeOption::SocketDefaultLingerTimeout;  
+  //std::cout<<"ScoketDefaultLingerTimeout="<< RuntimeOption::SocketDefaultLingerTimeout<<std::endl;  
+  Logger::Error("SocketDefaultLingerTimeout=%d\n",RuntimeOption::SocketDefaultLingerTimeout);
+  setsockopt(m_fd, SOL_SOCKET, SO_LINGER, &so_linger, sizeof (so_linger));
 }
 
 Socket::~Socket() {

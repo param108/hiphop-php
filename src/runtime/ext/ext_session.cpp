@@ -342,17 +342,12 @@ String SessionModule::create_sid() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // FileSessionModule
-
-class FileSessionModule : public SessionModule {
+class FileSessionData {
 public:
-  FileSessionModule()
-    : SessionModule("files"), m_fd(-1), m_dirdepth(0), m_st_size(0),
-      m_filemode(0600) {
+  FileSessionData() : m_fd(-1), m_dirdepth(0), m_st_size(0), m_filemode(0600) {
   }
 
-  virtual bool open(const char *save_path, const char *session_name) {
-    Lock lock(m_mutex);
-
+  bool open(const char *save_path, const char *session_name) {
     String tmpdir;
     if (*save_path == '\0') {
       tmpdir = f_sys_get_temp_dir();
@@ -399,16 +394,14 @@ public:
     return true;
   }
 
-  virtual bool close() {
-    Lock lock(m_mutex);
+  bool close() {
     closeImpl();
     m_lastkey.clear();
     m_basedir.clear();
     return true;
   }
 
-  virtual bool read(const char *key, String &value) {
-    Lock lock(m_mutex);
+  bool read(const char *key, String &value) {
     openImpl(key);
     if (m_fd < 0) {
       return false;
@@ -448,8 +441,7 @@ public:
     return true;
   }
 
-  virtual bool write(const char *key, CStrRef value) {
-    Lock lock(m_mutex);
+  bool write(const char *key, CStrRef value) {
     openImpl(key);
     if (m_fd < 0) {
       return false;
@@ -462,9 +454,9 @@ public:
     m_st_size = sbuf.st_size;
 
     /*
-     * truncate file, if the amount of new data is smaller than
-     * the existing data set.
-     */
+* truncate file, if the amount of new data is smaller than
+* the existing data set.
+*/
     if (value.size() < (int)m_st_size) {
       if (ftruncate(m_fd, 0) < 0) {
         raise_warning("truncate failed: %s (%d)", strerror(errno), errno);
@@ -491,8 +483,7 @@ public:
     return true;
   }
 
-  virtual bool destroy(const char *key) {
-    Lock lock(m_mutex);
+  bool destroy(const char *key) {
     char buf[PATH_MAX];
     if (!createPath(buf, sizeof(buf), key)) {
       return false;
@@ -502,7 +493,7 @@ public:
       closeImpl();
       if (unlink(buf) == -1) {
         /* This is a little safety check for instances when we are dealing
-           with a regenerated session that was not yet written to disk */
+with a regenerated session that was not yet written to disk */
         if (!access(buf, F_OK)) {
           return false;
         }
@@ -512,11 +503,10 @@ public:
     return true;
   }
 
-  virtual bool gc(int maxlifetime, int *nrdels) {
-    Lock lock(m_mutex);
+  bool gc(int maxlifetime, int *nrdels) {
     /* we don't perform any cleanup, if dirdepth is larger than 0.
-       we return true, since all cleanup should be handled by
-       an external entity (i.e. find -ctime x | xargs rm) */
+we return true, since all cleanup should be handled by
+an external entity (i.e. find -ctime x | xargs rm) */
     if (m_dirdepth == 0) {
       *nrdels = CleanupDir(m_basedir.c_str(), maxlifetime);
     }
@@ -524,7 +514,6 @@ public:
   }
 
 private:
-  Mutex m_mutex;
   int m_fd;
   string m_lastkey;
   string m_basedir;
@@ -533,7 +522,7 @@ private:
   int m_filemode;
 
   /* If you change the logic here, please also update the error message in
-   * ps_files_open() appropriately */
+* ps_files_open() appropriately */
   static bool IsValid(const char *key) {
     const char *p; char c;
     bool ret = true;
@@ -587,8 +576,8 @@ private:
     if (m_fd != -1) {
 #ifdef PHP_WIN32
       /* On Win32 locked files that are closed without being explicitly
-         unlocked will be unlocked only when "system resources become
-         available". */
+unlocked will be unlocked only when "system resources become
+available". */
       flock(m_fd, LOCK_UN);
 #endif
       ::close(m_fd);
@@ -623,7 +612,7 @@ private:
 
 #ifdef F_SETFD
 # ifndef FD_CLOEXEC
-#  define FD_CLOEXEC 1
+# define FD_CLOEXEC 1
 # endif
         if (fcntl(m_fd, F_SETFD, FD_CLOEXEC)) {
           raise_warning("fcntl(%d, F_SETFD, FD_CLOEXEC) failed: %s (%d)",
@@ -683,6 +672,32 @@ private:
 
     closedir(dir);
     return nrdels;
+  }
+};
+
+IMPLEMENT_THREAD_LOCAL(FileSessionData, s_file_session_data);
+
+class FileSessionModule : public SessionModule {
+public:
+  FileSessionModule() : SessionModule("files") {
+  }
+  virtual bool open(const char *save_path, const char *session_name) {
+    return s_file_session_data->open(save_path, session_name);
+  }
+  virtual bool close() {
+    return s_file_session_data->close();
+  }
+  virtual bool read(const char *key, String &value) {
+    return s_file_session_data->read(key, value);
+  }
+  virtual bool write(const char *key, CStrRef value) {
+    return s_file_session_data->write(key, value);
+  }
+  virtual bool destroy(const char *key) {
+    return s_file_session_data->destroy(key);
+  }
+  virtual bool gc(int maxlifetime, int *nrdels) {
+    return s_file_session_data->gc(maxlifetime, nrdels);
   }
 };
 static FileSessionModule s_file_session_module;
